@@ -1,0 +1,1604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Well Lups Auto Tyres Limited — Nairobi's Tyre & Auto Parts Specialist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ─── RESET & BASE ─────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: #F1F0EF;
+  color: #1A1B1B;
+  font-size: 16px;
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── TOKENS ────────────────────────────────────────── */
+:root {
+  --primary: #045CB4;
+  --primary-dark: #043D8B;
+  --navy: #144177;
+  --blue-muted: #658EBE;
+  --bg: #F1F0EF;
+  --bg-card: #FFFFFF;
+  --border: #E0DFDD;
+  --text: #1A1B1B;
+  --text-secondary: #777878;
+  --stock-in: #16A34A;
+  --stock-low: #D97706;
+  --stock-out: #9CA3AF;
+  --whatsapp: #25D366;
+}
+
+/* ─── TREAD TEXTURE SVG ─────────────────────────────── */
+.tread-texture {
+  position: relative;
+}
+.tread-texture::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Crect width='60' height='60' fill='none'/%3E%3Cpath d='M0 10 L10 0 M0 30 L30 0 M0 50 L50 0 M10 60 L60 10 M30 60 L60 30 M50 60 L60 50' stroke='%231A1B1B' stroke-width='1' opacity='0.055'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+}
+.tread-texture > * { position: relative; z-index: 1; }
+.tread-texture-light::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Crect width='60' height='60' fill='none'/%3E%3Cpath d='M0 10 L10 0 M0 30 L30 0 M0 50 L50 0 M10 60 L60 10 M30 60 L60 30 M50 60 L60 50' stroke='%23ffffff' stroke-width='1' opacity='0.07'/%3E%3C/svg%3E");
+}
+
+/* ─── ANNOUNCEMENT BAR ──────────────────────────────── */
+.announcement-bar {
+  background: var(--navy);
+  color: white;
+  text-align: center;
+  padding: 9px 24px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+.announcement-bar a { color: var(--blue-muted); text-decoration: underline; margin-left: 10px; }
+
+/* ─── NAV ───────────────────────────────────────────── */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  padding: 0 40px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  transition: box-shadow 0.2s ease;
+}
+.nav.scrolled { box-shadow: 0 2px 16px rgba(0,0,0,0.07); }
+.nav-inner {
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  margin-right: 48px;
+  flex-shrink: 0;
+}
+.nav-logo-icon {
+  width: 36px;
+  height: 36px;
+}
+.nav-logo-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+}
+.nav-logo-main {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--primary);
+  letter-spacing: -0.01em;
+}
+.nav-logo-sub {
+  font-size: 9px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  letter-spacing: 0.04em;
+}
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  list-style: none;
+  flex: 1;
+}
+.nav-links a {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+.nav-links a:hover { color: var(--primary); }
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-left: auto;
+}
+.nav-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: white;
+  border: 1px solid var(--border);
+  padding: 7px 14px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+  width: 200px;
+}
+.nav-search:hover { border-color: var(--blue-muted); }
+.nav-icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+  transition: color 0.15s ease;
+  position: relative;
+}
+.nav-icon-btn:hover { color: var(--primary); }
+.nav-cart-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 18px;
+  height: 18px;
+  background: var(--primary);
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ─── HERO ──────────────────────────────────────────── */
+.hero {
+  min-height: calc(100vh - 64px - 38px);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: end;
+  overflow: hidden;
+  background: var(--bg);
+  position: relative;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Crect width='60' height='60' fill='none'/%3E%3Cpath d='M0 10 L10 0 M0 30 L30 0 M0 50 L50 0 M10 60 L60 10 M30 60 L60 30 M50 60 L60 50' stroke='%231A1B1B' stroke-width='1' opacity='0.045'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+.hero-content {
+  padding: 80px 0 80px 40px;
+  padding-left: max(40px, calc((100vw - 1240px) / 2 + 40px));
+  max-width: 620px;
+  position: relative;
+  z-index: 1;
+}
+.hero-headline {
+  font-size: clamp(44px, 5.5vw, 76px);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: var(--text);
+  margin-bottom: 20px;
+}
+.hero-body {
+  font-size: 17px;
+  font-weight: 400;
+  color: var(--text-secondary);
+  max-width: 420px;
+  line-height: 1.65;
+  margin-bottom: 36px;
+}
+.hero-ctas {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 52px;
+  flex-wrap: wrap;
+}
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 50px;
+  padding: 0 28px;
+  background: var(--primary);
+  color: white;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  border: 2px solid var(--primary);
+  border-radius: 0;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.btn-primary:hover { background: var(--primary-dark); border-color: var(--primary-dark); }
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 50px;
+  padding: 0 28px;
+  background: transparent;
+  color: var(--primary);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  border: 2px solid var(--primary);
+  border-radius: 0;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.btn-secondary:hover { background: var(--primary); color: white; }
+.hero-trust {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  flex-wrap: wrap;
+}
+.hero-trust span { white-space: nowrap; }
+.hero-trust-dot { color: var(--blue-muted); }
+
+.hero-visual {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  position: relative;
+  overflow: visible;
+  height: 100%;
+  min-height: 500px;
+}
+.hero-tyre-wrap {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  width: 100%;
+  overflow: visible;
+  padding-top: 40px;
+}
+.hero-tyre-svg, .hero-wheel-img {
+  width: min(600px, 50vw);
+  height: auto;
+  display: block;
+  transform: translateX(60px);
+  filter: drop-shadow(16px 28px 40px rgba(0,0,0,0.32));
+  animation: tyreSlideIn 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), filter 0.6s ease;
+  user-select: none;
+}
+.hero-wheel-img:hover {
+  transform: translateX(60px) rotate(3deg) scale(1.02);
+  filter: drop-shadow(20px 34px 48px rgba(0,0,0,0.38));
+}
+@keyframes tyreSlideIn {
+  from { transform: translateX(120px); opacity: 0.3; }
+  to   { transform: translateX(60px);  opacity: 1; }
+}
+
+/* Spinning tread ring (legacy fallback) */
+.tyre-ring-spin {
+  animation: spinRing 18s linear infinite;
+  transform-origin: 50% 50%;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tyre-ring-spin { animation: none; }
+  .hero-tyre-svg, .hero-wheel-img { animation: none; }
+}
+
+/* ─── CONTAINER ─────────────────────────────────────── */
+.container {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+/* ─── VEHICLE FIT FINDER ────────────────────────────── */
+.fit-finder {
+  background: white;
+  border-bottom: 1px solid var(--border);
+  padding: 52px 40px;
+}
+.fit-finder-inner {
+  max-width: 1240px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  align-items: center;
+  gap: 48px;
+}
+.fit-finder-heading {
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  line-height: 1.2;
+  margin-bottom: 8px;
+}
+.fit-finder-sub {
+  font-size: 15px;
+  color: var(--text-secondary);
+}
+.fit-finder-form {
+  display: flex;
+  gap: 0;
+  border: 1px solid var(--border);
+}
+.fit-finder-form select {
+  flex: 1;
+  height: 50px;
+  padding: 0 14px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  background: white;
+  border: none;
+  border-right: 1px solid var(--border);
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23777878' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+  cursor: pointer;
+}
+.fit-finder-form select:focus { outline: none; border-right: 1px solid var(--border); }
+.fit-finder-btn {
+  height: 50px;
+  padding: 0 24px;
+  background: var(--primary);
+  color: white;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease;
+  flex-shrink: 0;
+}
+.fit-finder-btn:hover { background: var(--primary-dark); }
+
+/* ─── CATALOG ───────────────────────────────────────── */
+.catalog {
+  padding: 80px 0 96px;
+  background: var(--bg);
+}
+.catalog-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 36px;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.catalog-heading {
+  font-size: clamp(32px, 3.8vw, 50px);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+  color: var(--text);
+  max-width: 520px;
+}
+.catalog-tabs {
+  display: flex;
+  gap: 0;
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.catalog-tab {
+  height: 40px;
+  padding: 0 20px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+  background: white;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.catalog-tab:first-child { border-right: 1px solid var(--border); }
+.catalog-tab.active {
+  background: var(--primary);
+  color: white;
+}
+.catalog-tab .count {
+  font-size: 11px;
+  font-weight: 700;
+  opacity: 0.75;
+}
+
+/* ─── PRODUCT GRID ──────────────────────────────────── */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+}
+.product-card {
+  background: white;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: box-shadow 0.2s ease;
+}
+.product-card:hover {
+  box-shadow: 0 0 0 2px var(--primary) inset;
+  z-index: 2;
+}
+.product-card-image {
+  background: #F7F7F6;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+.product-card-image svg.tyre-svg,
+.product-card-image .tyre-img {
+  width: 74%;
+  height: 74%;
+  object-fit: contain;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), filter 0.35s ease;
+  transform-origin: center center;
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.16));
+  user-select: none;
+}
+.product-card:hover .product-card-image svg.tyre-svg,
+.product-card:hover .product-card-image .tyre-img {
+  transform: translateY(-5px) rotate(8deg) scale(1.03);
+  filter: drop-shadow(0 14px 22px rgba(0, 0, 0, 0.22));
+}
+.product-card-image svg.oil-svg {
+  width: 55%;
+  height: 55%;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.product-card:hover .product-card-image svg.oil-svg {
+  transform: translateY(-6px) scale(1.05);
+}
+.stock-badge {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 5px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 0 0 4px 0;
+}
+.stock-in { background: var(--stock-in); color: white; }
+.stock-low { background: var(--stock-low); color: white; }
+.stock-out { background: var(--stock-out); color: white; }
+.wishlist-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 32px;
+  height: 32px;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+.wishlist-btn:hover { border-color: #ef4444; }
+.wishlist-btn.active svg { fill: #ef4444; color: #ef4444; }
+
+.product-card-body {
+  padding: 16px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+.product-cat {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--blue-muted);
+  text-transform: none;
+  letter-spacing: 0;
+  margin-bottom: 4px;
+}
+.product-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.3;
+  margin-bottom: 4px;
+}
+.product-spec {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 14px;
+}
+.product-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+}
+.product-price {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--primary);
+  letter-spacing: -0.02em;
+}
+.add-to-cart-btn {
+  width: 38px;
+  height: 38px;
+  background: var(--primary);
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  transition: background 0.15s ease;
+  flex-shrink: 0;
+}
+.add-to-cart-btn:hover { background: var(--primary-dark); }
+
+.catalog-footer {
+  text-align: center;
+  margin-top: 40px;
+}
+.view-all-link {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--primary);
+  text-decoration: none;
+  border-bottom: 1px solid var(--primary);
+  padding-bottom: 2px;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+.view-all-link:hover { color: var(--primary-dark); border-color: var(--primary-dark); }
+
+/* ─── SERVICES TAB CONTENT ──────────────────────────── */
+.service-grid { display: none; }
+.service-grid.active { display: grid; }
+.product-grid.active { display: grid; }
+.product-grid { display: grid; }
+
+/* ─── DARK BAND ─────────────────────────────────────── */
+.dark-band {
+  background: var(--navy);
+  padding: 88px 40px;
+  position: relative;
+  overflow: hidden;
+}
+.dark-band::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Crect width='60' height='60' fill='none'/%3E%3Cpath d='M0 10 L10 0 M0 30 L30 0 M0 50 L50 0 M10 60 L60 10 M30 60 L60 30 M50 60 L60 50' stroke='%23ffffff' stroke-width='1' opacity='0.06'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+.dark-band-inner {
+  max-width: 1240px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 80px;
+  position: relative;
+  z-index: 1;
+}
+.dark-band-heading {
+  font-size: clamp(28px, 3.5vw, 46px);
+  font-weight: 800;
+  color: white;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+  margin-bottom: 20px;
+}
+.dark-band-body {
+  font-size: 16px;
+  color: rgba(255,255,255,0.72);
+  line-height: 1.65;
+  margin-bottom: 32px;
+  max-width: 380px;
+}
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 50px;
+  padding: 0 28px;
+  background: transparent;
+  color: white;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  border: 2px solid rgba(255,255,255,0.6);
+  border-radius: 0;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.btn-ghost:hover { background: white; color: var(--navy); border-color: white; }
+
+.dark-band-stats {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+}
+.stat-item {
+  flex: 1;
+  padding: 0 32px;
+  border-left: 1px solid rgba(255,255,255,0.18);
+}
+.stat-item:first-child { padding-left: 0; border-left: none; }
+.stat-number {
+  font-size: clamp(40px, 4.5vw, 60px);
+  font-weight: 800;
+  color: white;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  margin-bottom: 6px;
+}
+.stat-label {
+  font-size: 13px;
+  color: rgba(255,255,255,0.55);
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* ─── WHY WELL LUPS ─────────────────────────────────── */
+.why {
+  padding: 88px 0;
+  background: var(--bg);
+}
+.why-heading {
+  font-size: clamp(28px, 3vw, 38px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin-bottom: 56px;
+}
+.why-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  border-top: 1px solid var(--border);
+}
+.why-item {
+  padding: 36px 40px 36px 0;
+  border-right: 1px solid var(--border);
+}
+.why-item:last-child { border-right: none; padding-right: 0; padding-left: 40px; }
+.why-item:nth-child(2) { padding-left: 40px; }
+.why-item-heading {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+.why-item-body {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.65;
+}
+
+/* ─── BRANCHES ──────────────────────────────────────── */
+.branches {
+  background: white;
+  padding: 80px 0;
+}
+.branches-heading {
+  font-size: clamp(32px, 3.8vw, 52px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  color: var(--text);
+  margin-bottom: 56px;
+}
+.branches-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  border: 1px solid var(--border);
+}
+.branch-card {
+  padding: 44px;
+  position: relative;
+  transition: background 0.15s ease;
+}
+.branch-card:hover { background: #fafafa; }
+.branch-card:first-child { border-right: 1px solid var(--border); }
+.branch-num {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--blue-muted);
+  margin-bottom: 20px;
+  letter-spacing: 0.06em;
+}
+.branch-name {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.01em;
+  margin-bottom: 12px;
+}
+.branch-address {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+.branch-phone {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--primary);
+  text-decoration: none;
+  transition: color 0.15s ease;
+  margin-bottom: 16px;
+}
+.branch-phone:hover { color: var(--primary-dark); }
+.branch-map-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.15s ease;
+  cursor: pointer;
+}
+.branch-map-link:hover { color: var(--text); }
+
+/* ─── FOOTER ────────────────────────────────────────── */
+.footer {
+  background: var(--navy);
+  padding: 72px 40px 0;
+}
+.footer-inner {
+  max-width: 1240px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.8fr 1fr 1fr 1fr;
+  gap: 48px;
+  padding-bottom: 56px;
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+}
+.footer-brand-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.footer-brand-name {
+  font-size: 14px;
+  font-weight: 800;
+  color: white;
+  letter-spacing: -0.01em;
+}
+.footer-brand-tagline {
+  font-size: 14px;
+  color: rgba(255,255,255,0.5);
+  line-height: 1.6;
+  max-width: 260px;
+}
+.footer-col-heading {
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 0.06em;
+  margin-bottom: 20px;
+}
+.footer-links {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.footer-links a {
+  font-size: 14px;
+  color: rgba(255,255,255,0.65);
+  text-decoration: none;
+  transition: color 0.15s ease;
+  font-weight: 500;
+}
+.footer-links a:hover { color: white; }
+.footer-bottom {
+  max-width: 1240px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 0;
+}
+.footer-copy {
+  font-size: 12px;
+  color: rgba(255,255,255,0.35);
+}
+
+/* ─── WHATSAPP FAB ──────────────────────────────────── */
+.whatsapp-fab {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  width: 56px;
+  height: 56px;
+  background: var(--whatsapp);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.22);
+  z-index: 200;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: opacity 0.25s ease, transform 0.25s ease, box-shadow 0.2s ease;
+  border: none;
+  text-decoration: none;
+}
+.whatsapp-fab.visible { opacity: 1; transform: scale(1); }
+.whatsapp-fab:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.28); transform: scale(1.05); }
+
+/* ─── TOAST ─────────────────────────────────────────── */
+.toast {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--text);
+  color: white;
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  z-index: 300;
+  transition: transform 0.3s cubic-bezier(0.22,1,0.36,1);
+  white-space: nowrap;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast-close {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.6);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 0;
+  display: flex;
+}
+
+/* ─── SCROLL REVEAL ─────────────────────────────────── */
+.reveal-heading {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.45s ease, transform 0.45s ease;
+}
+.reveal-heading.in-view { opacity: 1; transform: translateY(0); }
+
+/* ─── RESPONSIVE ────────────────────────────────────── */
+@media (max-width: 900px) {
+  .hero {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+  .hero-content {
+    padding: 60px 24px 32px;
+    max-width: 100%;
+  }
+  .hero-visual { min-height: 280px; }
+  .hero-tyre-svg, .hero-wheel-img {
+    width: min(340px, 85vw);
+    transform: translateX(30px);
+  }
+  .fit-finder-inner { grid-template-columns: 1fr; gap: 24px; }
+  .fit-finder-form { flex-direction: column; border: none; gap: 0; }
+  .fit-finder-form select {
+    border: 1px solid var(--border);
+    border-bottom: none;
+    border-radius: 0;
+  }
+  .fit-finder-form select:last-of-type { border-bottom: 1px solid var(--border); }
+  .fit-finder-btn { border: 1px solid var(--primary); width: 100%; margin-top: 10px; }
+  .product-grid { grid-template-columns: repeat(2, 1fr); }
+  .dark-band-inner { grid-template-columns: 1fr; gap: 48px; }
+  .dark-band-stats { gap: 0; }
+  .why-grid { grid-template-columns: 1fr; }
+  .why-item { padding: 28px 0; border-right: none; border-bottom: 1px solid var(--border); }
+  .why-item:last-child { padding-left: 0; border-bottom: none; }
+  .why-item:nth-child(2) { padding-left: 0; }
+  .branches-grid { grid-template-columns: 1fr; }
+  .branch-card:first-child { border-right: none; border-bottom: 1px solid var(--border); }
+  .footer-inner { grid-template-columns: 1fr 1fr; gap: 36px; }
+  .nav { padding: 0 24px; }
+  .nav-links { display: none; }
+  .nav-search { display: none; }
+  .dark-band { padding: 64px 24px; }
+  .branches { padding: 64px 0; }
+  .catalog-header { flex-direction: column; align-items: flex-start; }
+  .catalog-heading { font-size: 28px; }
+}
+@media (max-width: 560px) {
+  .product-grid { grid-template-columns: 1fr; }
+  .footer-inner { grid-template-columns: 1fr; }
+  .stat-number { font-size: 36px; }
+  .hero-ctas { flex-direction: column; }
+  .btn-primary, .btn-secondary { width: 100%; }
+  .branches { padding: 48px 0; }
+  .branch-card { padding: 28px 24px; }
+  .dark-band-stats { flex-direction: column; gap: 24px; }
+  .stat-item { padding: 0; border-left: none; border-top: 1px solid rgba(255,255,255,0.15); padding-top: 20px; }
+  .stat-item:first-child { border-top: none; padding-top: 0; }
+}
+</style>
+</head>
+<body>
+
+<!-- ANNOUNCEMENT BAR -->
+<div class="announcement-bar">
+  Genuine parts. Expert fitting. Two Nairobi branches.
+  <a href="#">Find your nearest branch</a>
+</div>
+
+<!-- NAV -->
+<nav class="nav" id="mainNav">
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">
+      <!-- Tyre icon -->
+      <svg class="nav-logo-icon" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="18" cy="18" r="17" stroke="#045CB4" stroke-width="2"/>
+        <circle cx="18" cy="18" r="11" stroke="#045CB4" stroke-width="1.5"/>
+        <circle cx="18" cy="18" r="5" fill="#045CB4"/>
+        <line x1="18" y1="1" x2="18" y2="7" stroke="#045CB4" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="18" y1="29" x2="18" y2="35" stroke="#045CB4" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="1" y1="18" x2="7" y2="18" stroke="#045CB4" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="29" y1="18" x2="35" y2="18" stroke="#045CB4" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="4.4" y1="4.4" x2="8.7" y2="8.7" stroke="#045CB4" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="27.3" y1="27.3" x2="31.6" y2="31.6" stroke="#045CB4" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="31.6" y1="4.4" x2="27.3" y2="8.7" stroke="#045CB4" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="8.7" y1="27.3" x2="4.4" y2="31.6" stroke="#045CB4" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <div class="nav-logo-text">
+        <span class="nav-logo-main">WELL LUPS</span>
+        <span class="nav-logo-sub">AUTO TYRES LIMITED</span>
+      </div>
+    </a>
+
+    <ul class="nav-links">
+      <li><a href="#">Shop Products</a></li>
+      <li><a href="#">Garage Services</a></li>
+      <li><a href="#">Our Branches</a></li>
+    </ul>
+
+    <div class="nav-actions">
+      <button class="nav-search" style="font-family:inherit;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        Search tyres, parts…
+      </button>
+      <button class="nav-icon-btn" aria-label="Account">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+        </svg>
+      </button>
+      <button class="nav-icon-btn" aria-label="Cart" onclick="showToast('Item added to cart')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <path d="M16 10a4 4 0 0 1-8 0"/>
+        </svg>
+        <span class="nav-cart-badge">2</span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-content">
+    <h1 class="hero-headline">Nairobi's tyres.<br>Fitted right.</h1>
+    <p class="hero-body">Two branches, genuine brands, qualified technicians. Parts and garage care for every road ahead.</p>
+    <div class="hero-ctas">
+      <a href="#catalog" class="btn-primary">Shop Products</a>
+      <a href="#booking" class="btn-secondary">Book a Service</a>
+    </div>
+    <div class="hero-trust">
+      <span>Genuine brands stocked</span>
+      <span class="hero-trust-dot">·</span>
+      <span>Two Nairobi branches</span>
+      <span class="hero-trust-dot">·</span>
+      <span>Fitting included</span>
+    </div>
+  </div>
+
+  <div class="hero-visual">
+    <div class="hero-tyre-wrap">
+      <img src="images/hero-wheel.png" alt="Well Lups Premium Automotive Wheel and Tyre" class="hero-wheel-img" width="580" height="580">
+    </div>
+  </div>
+</section>
+
+<!-- VEHICLE FIT FINDER -->
+<div class="fit-finder">
+  <div class="fit-finder-inner">
+    <div>
+      <h2 class="fit-finder-heading">Find tyres that fit your car.</h2>
+      <p class="fit-finder-sub">Select your vehicle and we'll show you compatible stock.</p>
+    </div>
+    <div class="fit-finder-form">
+      <select>
+        <option>Make</option>
+        <option>Toyota</option>
+        <option>Subaru</option>
+        <option>Nissan</option>
+        <option>Mitsubishi</option>
+        <option>Land Rover</option>
+        <option>Mercedes-Benz</option>
+        <option>BMW</option>
+        <option>Isuzu</option>
+      </select>
+      <select>
+        <option>Model</option>
+        <option>Prado</option>
+        <option>Hilux</option>
+        <option>Harrier</option>
+        <option>Forester</option>
+        <option>X-Trail</option>
+        <option>Outlander</option>
+      </select>
+      <select>
+        <option>Year</option>
+        <option>2024</option>
+        <option>2023</option>
+        <option>2022</option>
+        <option>2021</option>
+        <option>2020</option>
+        <option>2019</option>
+        <option>2018</option>
+        <option>2017</option>
+      </select>
+      <button class="fit-finder-btn">Find my fit</button>
+    </div>
+  </div>
+</div>
+
+<!-- CATALOG -->
+<section class="catalog" id="catalog">
+  <div class="container">
+    <div class="catalog-header">
+      <h2 class="catalog-heading reveal-heading">Everything you need<br>to keep moving.</h2>
+      <div class="catalog-tabs">
+        <button class="catalog-tab active" onclick="switchTab('products', this)">
+          Products <span class="count">24</span>
+        </button>
+        <button class="catalog-tab" onclick="switchTab('services', this)">
+          Services <span class="count">08</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Products -->
+    <div class="product-grid active" id="tab-products">
+
+      <!-- Card 1 -->
+      <div class="product-card">
+        <div class="product-card-image">
+          <span class="stock-badge stock-in">In Stock</span>
+          <img src="images/bridgestone-dueler.png" alt="Bridgestone Dueler H/T 684 III" class="tyre-img" width="200" height="200" loading="lazy">
+          <button class="wishlist-btn" onclick="toggleWishlist(this, 'Bridgestone Dueler H/T 684 III')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#777" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          </button>
+        </div>
+        <div class="product-card-body">
+          <div class="product-cat">Tyre</div>
+          <div class="product-name">Bridgestone Dueler H/T 684 III</div>
+          <div class="product-spec">265/65 R17 · 4.8 ★</div>
+          <div class="product-footer">
+            <span class="product-price">KES 18,500</span>
+            <button class="add-to-cart-btn" onclick="showToast('Bridgestone Dueler added to cart')" aria-label="Add to cart">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="product-card">
+        <div class="product-card-image">
+          <span class="stock-badge stock-low">Low Stock</span>
+          <img src="images/michelin-primacy.png" alt="Michelin Primacy 4+" class="tyre-img" width="200" height="200" loading="lazy">
+          <button class="wishlist-btn active" onclick="toggleWishlist(this, 'Michelin Primacy 4+')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="#ef4444" stroke="#ef4444" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          </button>
+        </div>
+        <div class="product-card-body">
+          <div class="product-cat">Tyre</div>
+          <div class="product-name">Michelin Primacy 4+</div>
+          <div class="product-spec">215/55 R17 · 4.9 ★</div>
+          <div class="product-footer">
+            <span class="product-price">KES 22,900</span>
+            <button class="add-to-cart-btn" onclick="showToast('Michelin Primacy 4+ added to cart')" aria-label="Add to cart">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="product-card">
+        <div class="product-card-image">
+          <span class="stock-badge stock-in">In Stock</span>
+          <svg class="oil-svg" viewBox="0 0 160 200" fill="none">
+            <rect x="45" y="20" width="70" height="155" rx="6" fill="#1a3a5c"/>
+            <rect x="45" y="20" width="70" height="60" rx="6" fill="#045CB4"/>
+            <rect x="55" y="30" width="50" height="40" rx="2" fill="white" opacity="0.9"/>
+            <text x="80" y="48" text-anchor="middle" font-size="8" font-weight="800" fill="#045CB4" font-family="sans-serif">CASTROL</text>
+            <text x="80" y="60" text-anchor="middle" font-size="7" font-weight="600" fill="#045CB4" font-family="sans-serif">EDGE 5W-30</text>
+            <rect x="60" y="95" width="40" height="6" rx="3" fill="white" opacity="0.2"/>
+            <rect x="60" y="108" width="40" height="6" rx="3" fill="white" opacity="0.2"/>
+            <rect x="60" y="121" width="30" height="6" rx="3" fill="white" opacity="0.2"/>
+            <rect x="60" y="12" width="40" height="14" rx="3" fill="#0d2a45"/>
+            <rect x="63" y="8" width="34" height="8" rx="4" fill="#0d2a45"/>
+          </svg>
+          <button class="wishlist-btn" onclick="toggleWishlist(this, 'Castrol EDGE 5W-30')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#777" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          </button>
+        </div>
+        <div class="product-card-body">
+          <div class="product-cat">Engine Oil</div>
+          <div class="product-name">Castrol EDGE 5W-30</div>
+          <div class="product-spec">4L · Full synthetic</div>
+          <div class="product-footer">
+            <span class="product-price">KES 8,750</span>
+            <button class="add-to-cart-btn" onclick="showToast('Castrol EDGE added to cart')" aria-label="Add to cart">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 4 -->
+      <div class="product-card">
+        <div class="product-card-image">
+          <span class="stock-badge stock-in">In Stock</span>
+          <img src="images/continental-crosscontact.png" alt="Continental CrossContact LX25" class="tyre-img" width="200" height="200" loading="lazy">
+          <button class="wishlist-btn" onclick="toggleWishlist(this, 'Continental CrossContact')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#777" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          </button>
+        </div>
+        <div class="product-card-body">
+          <div class="product-cat">Tyre</div>
+          <div class="product-name">Continental CrossContact LX25</div>
+          <div class="product-spec">235/60 R18 · 4.7 ★</div>
+          <div class="product-footer">
+            <span class="product-price">KES 24,200</span>
+            <button class="add-to-cart-btn" onclick="showToast('Continental CrossContact added to cart')" aria-label="Add to cart">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 5 -->
+      <div class="product-card">
+        <div class="product-card-image">
+          <span class="stock-badge stock-out">Out of Stock</span>
+          <img src="images/pirelli-scorpion.png" alt="Pirelli Scorpion ATR" class="tyre-img" width="200" height="200" loading="lazy" style="opacity:0.55">
+          <button class="wishlist-btn" onclick="toggleWishlist(this, 'Pirelli Scorpion ATR')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#777" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          </button>
+        </div>
+        <div class="product-card-body">
+          <div class="product-cat">Tyre</div>
+          <div class="product-name">Pirelli Scorpion ATR</div>
+          <div class="product-spec">255/70 R16 · 4.6 ★</div>
+          <div class="product-footer">
+            <span class="product-price" style="color:var(--text-secondary)">KES 16,800</span>
+            <button class="add-to-cart-btn" style="background:#ccc;cursor:not-allowed" disabled aria-label="Out of stock">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 6 -->
+      <div class="product-card">
+        <div class="product-card-image">
+          <span class="stock-badge stock-in">In Stock</span>
+          <img src="images/goodyear-wrangler.png" alt="Goodyear Wrangler HP All Weather" class="tyre-img" width="200" height="200" loading="lazy">
+          <button class="wishlist-btn" onclick="toggleWishlist(this, 'Goodyear Wrangler HP')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#777" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          </button>
+        </div>
+        <div class="product-card-body">
+          <div class="product-cat">Tyre</div>
+          <div class="product-name">Goodyear Wrangler HP All Weather</div>
+          <div class="product-spec">245/65 R17 · 4.5 ★</div>
+          <div class="product-footer">
+            <span class="product-price">KES 19,400</span>
+            <button class="add-to-cart-btn" onclick="showToast('Goodyear Wrangler added to cart')" aria-label="Add to cart">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Services tab -->
+    <div class="product-grid" id="tab-services" style="display:none">
+      <!-- Service Card 1 -->
+      <div class="product-card">
+        <div class="product-card-image" style="background:#EEF3FA">
+          <svg viewBox="0 0 120 120" width="55%" fill="none">
+            <circle cx="60" cy="60" r="40" stroke="#045CB4" stroke-width="3" fill="none"/>
+            <circle cx="60" cy="60" r="28" stroke="#045CB4" stroke-width="2" stroke-dasharray="5 3" fill="none"/>
+            <circle cx="60" cy="60" r="10" fill="#045CB4"/>
+            <line x1="60" y1="20" x2="60" y2="35" stroke="#045CB4" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="60" y1="85" x2="60" y2="100" stroke="#045CB4" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="20" y1="60" x2="35" y2="60" stroke="#045CB4" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="85" y1="60" x2="100" y2="60" stroke="#045CB4" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="product-card-body">
+          <div class="product-cat">Wheel Service</div>
+          <div class="product-name">Wheel Balancing</div>
+          <div class="product-spec">Per wheel · All vehicle types</div>
+          <div class="product-footer">
+            <span class="product-price">KES 600</span>
+            <button class="add-to-cart-btn" style="background:var(--navy)" onclick="showToast('Wheel Balancing booking started')" aria-label="Book service">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      <!-- Service Card 2 -->
+      <div class="product-card">
+        <div class="product-card-image" style="background:#EEF3FA">
+          <svg viewBox="0 0 120 120" width="55%" fill="none">
+            <rect x="25" y="50" width="70" height="30" rx="4" stroke="#045CB4" stroke-width="2.5" fill="none"/>
+            <circle cx="40" cy="80" r="14" stroke="#045CB4" stroke-width="2.5" fill="none"/>
+            <circle cx="80" cy="80" r="14" stroke="#045CB4" stroke-width="2.5" fill="none"/>
+            <circle cx="40" cy="80" r="5" fill="#045CB4"/>
+            <circle cx="80" cy="80" r="5" fill="#045CB4"/>
+            <path d="M25 60 L15 60 L12 72 L25 72" stroke="#045CB4" stroke-width="2" fill="none"/>
+            <path d="M95 60 L105 60 L108 72 L95 72" stroke="#045CB4" stroke-width="2" fill="none"/>
+            <line x1="60" y1="50" x2="60" y2="35" stroke="#045CB4" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="60" cy="30" r="5" fill="#045CB4"/>
+          </svg>
+        </div>
+        <div class="product-card-body">
+          <div class="product-cat">Tyre Service</div>
+          <div class="product-name">Tyre Fitting & Mounting</div>
+          <div class="product-spec">Per tyre · Includes removal</div>
+          <div class="product-footer">
+            <span class="product-price">KES 500</span>
+            <button class="add-to-cart-btn" style="background:var(--navy)" onclick="showToast('Tyre Fitting booking started')" aria-label="Book service">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      <!-- Service Card 3 -->
+      <div class="product-card">
+        <div class="product-card-image" style="background:#EEF3FA">
+          <svg viewBox="0 0 120 120" width="55%" fill="none">
+            <path d="M20 90 L60 30 L100 90" stroke="#045CB4" stroke-width="2.5" fill="none" stroke-linejoin="round"/>
+            <line x1="30" y1="90" x2="90" y2="90" stroke="#045CB4" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="60" y1="30" x2="60" y2="90" stroke="#658EBE" stroke-width="1.5" stroke-dasharray="4 3"/>
+            <circle cx="60" cy="60" r="5" fill="#045CB4"/>
+            <path d="M42 72 Q60 62 78 72" stroke="#045CB4" stroke-width="2" fill="none"/>
+          </svg>
+        </div>
+        <div class="product-card-body">
+          <div class="product-cat">Alignment</div>
+          <div class="product-name">Wheel Alignment</div>
+          <div class="product-spec">4-wheel · Quote on inspection</div>
+          <div class="product-footer">
+            <span class="product-price" style="font-size:14px;font-weight:700">Quote on inspection</span>
+            <button class="add-to-cart-btn" style="background:var(--navy)" onclick="showToast('Wheel Alignment booking started')" aria-label="Book service">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="catalog-footer">
+      <a href="#" class="view-all-link" id="viewAllLink">View all products</a>
+    </div>
+  </div>
+</section>
+
+<!-- DARK BAND -->
+<section class="dark-band" id="booking">
+  <div class="dark-band-inner">
+    <div>
+      <h2 class="dark-band-heading">Good parts need expert hands.</h2>
+      <p class="dark-band-body">Our technicians handle fitting, balancing, alignment, and repairs. Book ahead or drop in at either branch.</p>
+      <a href="#" class="btn-ghost">Book a service</a>
+    </div>
+    <div class="dark-band-stats">
+      <div class="stat-item">
+        <div class="stat-number">15+</div>
+        <div class="stat-label">years on<br>the road</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">2</div>
+        <div class="stat-label">branches in<br>Nairobi</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">4.8</div>
+        <div class="stat-label">average<br>customer rating</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY WELL LUPS -->
+<section class="why">
+  <div class="container">
+    <h2 class="why-heading reveal-heading">We know these roads.</h2>
+    <div class="why-grid">
+      <div class="why-item">
+        <div class="why-item-heading">Right fit, first time</div>
+        <p class="why-item-body">We match every part to your vehicle, not just your budget. Incompatible parts don't leave this shop.</p>
+      </div>
+      <div class="why-item">
+        <div class="why-item-heading">Technicians who show up</div>
+        <p class="why-item-body">Qualified team across both branches. No waiting for a specialist who isn't there.</p>
+      </div>
+      <div class="why-item">
+        <div class="why-item-heading">Honest about what you need</div>
+        <p class="why-item-body">Clear pricing, genuine warranties, no surprises at the counter. We tell you what's needed and what can wait.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BRANCHES -->
+<section class="branches">
+  <div class="container">
+    <h2 class="branches-heading reveal-heading">Two branches.<br>One standard.</h2>
+    <div class="branches-grid">
+      <div class="branch-card">
+        <div class="branch-num">Branch 01</div>
+        <div class="branch-name">Industrial Area</div>
+        <div class="branch-address">Enterprise Road, opposite Sameer Business Park<br>Nairobi, Kenya</div>
+        <div>
+          <a href="tel:+254700000000" class="branch-phone">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.42 2 2 0 0 1 3.58 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.96a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            +254 700 000 000
+          </a>
+        </div>
+        <div class="branch-map-link">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          Get directions
+        </div>
+      </div>
+      <div class="branch-card">
+        <div class="branch-num">Branch 02</div>
+        <div class="branch-name">Westlands</div>
+        <div class="branch-address">Waiyaki Way, next to Sarit Centre<br>Nairobi, Kenya</div>
+        <div>
+          <a href="tel:+254711000000" class="branch-phone">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.42 2 2 0 0 1 3.58 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.96a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            +254 711 000 000
+          </a>
+        </div>
+        <div class="branch-map-link">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          Get directions
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div>
+      <div class="footer-brand-logo">
+        <svg width="28" height="28" viewBox="0 0 36 36" fill="none">
+          <circle cx="18" cy="18" r="17" stroke="#658EBE" stroke-width="2"/>
+          <circle cx="18" cy="18" r="11" stroke="#658EBE" stroke-width="1.5"/>
+          <circle cx="18" cy="18" r="5" fill="#658EBE"/>
+        </svg>
+        <span class="footer-brand-name">WELL LUPS AUTO TYRES</span>
+      </div>
+      <p class="footer-brand-tagline">Tyres, parts, and garage care for the road ahead. Two branches in Nairobi.</p>
+    </div>
+    <div>
+      <div class="footer-col-heading">Shop</div>
+      <ul class="footer-links">
+        <li><a href="#">Tyres</a></li>
+        <li><a href="#">Engine Oil</a></li>
+        <li><a href="#">Batteries</a></li>
+        <li><a href="#">Brake Parts</a></li>
+        <li><a href="#">All products</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-heading">Services</div>
+      <ul class="footer-links">
+        <li><a href="#">Wheel Balancing</a></li>
+        <li><a href="#">Wheel Alignment</a></li>
+        <li><a href="#">Tyre Fitting</a></li>
+        <li><a href="#">Tyre Repair</a></li>
+        <li><a href="#">Book a service</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-heading">Company</div>
+      <ul class="footer-links">
+        <li><a href="#">Our Branches</a></li>
+        <li><a href="#">About Well Lups</a></li>
+        <li><a href="#">Warranty & Returns</a></li>
+        <li><a href="#">Contact Us</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span class="footer-copy">© 2025 Well Lups Auto Tyres Limited. All rights reserved.</span>
+    <span class="footer-copy">Nairobi, Kenya</span>
+  </div>
+</footer>
+
+<!-- WHATSAPP FAB -->
+<a href="https://wa.me/254700000000" class="whatsapp-fab" id="whatsappFab" target="_blank" rel="noopener" aria-label="Chat on WhatsApp">
+  <svg width="26" height="26" viewBox="0 0 24 24" fill="white">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.890-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
+  </svg>
+</a>
+
+<!-- TOAST -->
+<div class="toast" id="toast" role="alert" aria-live="polite">
+  <span id="toastMsg">Item added to cart</span>
+  <button class="toast-close" onclick="hideToast()" aria-label="Dismiss">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+  </button>
+</div>
+
+<script>
+// ─── NAV SCROLL STATE ─────────────────────────────────
+const nav = document.getElementById('mainNav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 10);
+}, { passive: true });
+
+// ─── WHATSAPP FAB ─────────────────────────────────────
+const fab = document.getElementById('whatsappFab');
+window.addEventListener('scroll', () => {
+  fab.classList.toggle('visible', window.scrollY > 400);
+}, { passive: true });
+
+// ─── TOAST ────────────────────────────────────────────
+let toastTimer;
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  const toastMsg = document.getElementById('toastMsg');
+  toastMsg.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(hideToast, 3000);
+}
+function hideToast() {
+  document.getElementById('toast').classList.remove('show');
+}
+
+// ─── WISHLIST TOGGLE ──────────────────────────────────
+function toggleWishlist(btn, productName) {
+  const isActive = btn.classList.toggle('active');
+  const svg = btn.querySelector('svg');
+  if (isActive) {
+    svg.setAttribute('fill', '#ef4444');
+    svg.setAttribute('stroke', '#ef4444');
+    showToast(productName + ' added to wishlist');
+  } else {
+    svg.setAttribute('fill', 'none');
+    svg.setAttribute('stroke', '#777');
+    showToast(productName + ' removed from wishlist');
+  }
+}
+
+// ─── TAB SWITCH ───────────────────────────────────────
+function switchTab(tab, btn) {
+  document.querySelectorAll('.catalog-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+
+  const products = document.getElementById('tab-products');
+  const services = document.getElementById('tab-services');
+  const viewAll = document.getElementById('viewAllLink');
+
+  if (tab === 'products') {
+    products.style.display = 'grid';
+    services.style.display = 'none';
+    viewAll.textContent = 'View all products';
+  } else {
+    products.style.display = 'none';
+    services.style.display = 'grid';
+    viewAll.textContent = 'View all services';
+  }
+}
+
+// ─── SCROLL REVEAL (headings only) ───────────────────
+const revealEls = document.querySelectorAll('.reveal-heading');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('in-view');
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.2 });
+revealEls.forEach(el => observer.observe(el));
+
+// ─── REDUCED MOTION ───────────────────────────────────
+if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  document.querySelectorAll('.reveal-heading').forEach(el => {
+    el.style.opacity = '1';
+    el.style.transform = 'none';
+    el.style.transition = 'none';
+  });
+}
+</script>
+</body>
+</html>
