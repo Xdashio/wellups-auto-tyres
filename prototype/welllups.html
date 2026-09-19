@@ -184,12 +184,208 @@ body {
   justify-content: center;
 }
 
+/* ─── MOBILE MENU (RIGHT OFF-CANVAS DRAWER) ────────── */
+.mobile-menu-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 25, 47, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 998;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  pointer-events: none;
+}
+.mobile-menu-overlay.open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.mobile-menu {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(340px, 86vw);
+  height: 100vh;
+  height: 100dvh;
+  background: #FFFFFF;
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  visibility: hidden;
+  box-shadow: -10px 0 36px rgba(0, 0, 0, 0.2);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.35s ease;
+  overflow: hidden;
+}
+.mobile-menu.open {
+  transform: translateX(0);
+  visibility: visible;
+}
+.mobile-menu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.mobile-menu-close {
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border: 1px solid var(--border);
+  color: var(--text);
+  cursor: pointer;
+  border-radius: 0;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.mobile-menu-close:hover {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+.mobile-menu-body {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.mobile-menu-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #F8F9FA;
+  border: 1px solid var(--border);
+  padding: 10px 14px;
+}
+.mobile-menu-search input {
+  border: none;
+  background: transparent;
+  width: 100%;
+  font-family: inherit;
+  font-size: 13.5px;
+  color: var(--text);
+  outline: none;
+}
+.mobile-menu-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.mobile-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  color: var(--text);
+  text-decoration: none;
+  font-size: 14.5px;
+  font-weight: 600;
+  background: #FBFBFA;
+  border: 1px solid var(--border);
+  transition: all 0.15s ease;
+}
+.mobile-nav-link:hover {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+.mobile-nav-link:hover .mobile-nav-arrow,
+.mobile-nav-link:hover .mobile-nav-icon,
+.mobile-nav-link:hover .mobile-nav-badge {
+  color: white;
+}
+.mobile-nav-icon {
+  display: flex;
+  color: var(--primary);
+  flex-shrink: 0;
+}
+.mobile-nav-text {
+  flex: 1;
+}
+.mobile-nav-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  background: var(--border);
+  color: var(--text-secondary);
+}
+.mobile-nav-arrow {
+  color: var(--text-secondary);
+  transition: transform 0.15s ease;
+}
+.mobile-nav-link:hover .mobile-nav-arrow {
+  transform: translateX(3px);
+}
+.mobile-menu-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
+}
+.mobile-menu-user-row {
+  display: flex;
+  gap: 10px;
+}
+.mobile-menu-footer {
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.mobile-menu-footer-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+}
+.mobile-menu-wa-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  background: #25D366;
+  color: white;
+  text-decoration: none;
+  font-size: 13.5px;
+  font-weight: 700;
+  transition: background 0.15s ease;
+}
+.mobile-menu-wa-btn:hover {
+  background: #1eb954;
+}
+.mobile-menu-branches-info {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* Hide mobile menu button on desktop */
+.nav-menu-btn { display: none; }
+
 /* ─── HERO ──────────────────────────────────────────── */
 .hero {
-  min-height: calc(100vh - 64px - 38px);
+  min-height: 600px;
+  height: calc(100vh - 64px - 38px);
+  max-height: 820px;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  align-items: end;
+  grid-template-columns: 1.15fr 0.85fr;
+  align-items: center;
   overflow: hidden;
   background: var(--bg);
   position: relative;
@@ -202,32 +398,31 @@ body {
   pointer-events: none;
 }
 .hero-content {
-  padding: 80px 0 80px 40px;
-  padding-left: max(40px, calc((100vw - 1240px) / 2 + 40px));
-  max-width: 620px;
+  padding: 60px max(40px, calc((100vw - 1240px) / 2 + 40px)) 60px max(40px, calc((100vw - 1240px) / 2));
   position: relative;
   z-index: 1;
 }
 .hero-headline {
-  font-size: clamp(44px, 5.5vw, 76px);
+  font-size: clamp(44px, 5.2vw, 72px);
   font-weight: 800;
   line-height: 1.05;
   letter-spacing: -0.03em;
   color: var(--text);
   margin-bottom: 20px;
+  max-width: 560px;
 }
 .hero-body {
   font-size: 17px;
   font-weight: 400;
   color: var(--text-secondary);
-  max-width: 420px;
+  max-width: 460px;
   line-height: 1.65;
-  margin-bottom: 36px;
+  margin-bottom: 34px;
 }
 .hero-ctas {
   display: flex;
   gap: 12px;
-  margin-bottom: 52px;
+  margin-bottom: 36px;
   flex-wrap: wrap;
 }
 .btn-primary {
@@ -266,54 +461,85 @@ body {
   transition: background 0.15s ease, color 0.15s ease;
 }
 .btn-secondary:hover { background: var(--primary); color: white; }
+
+/* ─── HERO WHEEL · roll-in & settle ─────────────────────
+   The wheel is drawn on .hero-stage (covers the whole hero) so it can roll
+   in from the right edge. Ground = the bottom edge of the hero.
+   Only transform + opacity are animated (GPU friendly, no layout work).   */
+.hero { --hw: min(600px, 50vw); --hx: clamp(20px, 5vw, 90px); }
+.hero-visual { height: 100%; min-height: 500px; }
+
+/* Hero trust items */
 .hero-trust {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   font-size: 13px;
   font-weight: 500;
   color: var(--text-secondary);
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
-.hero-trust span { white-space: nowrap; }
-.hero-trust-dot { color: var(--blue-muted); }
-
-.hero-visual {
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  position: relative;
-  overflow: visible;
-  height: 100%;
-  min-height: 500px;
+.hero-trust-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
-.hero-tyre-wrap {
-  position: relative;
-  display: flex;
-  align-items: flex-end;
-  justify-content: flex-end;
-  width: 100%;
-  overflow: visible;
-  padding-top: 40px;
+.hero-trust-item svg {
+  color: var(--primary);
+  flex-shrink: 0;
 }
-.hero-tyre-svg, .hero-wheel-img {
-  width: min(600px, 50vw);
-  height: auto;
-  display: block;
-  transform: translateX(60px);
-  filter: drop-shadow(16px 28px 40px rgba(0,0,0,0.32));
-  animation: tyreSlideIn 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), filter 0.6s ease;
-  user-select: none;
+.hero-trust-dot {
+  color: var(--blue-muted);
+  font-weight: 700;
+  flex-shrink: 0;
+  line-height: 1;
 }
-.hero-wheel-img:hover {
-  transform: translateX(60px) rotate(3deg) scale(1.02);
-  filter: drop-shadow(20px 34px 48px rgba(0,0,0,0.38));
+.hero-stage {
+  position: absolute; inset: 0; z-index: 2;
+  pointer-events: none; overflow: hidden;
 }
-@keyframes tyreSlideIn {
-  from { transform: translateX(120px); opacity: 0.3; }
-  to   { transform: translateX(60px);  opacity: 1; }
+.hero-rig {
+  position: absolute; width: var(--hw); height: var(--hw);
+  right: var(--hx); bottom: calc(var(--hw) * -0.072);
+  will-change: transform; opacity: 0;
 }
+.hero-rig.ready { opacity: 1; }
+.hero-wheel { position: absolute; inset: 0; will-change: transform; }
+.hero-wheel img {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  display: block; user-select: none; -webkit-user-drag: none;
+}
+.hero-wheel .hw-blur { opacity: 0; }   /* pre-blurred twin, cross-faded by speed */
+.hero-shadow {
+  position: absolute; opacity: 0; will-change: transform;
+  width: calc(var(--hw) * 0.84); height: calc(var(--hw) * 0.06);
+  right: calc(var(--hx) + var(--hw) * 0.08); bottom: calc(var(--hw) * -0.03);
+  background: radial-gradient(closest-side, rgba(0,0,0,0.4), rgba(0,0,0,0));
+}
+.hero-card {
+  position: absolute; right: calc(var(--hx) - 14px); bottom: 26px;
+  width: min(250px, 60vw); background: white; border: 1px solid var(--border);
+  padding: 14px 18px 18px; box-shadow: 0 18px 44px rgba(20, 65, 119, 0.2);
+  pointer-events: auto; opacity: 0;
+  transform: translate3d(30px, 26px, 0) scale(0.94);
+  transition: transform 0.6s cubic-bezier(0.2, 1.25, 0.3, 1), opacity 0.35s ease;
+  will-change: transform, opacity;
+}
+.hero-card.on { opacity: 1; transform: none; }
+.hc-row {
+  opacity: 0; transform: translateY(10px);
+  transition: opacity 0.35s ease, transform 0.45s cubic-bezier(0.2, 1, 0.3, 1);
+  transition-delay: calc(var(--i) * 70ms + 160ms);
+}
+.hero-card.on .hc-row { opacity: 1; transform: none; }
+.hc-badge {
+  display: inline-block; font-size: 11px; font-weight: 700; padding: 3px 8px;
+  color: var(--stock-in); background: rgba(22, 163, 74, 0.1); margin-bottom: 8px;
+}
+.hc-foot { display: flex; align-items: center; justify-content: space-between; }
+.hero-card .product-spec { margin-bottom: 10px; }
 
 /* Spinning tread ring (legacy fallback) */
 .tyre-ring-spin {
@@ -322,7 +548,7 @@ body {
 }
 @media (prefers-reduced-motion: reduce) {
   .tyre-ring-spin { animation: none; }
-  .hero-tyre-svg, .hero-wheel-img { animation: none; }
+  .hero-card, .hc-row { transition: none; }
 }
 
 /* ─── CONTAINER ─────────────────────────────────────── */
@@ -336,13 +562,13 @@ body {
 .fit-finder {
   background: white;
   border-bottom: 1px solid var(--border);
-  padding: 52px 40px;
+  padding: 48px 40px;
 }
 .fit-finder-inner {
   max-width: 1240px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 1fr 1.4fr;
+  grid-template-columns: 1fr 1.5fr;
   align-items: center;
   gap: 48px;
 }
@@ -360,36 +586,69 @@ body {
 }
 .fit-finder-form {
   display: flex;
-  gap: 0;
+  align-items: stretch;
+  background: white;
   border: 1px solid var(--border);
+  box-shadow: 0 4px 18px rgba(20, 65, 119, 0.04);
 }
-.fit-finder-form select {
+.fit-field {
   flex: 1;
-  height: 50px;
-  padding: 0 14px;
+  min-width: 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 9px 16px;
+  border-right: 1px solid var(--border);
+  transition: background 0.15s ease;
+}
+.fit-field:focus-within {
+  background: #F9FAFB;
+}
+.fit-label {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--blue-muted);
+  margin-bottom: 2px;
+  pointer-events: none;
+}
+.fit-select {
+  width: 100%;
+  height: 28px;
+  padding: 0 24px 0 0;
   font-family: inherit;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--text);
-  background: white;
+  background: transparent;
   border: none;
-  border-right: 1px solid var(--border);
+  border-radius: 0;
   appearance: none;
   -webkit-appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23777878' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23045CB4' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 12px center;
-  padding-right: 32px;
+  background-position: right 2px center;
+  background-size: 10px 6px;
   cursor: pointer;
+  outline: none;
 }
-.fit-finder-form select:focus { outline: none; border-right: 1px solid var(--border); }
+.fit-select:disabled {
+  color: var(--stock-out);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
 .fit-finder-btn {
-  height: 50px;
-  padding: 0 24px;
+  height: auto;
+  min-height: 56px;
+  padding: 0 28px;
   background: var(--primary);
   color: white;
   font-family: inherit;
-  font-size: 14px;
+  font-size: 14.5px;
   font-weight: 700;
   border: none;
   border-radius: 0;
@@ -397,6 +656,10 @@ body {
   white-space: nowrap;
   transition: background 0.15s ease;
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 .fit-finder-btn:hover { background: var(--primary-dark); }
 
@@ -574,6 +837,15 @@ body {
   font-weight: 800;
   color: var(--primary);
   letter-spacing: -0.02em;
+}
+.product-price.quote-btn {
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity 0.2s ease, transform 0.15s ease;
+}
+.product-price.quote-btn:hover {
+  opacity: 0.75;
+  text-decoration: underline;
 }
 .add-to-cart-btn {
   width: 38px;
@@ -933,6 +1205,99 @@ body {
 }
 .reveal-heading.in-view { opacity: 1; transform: translateY(0); }
 
+/* ─── FEATURED · wheel carousel ─────────────────────── */
+.featured {
+  background: var(--navy);
+  position: relative;
+  overflow: hidden;
+  padding-bottom: 64px;
+}
+.featured::before {
+  content: '';
+  position: absolute; inset: 0; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpath d='M0 10 L10 0 M0 30 L30 0 M0 50 L50 0 M10 60 L60 10 M30 60 L60 30 M50 60 L60 50' stroke='%23ffffff' stroke-width='1' opacity='0.06'/%3E%3C/svg%3E");
+}
+.featured-head { position: relative; z-index: 2; text-align: center; padding: 72px 24px 36px; }
+.featured-heading {
+  font-size: clamp(30px, 3.8vw, 50px); font-weight: 800; color: white;
+  letter-spacing: -0.025em; line-height: 1.1;
+}
+.featured-sub { font-size: 14px; color: rgba(255,255,255,0.6); margin-top: 8px; }
+.featured-track {
+  position: relative; height: 480px; overflow: hidden;
+  touch-action: pan-y; user-select: none; cursor: grab; outline: none;
+}
+.featured-track:active { cursor: grabbing; }
+/* soft fade so the fan bleeds into the section instead of ending on a hard edge */
+.featured-track::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 90px; pointer-events: none; z-index: 3; background: linear-gradient(rgba(20,65,119,0), var(--navy)); }
+.featured-track:focus-visible { outline: 2px solid rgba(255,255,255,0.7); outline-offset: -6px; }
+.fc-pivot { position: absolute; left: 50%; top: 0; width: 0; height: 0; will-change: transform; }
+.fc-spoke { position: absolute; left: 0; top: 0; width: 0; height: 0; }
+.fc-card { position: absolute; will-change: transform, opacity; }
+.fc-card .product-card { box-shadow: 0 16px 40px rgba(0,0,0,0.32); }
+.fc-card .product-card:hover { box-shadow: 0 16px 40px rgba(0,0,0,0.32), 0 0 0 2px var(--primary) inset; }
+/* the tyre is rotated by script while browsing; skip the filter + hover transition so it stays cheap */
+.fc-card .tyre-img { filter: none; transition: none; will-change: transform; }
+.fc-card .product-card:hover .tyre-img { filter: none; }
+.fc-ctl { position: relative; z-index: 2; display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 4px; }
+.fc-arrow {
+  width: 46px; height: 46px; background: transparent; color: white; cursor: pointer;
+  border: 2px solid rgba(255,255,255,0.6); border-radius: 0; font-family: inherit;
+  display: grid; place-items: center; transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.fc-arrow:hover { background: white; color: var(--navy); border-color: white; }
+.fc-arrow:disabled { opacity: 0.35; cursor: default; background: transparent; color: white; border-color: rgba(255,255,255,0.6); }
+.fc-ticks { display: flex; gap: 6px; }
+.fc-ticks i { display: block; width: 24px; height: 4px; background: rgba(255,255,255,0.25); transition: background 0.2s ease, transform 0.2s ease; }
+.fc-ticks i.on { background: white; transform: scaleY(1.5); }
+
+/* ─── ROAD SCENE · wheel drives right, world moves left ─ */
+.roadscene {
+  --rw: clamp(190px, 17vw, 250px);
+  --road: 78px; --contact: 26px;   /* road height, and how far the tyre sits below the road's top edge */
+  position: relative; overflow: hidden; background: white;
+}
+.rs-sky { position: relative; height: 300px; overflow: hidden; background: linear-gradient(#ffffff, #EAF1FA); }
+.rs-layer { position: absolute; left: 0; bottom: 0; background-repeat: repeat-x; background-position: 0 100%; will-change: transform; }
+.rs-far  { background-image: url('images/road-far.svg'); }
+.rs-mid  { background-image: url('images/road-mid.svg'); }
+.rs-near { background-image: url('images/road-near.svg'); }
+.rs-copy { position: absolute; z-index: 4; left: 0; right: 0; top: 0; padding-top: 44px; pointer-events: none; }
+.rs-heading {
+  font-size: clamp(28px, 3.4vw, 46px); font-weight: 800; letter-spacing: -0.025em;
+  line-height: 1.1; color: var(--text); max-width: 720px;
+}
+.rs-road {
+  position: relative; height: var(--road); background: var(--navy); z-index: 2;
+  box-shadow: inset 0 3px 0 rgba(255,255,255,0.14); overflow: hidden;
+}
+.rs-dashes {
+  position: absolute; left: 0; top: 62%; height: 5px; width: calc(100% + 120px);
+  background: repeating-linear-gradient(90deg, rgba(255,255,255,0.7) 0 56px, transparent 56px 120px);
+  will-change: transform;
+}
+.rs-shadow {
+  position: absolute; z-index: 3; left: calc(68% - var(--rw) * 0.42); width: calc(var(--rw) * 0.84); height: calc(var(--rw) * 0.07);
+  bottom: calc(var(--road) - var(--contact) - var(--rw) * 0.03);
+  background: radial-gradient(closest-side, rgba(0,0,0,0.5), rgba(0,0,0,0)); will-change: transform;
+}
+.rs-rig {
+  position: absolute; z-index: 3; width: var(--rw); height: var(--rw);
+  left: calc(68% - var(--rw) / 2); bottom: calc(var(--road) - var(--contact) - var(--rw) * 0.072);
+  will-change: transform;
+}
+.rs-wheel { position: absolute; inset: 0; will-change: transform; }
+.rs-wheel img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; user-select: none; -webkit-user-drag: none; }
+.rs-wheel .rs-blur { opacity: 0; }
+.roadscene + .footer { padding-top: 48px; }
+@media (max-width: 700px) {
+  .roadscene { --rw: 150px; --road: 64px; --contact: 22px; }
+  .rs-sky { height: 240px; }
+  .rs-rig { left: calc(56% - var(--rw) / 2); }
+  .rs-shadow { left: calc(56% - var(--rw) * 0.42); }
+  .rs-copy { padding-top: 32px; }
+}
+
 /* ─── RESPONSIVE ────────────────────────────────────── */
 @media (max-width: 900px) {
   .hero {
@@ -943,20 +1308,34 @@ body {
     padding: 60px 24px 32px;
     max-width: 100%;
   }
-  .hero-visual { min-height: 280px; }
-  .hero-tyre-svg, .hero-wheel-img {
-    width: min(340px, 85vw);
-    transform: translateX(30px);
-  }
+  .hero { --hw: min(86vw, 420px); --hx: calc((100vw - var(--hw)) / 2); }
+  .hero-visual { min-height: calc(var(--hw) * 0.93 + 20px); }
+  .hero-card { width: min(192px, 52vw); right: calc(var(--hx) - 10px); bottom: 10px; padding: 12px 14px 14px; }
   .fit-finder-inner { grid-template-columns: 1fr; gap: 24px; }
-  .fit-finder-form { flex-direction: column; border: none; gap: 0; }
-  .fit-finder-form select {
-    border: 1px solid var(--border);
-    border-bottom: none;
-    border-radius: 0;
+  .fit-finder-form {
+    flex-direction: column;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    gap: 8px;
   }
-  .fit-finder-form select:last-of-type { border-bottom: 1px solid var(--border); }
-  .fit-finder-btn { border: 1px solid var(--primary); width: 100%; margin-top: 10px; }
+  .fit-field {
+    border: 1px solid var(--border);
+    border-radius: 0;
+    padding: 10px 16px;
+    background: white;
+  }
+  .fit-select {
+    height: 32px;
+    font-size: 15px;
+  }
+  .fit-finder-btn {
+    border: none;
+    width: 100%;
+    min-height: 50px;
+    margin-top: 4px;
+    font-size: 15px;
+  }
   .product-grid { grid-template-columns: repeat(2, 1fr); }
   .dark-band-inner { grid-template-columns: 1fr; gap: 48px; }
   .dark-band-stats { gap: 0; }
@@ -970,13 +1349,71 @@ body {
   .nav { padding: 0 24px; }
   .nav-links { display: none; }
   .nav-search { display: none; }
+  .nav-menu-btn { display: flex; }
   .dark-band { padding: 64px 24px; }
   .branches { padding: 64px 0; }
   .catalog-header { flex-direction: column; align-items: flex-start; }
   .catalog-heading { font-size: 28px; }
+  .catalog-tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; flex-wrap: nowrap; }
+  .catalog-tab { white-space: nowrap; flex-shrink: 0; }
+  .product-price { font-size: 17px; }
+  .featured-track { height: 440px; }
 }
 @media (max-width: 560px) {
-  .product-grid { grid-template-columns: 1fr; }
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1px;
+  }
+  .product-card-body {
+    padding: 10px 10px 12px;
+  }
+  .product-cat {
+    font-size: 10px;
+    margin-bottom: 2px;
+  }
+  .product-name {
+    font-size: 13px;
+    line-height: 1.25;
+    margin-bottom: 3px;
+    min-height: 32px;
+  }
+  .product-spec {
+    font-size: 10.5px;
+    margin-bottom: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .product-footer {
+    margin-top: auto;
+    gap: 4px;
+  }
+  .product-price {
+    font-size: 13.5px;
+    letter-spacing: -0.01em;
+  }
+  .add-to-cart-btn {
+    width: 32px;
+    height: 32px;
+  }
+  .add-to-cart-btn svg {
+    width: 13px;
+    height: 13px;
+  }
+  .stock-badge {
+    padding: 2px 6px;
+    font-size: 9px;
+  }
+  .wishlist-btn {
+    width: 26px;
+    height: 26px;
+    top: 6px;
+    right: 6px;
+  }
+  .wishlist-btn svg {
+    width: 12px;
+    height: 12px;
+  }
   .footer-inner { grid-template-columns: 1fr; }
   .stat-number { font-size: 36px; }
   .hero-ctas { flex-direction: column; }
@@ -986,6 +1423,22 @@ body {
   .dark-band-stats { flex-direction: column; gap: 24px; }
   .stat-item { padding: 0; border-left: none; border-top: 1px solid rgba(255,255,255,0.15); padding-top: 20px; }
   .stat-item:first-child { border-top: none; padding-top: 0; }
+  .hero-headline { font-size: clamp(36px, 8vw, 52px); }
+  .hero-body { font-size: 15px; max-width: 100%; }
+  .fit-finder-heading { font-size: 24px; }
+  .catalog-heading { font-size: 24px; }
+  .branches-heading { font-size: 28px; }
+  .why-heading { font-size: 24px; }
+  .dark-band-heading { font-size: 26px; }
+  .featured-heading { font-size: 26px; }
+  .rs-heading { font-size: 24px; }
+  .nav { height: 56px; padding: 0 16px; }
+  .nav-logo-main { font-size: 13px; }
+  .nav-logo-sub { font-size: 8px; }
+  .nav-logo { margin-right: 16px; }
+  .nav-icon-btn { width: 32px; height: 32px; }
+  .whatsapp-fab { width: 48px; height: 48px; bottom: 20px; right: 20px; }
+  .featured-track { height: 400px; }
 }
 </style>
 </head>
@@ -1001,20 +1454,7 @@ body {
 <nav class="nav" id="mainNav">
   <div class="nav-inner">
     <a href="#" class="nav-logo">
-      <!-- Tyre icon -->
-      <svg class="nav-logo-icon" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="18" cy="18" r="17" stroke="#045CB4" stroke-width="2"/>
-        <circle cx="18" cy="18" r="11" stroke="#045CB4" stroke-width="1.5"/>
-        <circle cx="18" cy="18" r="5" fill="#045CB4"/>
-        <line x1="18" y1="1" x2="18" y2="7" stroke="#045CB4" stroke-width="1.5" stroke-linecap="round"/>
-        <line x1="18" y1="29" x2="18" y2="35" stroke="#045CB4" stroke-width="1.5" stroke-linecap="round"/>
-        <line x1="1" y1="18" x2="7" y2="18" stroke="#045CB4" stroke-width="1.5" stroke-linecap="round"/>
-        <line x1="29" y1="18" x2="35" y2="18" stroke="#045CB4" stroke-width="1.5" stroke-linecap="round"/>
-        <line x1="4.4" y1="4.4" x2="8.7" y2="8.7" stroke="#045CB4" stroke-width="1.5" stroke-linecap="round"/>
-        <line x1="27.3" y1="27.3" x2="31.6" y2="31.6" stroke="#045CB4" stroke-width="1.5" stroke-linecap="round"/>
-        <line x1="31.6" y1="4.4" x2="27.3" y2="8.7" stroke="#045CB4" stroke-width="1.5" stroke-linecap="round"/>
-        <line x1="8.7" y1="27.3" x2="4.4" y2="31.6" stroke="#045CB4" stroke-width="1.5" stroke-linecap="round"/>
-      </svg>
+      <img src="images/wellups_logo_no_bg.png" alt="Well Lups Auto Tyres" class="nav-logo-icon" width="48" height="48" loading="lazy" decoding="async">
       <div class="nav-logo-text">
         <span class="nav-logo-main">WELL LUPS</span>
         <span class="nav-logo-sub">AUTO TYRES LIMITED</span>
@@ -1047,9 +1487,114 @@ body {
         </svg>
         <span class="nav-cart-badge">2</span>
       </button>
+      <button class="nav-menu-btn nav-icon-btn" aria-label="Menu" aria-expanded="false" aria-controls="mobileMenu">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
     </div>
   </div>
 </nav>
+
+<!-- MOBILE MENU OVERLAY & RIGHT DRAWER -->
+<div class="mobile-menu-overlay" id="mobileMenuOverlay" aria-hidden="true"></div>
+<div class="mobile-menu" id="mobileMenu" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Mobile navigation">
+  <div class="mobile-menu-header">
+    <a href="#" class="nav-logo" style="margin-right:0">
+      <img src="images/wellups_logo_no_bg.png" alt="" class="nav-logo-icon">
+      <div class="nav-logo-text">
+        <span class="nav-logo-main">WELL LUPS</span>
+        <span class="nav-logo-sub">AUTO TYRES LIMITED</span>
+      </div>
+    </a>
+    <button class="mobile-menu-close" id="mobileMenuClose" aria-label="Close menu">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="mobile-menu-body">
+    <!-- Search -->
+    <div class="mobile-menu-search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input type="text" placeholder="Search tyres, parts, brands…" aria-label="Search tyres and parts">
+    </div>
+
+    <!-- Navigation Links -->
+    <nav class="mobile-menu-nav">
+      <a href="#catalog" class="mobile-nav-link" data-tab="products">
+        <span class="mobile-nav-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/></svg>
+        </span>
+        <span class="mobile-nav-text">Shop Products</span>
+        <span class="mobile-nav-badge">24</span>
+        <svg class="mobile-nav-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
+      <a href="#catalog" class="mobile-nav-link" data-tab="services">
+        <span class="mobile-nav-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+        </span>
+        <span class="mobile-nav-text">Garage Services</span>
+        <span class="mobile-nav-badge">08</span>
+        <svg class="mobile-nav-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
+      <a href="#fitFinder" class="mobile-nav-link">
+        <span class="mobile-nav-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3 3 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
+        </span>
+        <span class="mobile-nav-text">Vehicle Fit Finder</span>
+        <svg class="mobile-nav-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
+      <a href="#booking" class="mobile-nav-link">
+        <span class="mobile-nav-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </span>
+        <span class="mobile-nav-text">Book Fitting & Care</span>
+        <svg class="mobile-nav-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
+      <a href="#branches" class="mobile-nav-link">
+        <span class="mobile-nav-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+        </span>
+        <span class="mobile-nav-text">Our Branches (2)</span>
+        <svg class="mobile-nav-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
+    </nav>
+
+    <!-- Quick User Actions -->
+    <div class="mobile-menu-actions">
+      <div class="mobile-menu-user-row">
+        <button class="btn-secondary" style="height:44px; font-size:13px; flex:1; gap:8px;" onclick="showToast('Account feature coming soon')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Account
+        </button>
+        <button class="btn-primary" style="height:44px; font-size:13px; flex:1; gap:8px;" onclick="showToast('Cart has 2 items')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          Cart (2)
+        </button>
+      </div>
+    </div>
+
+    <!-- Contact & Branch Info in Menu -->
+    <div class="mobile-menu-footer">
+      <div class="mobile-menu-footer-title">Need direct assistance?</div>
+      <a href="https://wa.me/254748088741?text=Hello%20Well%20Lups!%20I%20would%20like%20to%20inquire%20about%20your%20tyres%2C%20products%2C%20and%20garage%20services." target="_blank" rel="noopener" class="mobile-menu-wa-btn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.664-.698c.969.587 1.777.949 2.796.949h.002c3.181 0 5.768-2.586 5.768-5.766 0-3.18-2.587-5.736-5.77-5.736zm3.392 8.235c-.144.405-.837.774-1.17.824-.312.045-.694.072-2.146-.531-1.857-.772-3.053-2.66-3.146-2.784-.093-.123-.746-.991-.746-1.889 0-.898.472-1.339.64-1.52.169-.181.369-.226.492-.226.124 0 .248.002.355.007.113.006.265-.043.414.316.154.372.525 1.282.571 1.376.046.093.077.202.015.326-.062.124-.093.201-.185.31-.093.109-.196.243-.279.327-.093.093-.19.195-.082.381.108.186.48 1.921 1.031 2.412.71.633 1.309.83 1.495.922.186.093.294.078.403-.047.109-.124.464-.541.588-.727.124-.186.248-.155.418-.093.17.062 1.082.51 1.267.603.186.093.309.139.355.217.046.077.046.449-.098.854z"/></svg>
+        <span>Chat on WhatsApp</span>
+      </a>
+      <div class="mobile-menu-branches-info">
+        <div><strong>Industrial Area:</strong> Commercial St, Nairobi</div>
+        <div><strong>Westlands:</strong> Mpaka Rd, Nairobi</div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- HERO -->
 <section class="hero">
@@ -1061,64 +1606,121 @@ body {
       <a href="#booking" class="btn-secondary">Book a Service</a>
     </div>
     <div class="hero-trust">
-      <span>Genuine brands stocked</span>
-      <span class="hero-trust-dot">·</span>
-      <span>Two Nairobi branches</span>
-      <span class="hero-trust-dot">·</span>
-      <span>Fitting included</span>
+      <span class="hero-trust-item">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        <span>Genuine brands stocked</span>
+      </span>
+      <span class="hero-trust-dot" aria-hidden="true">·</span>
+      <span class="hero-trust-item">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        <span>Two Nairobi branches</span>
+      </span>
+      <span class="hero-trust-dot" aria-hidden="true">·</span>
+      <span class="hero-trust-item">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        <span>Fitting included</span>
+      </span>
     </div>
   </div>
 
-  <div class="hero-visual">
-    <div class="hero-tyre-wrap">
-      <img src="images/hero-wheel.png" alt="Well Lups Premium Automotive Wheel and Tyre" class="hero-wheel-img" width="580" height="580">
+  <div class="hero-visual"></div>
+
+  <!-- Wheel + product card live on the stage so the wheel can roll in from the screen edge -->
+  <div class="hero-stage" id="heroStage">
+    <div class="hero-shadow" id="heroShadow"></div>
+    <div class="hero-rig" id="heroRig">
+      <div class="hero-wheel" id="heroWheel">
+        <img class="hw-sharp" src="images/hero-wheel.webp" alt="Well Lups premium automotive wheel and tyre" width="720" height="720" fetchpriority="high" decoding="async">
+        <img class="hw-blur" src="images/hero-wheel-blur.webp" alt="" aria-hidden="true" width="512" height="512" decoding="async">
+      </div>
+    </div>
+    <div class="hero-card" id="heroCard">
+      <div class="hc-row" style="--i:0"><span class="hc-badge">In Stock</span></div>
+      <div class="hc-row" style="--i:1"><div class="product-name">Pirelli P Zero</div></div>
+      <div class="hc-row" style="--i:2"><div class="product-spec">275/35 R21 · 4.9 ★</div></div>
+      <div class="hc-row hc-foot" style="--i:3">
+        <button class="product-price quote-btn" onclick="openWhatsAppInquiry('Pirelli P Zero', '275/35 R21', 'Tyres')" style="background:none;border:none;padding:0;" aria-label="Inquire about Pirelli P Zero on WhatsApp">Get a quote</button>
+        <button class="add-to-cart-btn" onclick="showToast('Pirelli P Zero added to cart')" aria-label="Add to cart">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        </button>
+      </div>
     </div>
   </div>
+  <noscript><style>.hero-rig{opacity:1}.hero-shadow{opacity:1}.hero-card,.hc-row{opacity:1;transform:none}</style></noscript>
 </section>
 
 <!-- VEHICLE FIT FINDER -->
-<div class="fit-finder">
+<div class="fit-finder" id="fitFinder">
   <div class="fit-finder-inner">
     <div>
       <h2 class="fit-finder-heading">Find tyres that fit your car.</h2>
       <p class="fit-finder-sub">Select your vehicle and we'll show you compatible stock.</p>
     </div>
     <div class="fit-finder-form">
-      <select>
-        <option>Make</option>
-        <option>Toyota</option>
-        <option>Subaru</option>
-        <option>Nissan</option>
-        <option>Mitsubishi</option>
-        <option>Land Rover</option>
-        <option>Mercedes-Benz</option>
-        <option>BMW</option>
-        <option>Isuzu</option>
-      </select>
-      <select>
-        <option>Model</option>
-        <option>Prado</option>
-        <option>Hilux</option>
-        <option>Harrier</option>
-        <option>Forester</option>
-        <option>X-Trail</option>
-        <option>Outlander</option>
-      </select>
-      <select>
-        <option>Year</option>
-        <option>2024</option>
-        <option>2023</option>
-        <option>2022</option>
-        <option>2021</option>
-        <option>2020</option>
-        <option>2019</option>
-        <option>2018</option>
-        <option>2017</option>
-      </select>
-      <button class="fit-finder-btn">Find my fit</button>
+      <div class="fit-field">
+        <label for="fitMake" class="fit-label">Make</label>
+        <select id="fitMake" class="fit-select">
+          <option value="" disabled selected>Select Make</option>
+          <option value="Toyota">Toyota</option>
+          <option value="Subaru">Subaru</option>
+          <option value="Nissan">Nissan</option>
+          <option value="Mitsubishi">Mitsubishi</option>
+          <option value="Land Rover">Land Rover</option>
+          <option value="Mercedes-Benz">Mercedes-Benz</option>
+          <option value="BMW">BMW</option>
+          <option value="Isuzu">Isuzu</option>
+        </select>
+      </div>
+      <div class="fit-field">
+        <label for="fitModel" class="fit-label">Model</label>
+        <select id="fitModel" class="fit-select" disabled>
+          <option value="" disabled selected>Select Model</option>
+        </select>
+      </div>
+      <div class="fit-field">
+        <label for="fitYear" class="fit-label">Year</label>
+        <select id="fitYear" class="fit-select">
+          <option value="" disabled selected>Select Year</option>
+          <option value="2025">2025</option>
+          <option value="2024">2024</option>
+          <option value="2023">2023</option>
+          <option value="2022">2022</option>
+          <option value="2021">2021</option>
+          <option value="2020">2020</option>
+          <option value="2019">2019</option>
+          <option value="2018">2018</option>
+          <option value="2017">2017</option>
+          <option value="2016">2016</option>
+          <option value="2015">2015</option>
+        </select>
+      </div>
+      <button class="fit-finder-btn" id="fitSubmitBtn" type="button">
+        <span>Find my fit</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
     </div>
   </div>
 </div>
+
+<!-- FEATURED · wheel carousel (cards are cloned from the catalog below) -->
+<section class="featured" id="featured" aria-label="Featured tyres">
+  <div class="featured-head">
+    <h2 class="featured-heading reveal-heading">Top picks, on a roll.</h2>
+    <p class="featured-sub">Drag, swipe or use the arrows.</p>
+  </div>
+  <div class="featured-track" id="fcTrack" tabindex="0" aria-roledescription="carousel" aria-label="Featured tyres, use the left and right arrow keys">
+    <div class="fc-pivot" id="fcPivot"></div>
+  </div>
+  <div class="fc-ctl">
+    <button class="fc-arrow" id="fcPrev" type="button" aria-label="Previous tyre">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    </button>
+    <div class="fc-ticks" id="fcTicks" aria-hidden="true"></div>
+    <button class="fc-arrow" id="fcNext" type="button" aria-label="Next tyre">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </button>
+  </div>
+</section>
 
 <!-- CATALOG -->
 <section class="catalog" id="catalog">
@@ -1142,7 +1744,7 @@ body {
       <div class="product-card">
         <div class="product-card-image">
           <span class="stock-badge stock-in">In Stock</span>
-          <img src="images/bridgestone-dueler.png" alt="Bridgestone Dueler H/T 684 III" class="tyre-img" width="200" height="200" loading="lazy">
+          <img src="images/bridgestone-dueler.webp" alt="Bridgestone Dueler H/T 684 III" class="tyre-img" width="200" height="200" loading="lazy">
           <button class="wishlist-btn" onclick="toggleWishlist(this, 'Bridgestone Dueler H/T 684 III')">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#777" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
           </button>
@@ -1152,7 +1754,7 @@ body {
           <div class="product-name">Bridgestone Dueler H/T 684 III</div>
           <div class="product-spec">265/65 R17 · 4.8 ★</div>
           <div class="product-footer">
-            <span class="product-price">KES 18,500</span>
+            <button class="product-price quote-btn" onclick="openWhatsAppInquiry('Bridgestone Dueler H/T 684 III', '265/65 R17', 'Tyre')" style="background:none;border:none;padding:0;" aria-label="Get a quote on WhatsApp">Get a quote</button>
             <button class="add-to-cart-btn" onclick="showToast('Bridgestone Dueler added to cart')" aria-label="Add to cart">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
             </button>
@@ -1164,7 +1766,7 @@ body {
       <div class="product-card">
         <div class="product-card-image">
           <span class="stock-badge stock-low">Low Stock</span>
-          <img src="images/michelin-primacy.png" alt="Michelin Primacy 4+" class="tyre-img" width="200" height="200" loading="lazy">
+          <img src="images/michelin-primacy.webp" alt="Michelin Primacy 4+" class="tyre-img" width="200" height="200" loading="lazy">
           <button class="wishlist-btn active" onclick="toggleWishlist(this, 'Michelin Primacy 4+')">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="#ef4444" stroke="#ef4444" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
           </button>
@@ -1174,7 +1776,7 @@ body {
           <div class="product-name">Michelin Primacy 4+</div>
           <div class="product-spec">215/55 R17 · 4.9 ★</div>
           <div class="product-footer">
-            <span class="product-price">KES 22,900</span>
+             <button class="product-price quote-btn" onclick="openWhatsAppInquiry('Michelin Primacy 4+', '215/55 R17', 'Tyre')" style="background:none;border:none;padding:0;" aria-label="Get a quote on WhatsApp">Get a quote</button>
             <button class="add-to-cart-btn" onclick="showToast('Michelin Primacy 4+ added to cart')" aria-label="Add to cart">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
             </button>
@@ -1207,7 +1809,7 @@ body {
           <div class="product-name">Castrol EDGE 5W-30</div>
           <div class="product-spec">4L · Full synthetic</div>
           <div class="product-footer">
-            <span class="product-price">KES 8,750</span>
+             <button class="product-price quote-btn" onclick="openWhatsAppInquiry('Castrol EDGE 5W-30', '4L · Full synthetic', 'Engine Oil')" style="background:none;border:none;padding:0;" aria-label="Get a quote on WhatsApp">Get a quote</button>
             <button class="add-to-cart-btn" onclick="showToast('Castrol EDGE added to cart')" aria-label="Add to cart">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
             </button>
@@ -1219,7 +1821,7 @@ body {
       <div class="product-card">
         <div class="product-card-image">
           <span class="stock-badge stock-in">In Stock</span>
-          <img src="images/continental-crosscontact.png" alt="Continental CrossContact LX25" class="tyre-img" width="200" height="200" loading="lazy">
+          <img src="images/continental-crosscontact.webp" alt="Continental CrossContact LX25" class="tyre-img" width="200" height="200" loading="lazy">
           <button class="wishlist-btn" onclick="toggleWishlist(this, 'Continental CrossContact')">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#777" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
           </button>
@@ -1229,7 +1831,7 @@ body {
           <div class="product-name">Continental CrossContact LX25</div>
           <div class="product-spec">235/60 R18 · 4.7 ★</div>
           <div class="product-footer">
-            <span class="product-price">KES 24,200</span>
+             <button class="product-price quote-btn" onclick="openWhatsAppInquiry('Continental CrossContact LX25', '235/60 R18', 'Tyre')" style="background:none;border:none;padding:0;" aria-label="Get a quote on WhatsApp">Get a quote</button>
             <button class="add-to-cart-btn" onclick="showToast('Continental CrossContact added to cart')" aria-label="Add to cart">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
             </button>
@@ -1241,7 +1843,7 @@ body {
       <div class="product-card">
         <div class="product-card-image">
           <span class="stock-badge stock-out">Out of Stock</span>
-          <img src="images/pirelli-scorpion.png" alt="Pirelli Scorpion ATR" class="tyre-img" width="200" height="200" loading="lazy" style="opacity:0.55">
+          <img src="images/pirelli-scorpion.webp" alt="Pirelli Scorpion ATR" class="tyre-img" width="200" height="200" loading="lazy" style="opacity:0.55">
           <button class="wishlist-btn" onclick="toggleWishlist(this, 'Pirelli Scorpion ATR')">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#777" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
           </button>
@@ -1251,7 +1853,7 @@ body {
           <div class="product-name">Pirelli Scorpion ATR</div>
           <div class="product-spec">255/70 R16 · 4.6 ★</div>
           <div class="product-footer">
-            <span class="product-price" style="color:var(--text-secondary)">KES 16,800</span>
+             <button class="product-price quote-btn" onclick="openWhatsAppInquiry('Pirelli Scorpion ATR', '255/70 R16', 'Tyre')" style="background:none;border:none;padding:0;color:var(--text-secondary)" aria-label="Get a quote on WhatsApp">Get a quote</button>
             <button class="add-to-cart-btn" style="background:#ccc;cursor:not-allowed" disabled aria-label="Out of stock">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
             </button>
@@ -1263,7 +1865,7 @@ body {
       <div class="product-card">
         <div class="product-card-image">
           <span class="stock-badge stock-in">In Stock</span>
-          <img src="images/goodyear-wrangler.png" alt="Goodyear Wrangler HP All Weather" class="tyre-img" width="200" height="200" loading="lazy">
+          <img src="images/goodyear-wrangler.webp" alt="Goodyear Wrangler HP All Weather" class="tyre-img" width="200" height="200" loading="lazy">
           <button class="wishlist-btn" onclick="toggleWishlist(this, 'Goodyear Wrangler HP')">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#777" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
           </button>
@@ -1273,7 +1875,7 @@ body {
           <div class="product-name">Goodyear Wrangler HP All Weather</div>
           <div class="product-spec">245/65 R17 · 4.5 ★</div>
           <div class="product-footer">
-            <span class="product-price">KES 19,400</span>
+             <button class="product-price quote-btn" onclick="openWhatsAppInquiry('Goodyear Wrangler HP All Weather', '245/65 R17', 'Tyre')" style="background:none;border:none;padding:0;" aria-label="Get a quote on WhatsApp">Get a quote</button>
             <button class="add-to-cart-btn" onclick="showToast('Goodyear Wrangler added to cart')" aria-label="Add to cart">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
             </button>
@@ -1287,22 +1889,14 @@ body {
       <!-- Service Card 1 -->
       <div class="product-card">
         <div class="product-card-image" style="background:#EEF3FA">
-          <svg viewBox="0 0 120 120" width="55%" fill="none">
-            <circle cx="60" cy="60" r="40" stroke="#045CB4" stroke-width="3" fill="none"/>
-            <circle cx="60" cy="60" r="28" stroke="#045CB4" stroke-width="2" stroke-dasharray="5 3" fill="none"/>
-            <circle cx="60" cy="60" r="10" fill="#045CB4"/>
-            <line x1="60" y1="20" x2="60" y2="35" stroke="#045CB4" stroke-width="2.5" stroke-linecap="round"/>
-            <line x1="60" y1="85" x2="60" y2="100" stroke="#045CB4" stroke-width="2.5" stroke-linecap="round"/>
-            <line x1="20" y1="60" x2="35" y2="60" stroke="#045CB4" stroke-width="2.5" stroke-linecap="round"/>
-            <line x1="85" y1="60" x2="100" y2="60" stroke="#045CB4" stroke-width="2.5" stroke-linecap="round"/>
-          </svg>
+         <img src="./images/wheel-lanacing.webp" alt="Wheel balancing service" class="tyre-img" width="200" height="200" loading="lazy">  
         </div>
         <div class="product-card-body">
           <div class="product-cat">Wheel Service</div>
           <div class="product-name">Wheel Balancing</div>
           <div class="product-spec">Per wheel · All vehicle types</div>
           <div class="product-footer">
-            <span class="product-price">KES 600</span>
+            <button class="product-price quote-btn" onclick="openWhatsAppInquiry('Wheel Balancing', 'Per wheel · All vehicle types', 'Wheel Service')" style="background:none;border:none;padding:0;" aria-label="Get a quote on WhatsApp">Get a quote</button>
             <button class="add-to-cart-btn" style="background:var(--navy)" onclick="showToast('Wheel Balancing booking started')" aria-label="Book service">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
             </button>
@@ -1312,24 +1906,14 @@ body {
       <!-- Service Card 2 -->
       <div class="product-card">
         <div class="product-card-image" style="background:#EEF3FA">
-          <svg viewBox="0 0 120 120" width="55%" fill="none">
-            <rect x="25" y="50" width="70" height="30" rx="4" stroke="#045CB4" stroke-width="2.5" fill="none"/>
-            <circle cx="40" cy="80" r="14" stroke="#045CB4" stroke-width="2.5" fill="none"/>
-            <circle cx="80" cy="80" r="14" stroke="#045CB4" stroke-width="2.5" fill="none"/>
-            <circle cx="40" cy="80" r="5" fill="#045CB4"/>
-            <circle cx="80" cy="80" r="5" fill="#045CB4"/>
-            <path d="M25 60 L15 60 L12 72 L25 72" stroke="#045CB4" stroke-width="2" fill="none"/>
-            <path d="M95 60 L105 60 L108 72 L95 72" stroke="#045CB4" stroke-width="2" fill="none"/>
-            <line x1="60" y1="50" x2="60" y2="35" stroke="#045CB4" stroke-width="2.5" stroke-linecap="round"/>
-            <circle cx="60" cy="30" r="5" fill="#045CB4"/>
-          </svg>
+          <img src="./images/automobile-factory-worker-installing-tires.webp" alt="Tyre fitting service" class="tyre-img" width="200" height="200" loading="lazy">
         </div>
         <div class="product-card-body">
           <div class="product-cat">Tyre Service</div>
           <div class="product-name">Tyre Fitting & Mounting</div>
           <div class="product-spec">Per tyre · Includes removal</div>
           <div class="product-footer">
-            <span class="product-price">KES 500</span>
+            <button class="product-price quote-btn" onclick="openWhatsAppInquiry('Tyre Fitting & Mounting', 'Per tyre · Includes removal', 'Tyre Service')" style="background:none;border:none;padding:0;" aria-label="Get a quote on WhatsApp">Get a quote</button>
             <button class="add-to-cart-btn" style="background:var(--navy)" onclick="showToast('Tyre Fitting booking started')" aria-label="Book service">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
             </button>
@@ -1339,20 +1923,14 @@ body {
       <!-- Service Card 3 -->
       <div class="product-card">
         <div class="product-card-image" style="background:#EEF3FA">
-          <svg viewBox="0 0 120 120" width="55%" fill="none">
-            <path d="M20 90 L60 30 L100 90" stroke="#045CB4" stroke-width="2.5" fill="none" stroke-linejoin="round"/>
-            <line x1="30" y1="90" x2="90" y2="90" stroke="#045CB4" stroke-width="2.5" stroke-linecap="round"/>
-            <line x1="60" y1="30" x2="60" y2="90" stroke="#658EBE" stroke-width="1.5" stroke-dasharray="4 3"/>
-            <circle cx="60" cy="60" r="5" fill="#045CB4"/>
-            <path d="M42 72 Q60 62 78 72" stroke="#045CB4" stroke-width="2" fill="none"/>
-          </svg>
+          <img src="./images/car-wheel-alignment-progress.webp" alt="Wheel alignment service" class="tyre-img" width="200" height="200" loading="lazy">
         </div>
         <div class="product-card-body">
           <div class="product-cat">Alignment</div>
           <div class="product-name">Wheel Alignment</div>
           <div class="product-spec">4-wheel · Quote on inspection</div>
           <div class="product-footer">
-            <span class="product-price" style="font-size:14px;font-weight:700">Quote on inspection</span>
+            <button class="product-price quote-btn" onclick="openWhatsAppInquiry('Wheel Alignment', '4-wheel', 'Alignment')" style="background:none;border:none;padding:0;font-size:14px;font-weight:700;" aria-label="Get a quote on WhatsApp">Quote on inspection</button>
             <button class="add-to-cart-btn" style="background:var(--navy)" onclick="showToast('Wheel Alignment booking started')" aria-label="Book service">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
             </button>
@@ -1423,9 +2001,9 @@ body {
         <div class="branch-name">Industrial Area</div>
         <div class="branch-address">Enterprise Road, opposite Sameer Business Park<br>Nairobi, Kenya</div>
         <div>
-          <a href="tel:+254700000000" class="branch-phone">
+          <a href="tel:+254748088741" class="branch-phone">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.42 2 2 0 0 1 3.58 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.96a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-            +254 700 000 000
+            +254 748 088 741
           </a>
         </div>
         <div class="branch-map-link">
@@ -1452,16 +2030,30 @@ body {
   </div>
 </section>
 
+<!-- ROAD SCENE · wheel drives right, the world moves left. Road surface flows into the footer. -->
+<section class="roadscene" id="roadScene" aria-label="Fitted right, ready for the road ahead">
+  <div class="rs-sky">
+    <div class="rs-copy"><div class="container"><h2 class="rs-heading reveal-heading">Fitted right.<br>Ready for every road ahead.</h2></div></div>
+    <div class="rs-layer rs-far" data-f="0.12" data-h="200"></div>
+    <div class="rs-layer rs-mid" data-f="0.32" data-h="150"></div>
+    <div class="rs-layer rs-near" data-f="0.7" data-h="150"></div>
+  </div>
+  <div class="rs-road"><div class="rs-dashes" id="rsDashes"></div></div>
+  <div class="rs-shadow" id="rsShadow"></div>
+  <div class="rs-rig" id="rsRig">
+    <div class="rs-wheel" id="rsWheel">
+      <img class="rs-sharp" src="images/hero-wheel.webp" alt="" aria-hidden="true" width="720" height="720" loading="lazy" decoding="async">
+      <img class="rs-blur" src="images/hero-wheel-blur.webp" alt="" aria-hidden="true" width="512" height="512" loading="lazy" decoding="async">
+    </div>
+  </div>
+</section>
+
 <!-- FOOTER -->
 <footer class="footer">
   <div class="footer-inner">
     <div>
       <div class="footer-brand-logo">
-        <svg width="28" height="28" viewBox="0 0 36 36" fill="none">
-          <circle cx="18" cy="18" r="17" stroke="#658EBE" stroke-width="2"/>
-          <circle cx="18" cy="18" r="11" stroke="#658EBE" stroke-width="1.5"/>
-          <circle cx="18" cy="18" r="5" fill="#658EBE"/>
-        </svg>
+        <img src="images/wellups_logo_no_bg.png" alt="Well Lups Auto Tyres" width="40" height="40" loading="lazy" decoding="async">
         <span class="footer-brand-name">WELL LUPS AUTO TYRES</span>
       </div>
       <p class="footer-brand-tagline">Tyres, parts, and garage care for the road ahead. Two branches in Nairobi.</p>
@@ -1503,7 +2095,7 @@ body {
 </footer>
 
 <!-- WHATSAPP FAB -->
-<a href="https://wa.me/254700000000" class="whatsapp-fab" id="whatsappFab" target="_blank" rel="noopener" aria-label="Chat on WhatsApp">
+<a href="https://wa.me/254748088741?text=Hello%20Well%20Lups!%20I%20would%20like%20to%20inquire%20about%20your%20tyres%2C%20products%2C%20and%20garage%20services." class="whatsapp-fab" id="whatsappFab" target="_blank" rel="noopener" aria-label="Chat on WhatsApp">
   <svg width="26" height="26" viewBox="0 0 24 24" fill="white">
     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.890-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
   </svg>
@@ -1523,6 +2115,118 @@ const nav = document.getElementById('mainNav');
 window.addEventListener('scroll', () => {
   nav.classList.toggle('scrolled', window.scrollY > 10);
 }, { passive: true });
+
+// ─── MOBILE MENU (RIGHT OFF-CANVAS DRAWER) ───────────
+const menuBtn = document.querySelector('.nav-menu-btn');
+const mobileMenu = document.getElementById('mobileMenu');
+const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+const mobileMenuClose = document.getElementById('mobileMenuClose');
+
+function openMobileMenu() {
+  if (!mobileMenu) return;
+  mobileMenu.classList.add('open');
+  if (mobileMenuOverlay) mobileMenuOverlay.classList.add('open');
+  if (menuBtn) menuBtn.setAttribute('aria-expanded', 'true');
+  mobileMenu.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeMobileMenu() {
+  if (!mobileMenu) return;
+  mobileMenu.classList.remove('open');
+  if (mobileMenuOverlay) mobileMenuOverlay.classList.remove('open');
+  if (menuBtn) menuBtn.setAttribute('aria-expanded', 'false');
+  mobileMenu.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+}
+
+if (menuBtn) menuBtn.addEventListener('click', openMobileMenu);
+if (mobileMenuClose) mobileMenuClose.addEventListener('click', closeMobileMenu);
+if (mobileMenuOverlay) mobileMenuOverlay.addEventListener('click', closeMobileMenu);
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && mobileMenu && mobileMenu.classList.contains('open')) {
+    closeMobileMenu();
+  }
+});
+
+// Close menu on link click and optionally switch tab if data-tab is specified
+if (mobileMenu) {
+  mobileMenu.querySelectorAll('.mobile-menu-nav a, .mobile-menu-actions button, .mobile-menu-footer a').forEach(link => {
+    link.addEventListener('click', () => {
+      const tab = link.getAttribute('data-tab');
+      if (tab) {
+        const tabBtn = document.querySelector(`.catalog-tab[onclick*="${tab}"]`);
+        if (tabBtn) switchTab(tab, tabBtn);
+      }
+      closeMobileMenu();
+    });
+  });
+}
+
+// ─── VEHICLE FIT FINDER ───────────────────────────────
+const VEHICLE_MODELS = {
+  'Toyota': ['Prado', 'Hilux', 'Land Cruiser V8', 'Harrier', 'RAV4', 'Fortuner', 'Premio'],
+  'Subaru': ['Forester', 'Outback', 'Legacy', 'XV / Crosstrek', 'Impreza'],
+  'Nissan': ['X-Trail', 'Patrol', 'Navara', 'Qashqai', 'Note'],
+  'Mitsubishi': ['Pajero', 'Outlander', 'L200', 'RVR', 'Pajero Sport'],
+  'Land Rover': ['Defender', 'Range Rover Sport', 'Discovery 4', 'Discovery 5', 'Evoque'],
+  'Mercedes-Benz': ['C-Class', 'E-Class', 'GLC', 'GLE', 'G-Wagon'],
+  'BMW': ['X3', 'X5', 'X6', '3 Series', '5 Series'],
+  'Isuzu': ['D-Max', 'mu-X', 'N-Series Truck']
+};
+
+const fitMake = document.getElementById('fitMake');
+const fitModel = document.getElementById('fitModel');
+const fitYear = document.getElementById('fitYear');
+const fitSubmitBtn = document.getElementById('fitSubmitBtn');
+
+if (fitMake && fitModel) {
+  fitMake.addEventListener('change', () => {
+    const make = fitMake.value;
+    const models = VEHICLE_MODELS[make] || [];
+    fitModel.innerHTML = '<option value="" disabled selected>Select Model</option>';
+    models.forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m;
+      opt.textContent = m;
+      fitModel.appendChild(opt);
+    });
+    fitModel.disabled = false;
+  });
+}
+
+if (fitSubmitBtn) {
+  fitSubmitBtn.addEventListener('click', () => {
+    const make = fitMake ? fitMake.value : '';
+    const model = fitModel ? fitModel.value : '';
+    if (!make) {
+      showToast('Please select your vehicle make first');
+      fitMake.focus();
+      return;
+    }
+    const label = model ? `${make} ${model}` : make;
+    showToast(`Found 8 matching genuine tyres for ${label}`);
+    const catalog = document.getElementById('catalog');
+    if (catalog) catalog.scrollIntoView({ behavior: 'smooth' });
+  });
+}
+
+// ─── WHATSAPP INQUIRY ──────────────────────────────────
+function openWhatsAppInquiry(itemName = '', itemSpec = '', itemCategory = '') {
+  const phone = '254748088741';
+  let message = 'Hello Well Lups!';
+  if (itemName) {
+    message += ` I would like to inquire about ${itemName}`;
+    if (itemSpec) message += ` (${itemSpec})`;
+    if (itemCategory) message += ` under ${itemCategory}`;
+    message += '.';
+  } else {
+    message += ' I would like to inquire about your tyres, products, and garage services.';
+  }
+  const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+  window.open(url, '_blank', 'noopener');
+}
 
 // ─── WHATSAPP FAB ─────────────────────────────────────
 const fab = document.getElementById('whatsappFab');
@@ -1599,6 +2303,222 @@ if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     el.style.transition = 'none';
   });
 }
+
+// ═══ MOTION · shared ═══════════════════════════════════
+// Rules: animate only transform + opacity, keep one rAF loop per effect, and
+// sleep when nothing is moving or the effect is off screen.
+const RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const easeOutCubic = u => 1 - Math.pow(1 - u, 3);
+const TYRE_R = 0.427;          // visible tyre radius as a fraction of the wheel image width
+const DEG = 57.2958;
+function loop(fn) {            // returns stop(); dt is clamped so tab switches never cause jumps
+  let last = performance.now(), id = 0, alive = true;
+  const tick = t => {
+    if (!alive) return;
+    const dt = Math.min(0.05, (t - last) / 1000); last = t;
+    if (fn(dt, t) === false) { alive = false; return; }
+    id = requestAnimationFrame(tick);
+  };
+  id = requestAnimationFrame(tick);
+  return () => { alive = false; cancelAnimationFrame(id); };
+}
+
+// ═══ HERO · roll-in & settle ═══════════════════════════
+(function heroRoll() {
+  const stage = document.getElementById('heroStage');
+  if (!stage) return;
+  const rig = document.getElementById('heroRig'), wheel = document.getElementById('heroWheel');
+  const blur = wheel.querySelector('.hw-blur'), sharp = wheel.querySelector('.hw-sharp');
+  const shadow = document.getElementById('heroShadow'), card = document.getElementById('heroCard');
+  let W, R, x0, prev = null, v = 0, cardOn = false;
+  const measure = () => { W = rig.offsetWidth; R = W * TYRE_R; x0 = stage.offsetWidth - rig.offsetLeft + 14; };
+  const D1 = 1.15;                                   // roll-in time (s)
+  const xAt = t => {                                 // position relative to rest (px)
+    const OV = -W * 0.05;                            // overshoot past the rest spot
+    if (t < D1) return x0 + (OV - x0) * easeOutCubic(t / D1);
+    const s = t - D1;                                // then rock back and settle
+    return OV * Math.exp(-6.5 * s) * Math.cos(11 * s);
+  };
+  const draw = (x, dt) => {
+    if (prev !== null && dt > 0) v = v * 0.6 + ((x - prev) / dt) * 0.4;
+    prev = x;
+    wheel.style.transform = 'rotate(' + (x / R * DEG) + 'deg)';       // rolling: rotation = distance / radius
+    rig.style.transform = 'translate3d(' + x + 'px,0,0)';
+    blur.style.opacity = clamp((Math.abs(v / R * DEG) - 250) / 900, 0, 0.95);
+    shadow.style.transform = 'translate3d(' + x + 'px,0,0) scaleX(' + (1 + Math.min(0.25, Math.abs(v) / 6000)) + ')';
+  };
+  const show = () => { rig.classList.add('ready'); shadow.style.opacity = 1; };
+  measure();
+  if (RM) { draw(0, 0); blur.style.opacity = 0; show(); card.classList.add('on'); return; }
+  draw(x0, 0); show();
+  const go = () => {
+    let t = 0;
+    loop(dt => {
+      t += dt; draw(xAt(t), dt);
+      if (!cardOn && t > 0.85) { cardOn = true; card.classList.add('on'); }
+      if (t > D1 + 1.7) { draw(0, dt); blur.style.opacity = 0; return false; }
+    });
+  };
+  // start once the wheel photo is decoded so it never pops in mid-roll
+  let started = false; const start = () => { if (!started) { started = true; measure(); go(); } };
+  (sharp.decode ? sharp.decode() : Promise.resolve()).then(start, start);
+  setTimeout(start, 1500);
+})();
+
+// ═══ FEATURED · wheel carousel ═════════════════════════
+(function featuredCarousel() {
+  const track = document.getElementById('fcTrack');
+  if (!track) return;
+  const pivot = document.getElementById('fcPivot'), ticks = document.getElementById('fcTicks');
+  const prevB = document.getElementById('fcPrev'), nextB = document.getElementById('fcNext');
+  // single source of truth: clone the in-stock tyre cards from the catalog grid
+  const src = [...document.querySelectorAll('#tab-products .product-card')]
+    .filter(c => c.querySelector('.tyre-img') && !c.querySelector('.add-to-cart-btn[disabled]'));
+  if (!src.length) return;
+  const N = src.length;
+  let STEP, RR, CW, CH, PPC;
+  let pos = 0, target = Math.min(1, N - 1), vel = 0, dragging = false, moved = 0;
+  let sx = 0, sp0 = 0, lastX = 0, lastT = 0, dv = 0, stopLoop = null;
+
+  const items = src.map((c, i) => {
+    const clone = c.cloneNode(true);
+    clone.querySelectorAll('img').forEach(im => { im.removeAttribute('loading'); im.draggable = false; });
+    const spoke = document.createElement('div'); spoke.className = 'fc-spoke';
+    const holder = document.createElement('div'); holder.className = 'fc-card';
+    holder.appendChild(clone); spoke.appendChild(holder); pivot.appendChild(spoke);
+    ticks.appendChild(document.createElement('i'));
+    holder.addEventListener('click', e => {
+      if (moved > 6 || e.target.closest('button')) return;
+      if (i !== target) go(i);
+    });
+    return { spoke, holder, img: clone.querySelector('.tyre-img') };
+  });
+
+  function layout() {
+    const mobile = track.clientWidth < 640;
+    STEP = mobile ? 21 : 14; RR = mobile ? 760 : 1300; CW = mobile ? 224 : 264; PPC = mobile ? 230 : 290;
+    items.forEach(it => { it.holder.style.width = CW + 'px'; });
+    CH = items[0].holder.offsetHeight;
+    const top = mobile ? 14 : 24;
+    track.style.height = (top + CH + (mobile ? 60 : 72)) + 'px';
+    pivot.style.top = (top + CH / 2 + RR) + 'px';
+    items.forEach((it, i) => {
+      it.spoke.style.transform = 'rotate(' + (i * STEP) + 'deg)';
+      it.holder.style.left = (-CW / 2) + 'px';
+      it.holder.style.top = (-RR - CH / 2) + 'px';
+    });
+    render();
+  }
+  function render() {
+    pivot.style.transform = 'rotate(' + (-pos * STEP) + 'deg)';
+    items.forEach((it, i) => {
+      const d = Math.min(1, Math.abs(i - pos));
+      it.holder.style.transform = 'scale(' + (1 - 0.09 * d) + ')';
+      it.holder.style.opacity = 1 - 0.32 * d;
+      if (it.img) it.img.style.transform = 'rotate(' + ((pos - i) * 70 + i * 17) + 'deg)';   // tyres roll as the wheel turns
+    });
+    const cur = Math.round(clamp(pos, 0, N - 1));
+    [...ticks.children].forEach((t, i) => t.classList.toggle('on', i === cur));
+    prevB.disabled = target <= 0; nextB.disabled = target >= N - 1;
+  }
+  function kick() {                       // the loop only runs while something is moving
+    if (stopLoop) return;
+    stopLoop = loop(dt => {
+      if (!dragging) { vel += ((target - pos) * 130 - vel * 17) * dt; pos += vel * dt; }
+      render();
+      if (!dragging && Math.abs(target - pos) < 0.0008 && Math.abs(vel) < 0.003) {
+        pos = target; vel = 0; render(); stopLoop = null; return false;
+      }
+    });
+  }
+  function go(i) { target = clamp(i, 0, N - 1); kick(); }
+  prevB.addEventListener('click', () => go(target - 1));
+  nextB.addEventListener('click', () => go(target + 1));
+  track.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight') { go(target + 1); e.preventDefault(); }
+    if (e.key === 'ArrowLeft')  { go(target - 1); e.preventDefault(); }
+  });
+  track.addEventListener('pointerdown', e => {
+    if (e.target.closest('button')) return;
+    dragging = true; moved = 0; sx = lastX = e.clientX; sp0 = pos; lastT = performance.now(); dv = 0; vel = 0;
+    track.setPointerCapture(e.pointerId); kick();
+  });
+  track.addEventListener('pointermove', e => {
+    if (!dragging) return;
+    const dx = e.clientX - sx; moved = Math.max(moved, Math.abs(dx));
+    pos = clamp(sp0 - dx / PPC, -0.35, N - 1 + 0.35);
+    const now = performance.now(), dt = (now - lastT) / 1000;
+    if (dt > 0) dv = dv * 0.6 + ((-(e.clientX - lastX) / PPC) / dt) * 0.4;
+    lastX = e.clientX; lastT = now;
+  });
+  const end = () => {
+    if (!dragging) return;
+    dragging = false; target = clamp(Math.round(pos + dv * 0.18), 0, N - 1); vel = dv * 0.6; kick();
+    setTimeout(() => { moved = 0; }, 0);
+  };
+  track.addEventListener('pointerup', end);
+  track.addEventListener('pointercancel', end);
+
+  let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(layout, 120); });
+  pos = RM ? target : target + 0.9;       // start slightly off and roll in when scrolled into view
+  layout();
+  if (!RM && 'IntersectionObserver' in window) {
+    const io = new IntersectionObserver(es => { if (es[0].isIntersecting) { io.disconnect(); kick(); } }, { threshold: 0.25 });
+    io.observe(track);
+  } else { pos = target; render(); }
+})();
+
+// ═══ ROAD SCENE · wheel drives right, world moves left ═
+(function roadScene() {
+  const scene = document.getElementById('roadScene');
+  if (!scene) return;
+  const rig = document.getElementById('rsRig'), wheel = document.getElementById('rsWheel');
+  const blur = wheel.querySelector('.rs-blur'), shadow = document.getElementById('rsShadow');
+  const dashes = document.getElementById('rsDashes');
+  const layers = [...scene.querySelectorAll('.rs-layer')].map(el => ({ el, f: +el.dataset.f, h: +el.dataset.h, tile: 1400 }));
+  const DASH = 120, TILE = 1400, BASE = 150;   // BASE = cruising speed in px/s at road level
+  let dist = 0, boost = 0, lastY = window.scrollY, R = 90, stop = null;
+  function size() {
+    const k = window.innerWidth < 700 ? 0.72 : 1;
+    layers.forEach(l => {
+      l.tile = TILE * k;
+      l.el.style.height = (l.h * k) + 'px';
+      l.el.style.width = 'calc(100% + ' + l.tile + 'px)';
+      l.el.style.backgroundSize = l.tile + 'px ' + (l.h * k) + 'px';
+    });
+    R = rig.offsetWidth * TYRE_R;
+  }
+  function apply(speed) {
+    for (const l of layers) l.el.style.transform = 'translate3d(' + (-((dist * l.f) % l.tile)) + 'px,0,0)';   // parallax: far = slow, near = fast
+    dashes.style.transform = 'translate3d(' + (-(dist % DASH)) + 'px,0,0)';                                  // road markings move at wheel speed
+    wheel.style.transform = 'rotate(' + (dist / R * DEG) + 'deg)';                                           // rotation = distance / radius
+    const bob = Math.sin(dist * 0.045) * Math.min(1, speed / 400) * 1.6;                                      // tiny suspension bounce
+    rig.style.transform = 'translate3d(0,' + bob + 'px,0)';
+    blur.style.opacity = clamp((speed / R * DEG - 300) / 900, 0, 0.9);
+    shadow.style.transform = 'scaleX(' + (1 + Math.min(0.12, speed / 12000)) + ')';
+  }
+  size(); apply(0);
+  window.addEventListener('resize', () => { size(); apply(BASE); });
+  if (RM) { dist = 420; apply(0); return; }
+  // cruise gently; scrolling the page makes the wheel accelerate
+  const run = () => {
+    if (stop) return;
+    lastY = window.scrollY;
+    stop = loop(dt => {
+      const y = window.scrollY, inst = Math.abs(y - lastY) / Math.max(dt, 0.001); lastY = y;
+      boost += (Math.min(inst, 1500) * 0.7 - boost) * (1 - Math.exp(-dt * 6));
+      const speed = BASE + boost;
+      dist += speed * dt;
+      apply(speed);
+    });
+  };
+  const halt = () => { if (stop) { stop(); stop = null; } };
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(es => { es[0].isIntersecting ? run() : halt(); }, { rootMargin: '120px' }).observe(scene);
+  } else run();
+  document.addEventListener('visibilitychange', () => { if (document.hidden) halt(); });
+})();
 </script>
 </body>
 </html>
