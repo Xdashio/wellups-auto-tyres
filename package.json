@@ -8,6 +8,7 @@
     "build": "next build --webpack",
     "start": "next start",
     "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
     "test": "vitest run",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
@@ -49,6 +50,8 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "esbuild": "^0.28.1",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.3.5",
     "typescript": "^7.0.2",
     "vitest": "^5.0.1",
     "wrangler": "^4.135.0"
