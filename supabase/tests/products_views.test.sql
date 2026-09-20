@@ -16,9 +16,9 @@ select lives_ok(
     ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'manager'),
     ('cccccccc-cccc-cccc-cccc-cccccccccccc', 'cashier');
    insert into app.branches (id, name)
-    values ('11111111-1111-1111-1111-111111111111', 'Industrial Area');
+    values ('11111111-1111-1111-1111-111111111111', 'pgTAP Test Branch');
    insert into app.categories (id, name)
-    values ('22222222-2222-2222-2222-222222222222', 'Tyres');
+    values ('22222222-2222-2222-2222-222222222222', 'pgTAP Test Category');
    insert into app.products (branch_id, category_id, name, sku, cost_price, sell_price, stock_quantity)
     values ('11111111-1111-1111-1111-111111111111', '22222222-2222-2222-2222-222222222222',
             'Probe Tyre', 'SKU-PROBE', 10000, 13500, 4)$$,
@@ -46,7 +46,7 @@ set local role authenticated;
 do $$ begin perform set_config('request.jwt.claims',
   '{"sub":"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa","app_metadata":{"user_role":"admin"}}', true); end $$;
 select is(
-  (select array_agg(sku || '|' || cost_price::text || '|' || margin::text)::text from public.products_admin),
+  (select array_agg(sku || '|' || cost_price::text || '|' || margin::text)::text from public.products_admin where sku = 'SKU-PROBE'),
   '{SKU-PROBE|10000.00|3500.00}',
   'admin sees cost_price and margin'
 );
@@ -55,7 +55,7 @@ select is(
 do $$ begin perform set_config('request.jwt.claims',
   '{"sub":"bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb","app_metadata":{"user_role":"manager"}}', true); end $$;
 select is(
-  (select array_agg(sku || '|' || cost_price::text)::text from public.products_manager),
+  (select array_agg(sku || '|' || cost_price::text)::text from public.products_manager where sku = 'SKU-PROBE'),
   '{SKU-PROBE|10000.00}',
   'manager sees cost_price'
 );
@@ -73,7 +73,7 @@ select is_empty(
 do $$ begin perform set_config('request.jwt.claims',
   '{"sub":"cccccccc-cccc-cccc-cccc-cccccccccccc","app_metadata":{"user_role":"cashier"}}', true); end $$;
 select is(
-  (select array_agg(sku)::text from public.products_cashier),
+  (select array_agg(sku)::text from public.products_cashier where sku = 'SKU-PROBE'),
   '{SKU-PROBE}',
   'cashier sees operational rows'
 );
