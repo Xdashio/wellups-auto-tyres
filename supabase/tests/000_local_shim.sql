@@ -24,3 +24,8 @@ create or replace function auth.uid() returns uuid
 language sql stable as $$
   select nullif(auth.jwt() ->> 'sub', '')::uuid;
 $$;
+
+-- Supabase grants these natively; recreate the grants locally.
+grant usage on schema auth to anon, authenticated;
+grant execute on function auth.jwt() to anon, authenticated;
+grant execute on function auth.uid() to anon, authenticated;
