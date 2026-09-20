@@ -81,7 +81,7 @@ Home
 
 **Service booking form** — vehicle, service, branch, preferred date; in-shop payment stated clearly on-screen.
 
-**Staff / admin** — POS screen for fast in-shop checkout; stock view with cost/margin visible to Admin/Owner only; booking queue with status controls; daily/monthly reporting.
+**Staff / admin** — POS screen for fast in-shop checkout; stock view with cost/margin visible to Admin/Manager only; booking queue with status controls; daily/monthly reporting.
 
 ## 6. Content Dependencies
 

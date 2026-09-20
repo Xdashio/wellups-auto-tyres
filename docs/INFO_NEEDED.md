@@ -6,7 +6,7 @@
 1. **Stock pooling model.** Is stock a single pool shared across both branches, or tracked separately per branch? This determines the Product–Branch relationship in the schema.
 2. **Product and price list.** Full catalog with categories, pricing, and stock levels.
 3. **Services list.** Full list of services offered with pricing logic (fixed vs. varies by vehicle type).
-4. **Admin / Owner / Cashier permission boundaries.** Specifically, what Owner can see/do that Cashier cannot, and whether Owner's access differs from Admin's.
+4. **Admin / Manager / Cashier permission boundaries.** Specifically, what Manager can see/do that Cashier cannot, and whether Manager's access differs from Admin's.
 
 ## Needed before related features can be finalized
 

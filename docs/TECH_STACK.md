@@ -5,7 +5,7 @@
 
 | Layer | Choice | Rationale |
 |---|---|---|
-| Framework | Next.js (App Router), TypeScript | Server-side rendering for SEO/AI EO, strong Cloudflare Pages support, type safety across a large feature set |
+| Framework | Next.js (App Router), TypeScript | Server-side rendering for SEO/AI EO, type safety across a large feature set — deployed via OpenNext to Cloudflare Workers rather than Pages, since Pages cannot serve SSR (see `ARCHITECTURE.md` ADR-01) |
 | Styling | Tailwind CSS | Fast, consistent implementation of a custom design system without fighting a component library's defaults |
 | UI primitives | Radix UI (unstyled, accessible primitives) | Accessibility handled correctly by default, fully restyleable to a distinctive visual identity — avoids the "generic component library" look |
 | Motion | Framer Motion | Used deliberately for polish (page transitions, micro-interactions) — not decoration for its own sake |
@@ -31,10 +31,10 @@
 
 ## Hosting & Deployment
 
-- **Frontend:** Cloudflare Pages
+- **Frontend:** Cloudflare Workers, via `@opennextjs/cloudflare` — full SSR/RSC support for SEO/AI EO. Pages serves static exports only and cannot host a server-rendered App Router app.
 - **Backend:** Supabase (managed)
 - **Domain & DNS:** Cloudflare (once domain is registered)
-- **CI/CD:** Git-based deployment — pushes to the main branch deploy to Cloudflare Pages automatically; preview deployments for feature branches
+- **CI/CD:** Git-based deployment — pushes to the main branch deploy to Cloudflare Workers via `wrangler deploy`; preview deployments for feature branches. Requires `wrangler.toml` with `nodejs_compat` enabled.
 
 ## Development Tooling
 
@@ -48,3 +48,8 @@
 - No CMS or e-commerce plugin platform (e.g. WordPress/WooCommerce) — this is a fully custom build.
 - No separate Node/Express/NestJS API service — custom backend logic runs in Supabase Edge Functions to keep the system on one platform.
 - No multi-currency handling — single currency (KES).
+- No multi-branch stock logic — single branch, single stock pool.
+
+## Component & Code Architecture
+
+See `CODE_STANDARDS.md` for the binding rules on component structure, folder layout, schema principles, and testing — in particular the "no God components" constraint that governs every layer of this stack.

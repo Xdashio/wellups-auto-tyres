@@ -21,10 +21,10 @@ This is a custom build. The frontend must be clean, modern, creative, and profes
 |---|---|
 | **Customer** | Browses goods and services, places orders, books services, manages an account (wishlist, saved vehicles, order/booking history) |
 | **Cashier** | Processes in-shop sales via POS, views stock for their branch, updates booking status |
-| **Owner** | Business-level visibility across both branches — reporting and oversight |
+| **Manager** | Business-level visibility across both branches — reporting and oversight |
 | **Admin** | Full system access — stock, pricing, margin data, staff management, both branches |
 
-**Needs input from client:** exact permission boundaries between Owner and Admin (e.g., whether Owner has the same system-configuration rights as Admin, or a reporting-only superset of Cashier access).
+**Needs input from client:** exact permission boundaries between Manager and Admin (e.g., whether Manager has the same system-configuration rights as Admin, or a reporting-only superset of Cashier access).
 
 ## 4. Functional Requirements
 
@@ -50,7 +50,7 @@ This is a custom build. The frontend must be clean, modern, creative, and profes
 - Per-item cost price, sell price, and automatically computed margin.
 - Daily and monthly sales and margin reporting.
 - A booking queue for incoming service requests, with status updates (Scheduled → In Progress → Complete).
-- Role-based dashboard views for Admin, Owner, and Cashier.
+- Role-based dashboard views for Admin, Manager, and Cashier.
 
 **Needs input from client:** whether stock is a single pool shared across both branches, or tracked separately per branch. This determines the data model for Product and Branch and cannot be finalized without an answer.
 
