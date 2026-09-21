@@ -1,9 +1,6 @@
-import { createClient } from "@supabase/supabase-js";
+import { supabase } from "./client";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://odammhhhryyepynnilbr.supabase.co";
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder-anon-key";
-
-export const publicSupabase = createClient(supabaseUrl, supabaseAnonKey);
+export const publicSupabase = supabase;
 
 export interface PublicProduct {
   id: string;

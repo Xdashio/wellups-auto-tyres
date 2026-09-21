@@ -40,7 +40,10 @@ as $$
     q.vehicle_summary,
     q.quantity,
     q.customer_notes,
-    q.status,
+    case
+      when q.status = 'quoted' and q.valid_until is not null and q.valid_until < now() then 'expired'::app.quote_status
+      else q.status
+    end as status,
     q.offered_price,
     q.valid_until,
     q.created_at,
@@ -173,7 +176,6 @@ begin
 
   -- Validate expiration
   if v_quote.valid_until is not null and v_quote.valid_until < now() then
-    update app.quote_requests set status = 'expired', updated_at = now() where id = p_quote_id;
     raise exception 'Quote has expired and can no longer be accepted';
   end if;
 

@@ -44,6 +44,8 @@ export function QuoteRequestModal({
   const [errorMessage, setErrorMessage] = useState("");
   const [submittedQuote, setSubmittedQuote] = useState<{
     quoteNumber: string;
+    quoteId: string;
+    secretToken: string;
     waUrl: string | null;
   } | null>(null);
 
@@ -71,7 +73,7 @@ export function QuoteRequestModal({
 
     setIsSubmitting(false);
 
-    if (!res.success || !res.quoteNumber) {
+    if (!res.success || !res.quoteNumber || !res.quoteId || !res.secretToken) {
       setErrorMessage(res.error || "Failed to submit quote request. Please try again.");
       return;
     }
@@ -81,6 +83,8 @@ export function QuoteRequestModal({
 
     setSubmittedQuote({
       quoteNumber: res.quoteNumber,
+      quoteId: res.quoteId,
+      secretToken: res.secretToken,
       waUrl
     });
   };
@@ -120,6 +124,13 @@ export function QuoteRequestModal({
                 Our team at Well Lups Auto Tyres will review your request and contact you shortly.
               </p>
             </div>
+
+            <a
+              href={`/quotes/${submittedQuote.quoteId}?token=${submittedQuote.secretToken}`}
+              className="w-full inline-flex justify-center items-center gap-2 py-2.5 px-4 bg-primary hover:bg-primary-hover text-white font-medium text-sm rounded-md transition-colors"
+            >
+              <span>View & Track Quote Status</span>
+            </a>
 
             {submittedQuote.waUrl && (
               <a
