@@ -76,6 +76,8 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
             whatsappNumber={branch?.whatsapp}
             itemName={service.name}
             itemSku={`SRV-${service.id.slice(0, 8)}`}
+            itemType="service"
+            serviceId={service.id}
             className="w-full sm:w-auto"
           />
         </div>

@@ -50,6 +50,8 @@ export function ServiceCard({ service, whatsappNumber }: ServiceCardProps) {
           whatsappNumber={whatsappNumber}
           itemName={service.name}
           itemSku={`SRV-${service.id.slice(0, 8)}`}
+          itemType="service"
+          serviceId={service.id}
           className="w-1/2"
         />
       </div>

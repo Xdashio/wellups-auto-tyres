@@ -80,6 +80,8 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
               itemName={product.name}
               itemSku={product.sku}
               sizeSpec={product.size_spec}
+              itemType="product"
+              productId={product.id}
               className="w-full"
             />
           </div>

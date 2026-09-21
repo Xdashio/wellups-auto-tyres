@@ -50,6 +50,8 @@ export function ProductCard({ product, whatsappNumber }: ProductCardProps) {
           itemName={product.name}
           itemSku={product.sku}
           sizeSpec={product.size_spec}
+          itemType="product"
+          productId={product.id}
           className="w-1/2"
         />
       </div>
