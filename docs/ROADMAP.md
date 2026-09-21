@@ -13,7 +13,7 @@ What exists today:
 
 Nothing below starts until the blocking items in `INFO_NEEDED.md` are resolved (product/service list, final role sign-off, real branch details).
 
-## v0.1 — Foundations
+## v0.1 — Foundations [RELEASED — tag: v0.1-foundation]
 
 - Initialize the Next.js (App Router, TypeScript) project and its Cloudflare Workers deployment pipeline via `@opennextjs/cloudflare` (see `ARCHITECTURE.md` ADR-01 — not Cloudflare Pages, which can't serve SSR).
 - Initialize the Supabase project: schema migrations for Product, Service, Category, Vehicle, QuoteRequest, Order, ServiceBooking, Review, Wishlist, StaffUser, Branch (single row).
@@ -22,15 +22,17 @@ Nothing below starts until the blocking items in `INFO_NEEDED.md` are resolved (
 - Shared UI primitive library started (`/components/ui`) per `CODE_STANDARDS.md` — no feature UI yet, just the building blocks.
 - Seed script with realistic placeholder data (clearly marked as seed data).
 
-**Exit criteria:** a deployed, empty-but-real app; schema and auth functional; component library has its first primitives; nothing hardcoded.
+**Exit criteria:** a deployed, empty-but-real app; schema and auth functional; component library has its first primitives; nothing hardcoded. (VERIFIED & TAGGED)
 
-## v0.2 — Catalog (Read Path)
+## v0.2 — Catalog (Read Path) [COMPLETE & LIVE VERIFIED]
 
-- Product and service listing pages, category browsing, search, vehicle filter — all reading real data from Supabase (seeded).
-- Product and service detail pages, including the "Get a Quote" action (UI only at this stage — see v0.3 for the logged request).
-- Additional page prototypes needed here (product detail, service detail) if not already covered by the reference prototype — see "Additional Prototypes" below.
+- Product and service listing pages (`/products`, `/services`), category browsing, search, vehicle filter — all reading real data from Supabase.
+- Product and service detail pages (`/products/[id]`, `/services/[id]`), including the WhatsApp deep-link quote button.
+- 4-tier normalized vehicle fitment hierarchy (`app.vehicle_makes` -> `app.vehicle_models` -> `app.vehicle_trims` -> `app.vehicle_fitments`) supporting Kenya-relevant vehicle catalog.
+- Security Projections: `security_invoker = true` views (`products_public`, `categories_public`, `services_public`, `branches_public`, `vehicle_fitments_public`).
+- Strict Public Security Enforcements: Zero product prices (`sell_price`, `cost_price`, `margin`) and zero exact stock quantities (`stock_quantity`) exposed to public users. Qualitative stock status (`In Stock`, `Low Stock`, `Out of Stock`) only. Direct base table queries to `app.*` return HTTP 404 over PostgREST API.
 
-**Exit criteria:** a visitor can browse the full catalog and open any product/service detail page, with real data, no placeholder content in the code itself.
+**Exit criteria:** a visitor can browse the full catalog and open any product/service detail page, with real Supabase-backed data, qualitative stock badges, zero prices exposed, and live E2E browser tests passing cleanly. (COMPLETE & LIVE VERIFIED)
 
 ## v0.3 — Quote System
 

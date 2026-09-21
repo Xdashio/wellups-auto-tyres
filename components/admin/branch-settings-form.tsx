@@ -1,0 +1,181 @@
+"use client";
+
+import React, { useState } from "react";
+import { BranchData, BranchSettingsInput, BranchSettingsSchema } from "@/lib/supabase/branch";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+
+interface BranchSettingsFormProps {
+  initialBranch: BranchData;
+  onSave: (input: BranchSettingsInput) => Promise<{ success: boolean; error?: string; data?: BranchData }>;
+}
+
+export function BranchSettingsForm({ initialBranch, onSave }: BranchSettingsFormProps) {
+  const [formData, setFormData] = useState<BranchSettingsInput>({
+    name: initialBranch.name || "",
+    address: initialBranch.address || "",
+    phone: initialBranch.phone || "",
+    whatsapp: initialBranch.whatsapp || "",
+    opening_hours: initialBranch.opening_hours || "",
+  });
+
+  const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+    setSuccessMessage(null);
+    setErrorMessage(null);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSuccessMessage(null);
+    setErrorMessage(null);
+
+    // Client-side Zod validation
+    const validation = BranchSettingsSchema.safeParse(formData);
+    if (!validation.success) {
+      const msg = validation.error.issues.map((i) => i.message).join(", ");
+      setErrorMessage(msg);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await onSave(validation.data);
+      if (res.success) {
+        setSuccessMessage("Branch business settings updated successfully!");
+        if (res.data) {
+          setFormData({
+            name: res.data.name || "",
+            address: res.data.address || "",
+            phone: res.data.phone || "",
+            whatsapp: res.data.whatsapp || "",
+            opening_hours: res.data.opening_hours || "",
+          });
+        }
+      } else {
+        setErrorMessage(res.error || "Failed to update branch settings.");
+      }
+    } catch (err: any) {
+      setErrorMessage(err.message || "An unexpected error occurred.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Card className="max-w-2xl mx-auto p-6 space-y-6">
+      <div>
+        <h2 className="text-xl font-bold tracking-tight">Public Business Settings</h2>
+        <p className="text-sm text-text-secondary mt-1">
+          Manage your official branch contact details and public website configuration.
+        </p>
+      </div>
+
+      {successMessage && (
+        <div className="p-4 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-emerald-700 text-sm font-medium">
+          {successMessage}
+        </div>
+      )}
+
+      {errorMessage && (
+        <div className="p-4 rounded-md bg-rose-500/15 border border-rose-500/30 text-rose-700 text-sm font-medium">
+          {errorMessage}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-1">
+          <label htmlFor="name" className="block text-sm font-medium text-navy">
+            Branch Name *
+          </label>
+          <input
+            id="name"
+            name="name"
+            type="text"
+            required
+            value={formData.name}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            placeholder="WELL LUPS AUTO TYRES — Industrial Area"
+          />
+        </div>
+
+        <div className="space-y-1">
+          <label htmlFor="whatsapp" className="block text-sm font-medium text-navy">
+            WhatsApp Business Number
+          </label>
+          <input
+            id="whatsapp"
+            name="whatsapp"
+            type="text"
+            value={formData.whatsapp || ""}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary font-mono"
+            placeholder="e.g. 254712345678"
+          />
+          <p className="text-xs text-text-secondary">
+            Used to generate "Get a Quote" WhatsApp deep links across product and service pages.
+          </p>
+        </div>
+
+        <div className="space-y-1">
+          <label htmlFor="phone" className="block text-sm font-medium text-navy">
+            Phone Number
+          </label>
+          <input
+            id="phone"
+            name="phone"
+            type="text"
+            value={formData.phone || ""}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            placeholder="+254 700 000000"
+          />
+        </div>
+
+        <div className="space-y-1">
+          <label htmlFor="address" className="block text-sm font-medium text-navy">
+            Physical Address
+          </label>
+          <textarea
+            id="address"
+            name="address"
+            rows={2}
+            value={formData.address || ""}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            placeholder="Industrial Area, Nairobi, Kenya"
+          />
+        </div>
+
+        <div className="space-y-1">
+          <label htmlFor="opening_hours" className="block text-sm font-medium text-navy">
+            Opening Hours
+          </label>
+          <input
+            id="opening_hours"
+            name="opening_hours"
+            type="text"
+            value={formData.opening_hours || ""}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            placeholder="Mon - Sat: 8:00 AM - 6:00 PM"
+          />
+        </div>
+
+        <div className="pt-4 border-t flex justify-end">
+          <Button type="submit" disabled={loading} variant="primary">
+            {loading ? "Saving Settings..." : "Save Settings"}
+          </Button>
+        </div>
+      </form>
+    </Card>
+  );
+}

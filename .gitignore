@@ -8,3 +8,5 @@ coverage/
 .env
 .env*.local
 tsconfig.tsbuildinfo
+supabase/.temp/
+test-results/
