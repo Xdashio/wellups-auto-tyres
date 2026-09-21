@@ -61,7 +61,7 @@ test.describe("GATE 010C Playwright E2E Browser Certification Suite", () => {
 
     // Staff sets price on created quote using authoritative staff pricing helper (Admin/Manager ONLY)
     const validUntil = new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString();
-    const priceSuccess = executeStaffPricing({
+    const priceSuccess = await executeStaffPricing({
       quoteId: createdQuoteId,
       status: "quoted",
       offeredPrice: 24500.0,
@@ -116,7 +116,7 @@ test.describe("GATE 010C Playwright E2E Browser Certification Suite", () => {
     console.log(`[E2E EVIDENCE] Fresh Decline Quote ID: ${declineQuoteId}, TOKEN: [REDACTED]`);
 
     // 2. Staff (Manager) prices quote
-    const priceSuccess = executeStaffPricing({
+    const priceSuccess = await executeStaffPricing({
       quoteId: declineQuoteId,
       status: "quoted",
       offeredPrice: 19000.0,
@@ -154,7 +154,7 @@ test.describe("GATE 010C Playwright E2E Browser Certification Suite", () => {
     const expiryToken = urlObj.searchParams.get("token") || "";
 
     // 2. Staff sets past valid_until date (expired)
-    const priceSuccess = executeStaffPricing({
+    const priceSuccess = await executeStaffPricing({
       quoteId: expiryQuoteId,
       status: "quoted",
       offeredPrice: 15000.0,

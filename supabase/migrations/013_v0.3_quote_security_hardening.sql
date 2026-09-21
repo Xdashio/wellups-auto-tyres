@@ -206,15 +206,48 @@ as $$
 declare
   v_role text;
   v_staff_id uuid;
+  v_current_status app.quote_status;
 begin
-  -- Strictly enforce Admin and Manager role requirement. Cashiers and anon are strictly forbidden.
+  -- 1. Strictly enforce Admin and Manager role requirement. Cashiers and anon are strictly forbidden.
   select coalesce(auth.jwt() -> 'app_metadata' ->> 'user_role', '') into v_role;
   if v_role not in ('admin', 'manager') then
     raise exception 'Forbidden: Only Admin and Manager roles are authorized to manage quote pricing';
   end if;
 
+  -- 2. Fetch current quote status
+  select status into v_current_status
+  from app.quote_requests
+  where id = p_quote_id;
+
+  if not found then
+    raise exception 'Quote not found';
+  end if;
+
+  -- 3. Authoritative State-Machine Validation:
+  -- Allowed staff transitions:
+  -- new -> under_review
+  -- under_review -> quoted
+  -- quoted -> quoted (revising price/notes while remaining in quoted status)
+  if v_current_status = 'new' then
+    if p_status != 'under_review' then
+      raise exception 'Invalid state transition from new to %: quotes must be moved to under_review before pricing', p_status;
+    end if;
+  elsif v_current_status = 'under_review' then
+    if p_status != 'quoted' then
+      raise exception 'Invalid state transition from under_review to %', p_status;
+    end if;
+  elsif v_current_status = 'quoted' then
+    if p_status != 'quoted' then
+      raise exception 'Invalid state transition from quoted to %: staff cannot directly transition quoted quotes to %', p_status, p_status;
+    end if;
+  else
+    raise exception 'Cannot transition quote in status %: quote is in a terminal or customer-managed state', v_current_status;
+  end if;
+
+  -- 4. Derive staff id from auth.uid()
   select id into v_staff_id from app.staff_users where auth_user_id = (select auth.uid());
 
+  -- 5. Execute state transition and update fields
   update app.quote_requests
   set
     status = p_status,

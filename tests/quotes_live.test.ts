@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeAll } from "vitest";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { executeStaffPricing } from "./helpers/staff_admin";
-import { execSync } from "child_process";
 import fs from "fs";
 import path from "path";
 
@@ -72,51 +71,37 @@ describe("GATE 010C Live Database Integration & Security Test Suite", () => {
     });
     expect(createErr).toBeNull();
     const testQuoteId = createData[0].id;
-    const testSecretToken = createData[0].secret_token;
 
     // 1. Anonymous guest with VALID secret token calls staff_respond_to_quote -> MUST BE DENIED
     const anonRes = await anonClient.rpc("staff_respond_to_quote", {
       p_quote_id: testQuoteId,
-      p_status: "quoted",
-      p_offered_price: 15000.0,
-      p_valid_until: new Date(Date.now() + 7 * 86400000).toISOString(),
-      p_staff_notes: "Hostile anon price tampering"
+      p_status: "under_review"
     });
     expect(anonRes.error).toBeDefined();
     expect(anonRes.error?.message).toMatch(/permission denied for function staff_respond_to_quote/i);
 
-    // 2. Authenticated customer with VALID secret token calls staff_respond_to_quote -> MUST BE DENIED
-    const customerClaims = JSON.stringify({ sub: "dddddddd-dddd-dddd-dddd-dddddddddddd", app_metadata: {} }).replace(/"/g, '\\"');
-    const customerSql = `
-      set role authenticated;
-      select set_config('request.jwt.claims', '${customerClaims}', false);
-      select public.staff_respond_to_quote('${testQuoteId}'::uuid, 'quoted'::app.quote_status, 12000.0, (now() + interval '7 days'), 'Customer pricing attempt');
-    `;
-    let customerError = "";
-    try {
-      execSync(`npx supabase db query --linked "${customerSql}"`, { encoding: "utf-8" });
-    } catch (e: any) {
-      customerError = `${e.stdout || ""} ${e.stderr || ""} ${e.message || ""}`;
-    }
-    expect(customerError).toMatch(/Forbidden: Only Admin and Manager roles are authorized to manage quote pricing/i);
+    // 2. Authenticated customer calls staff_respond_to_quote -> MUST BE DENIED
+    const customerClient = createClient(supabaseUrl, supabaseAnonKey, { auth: { persistSession: false } });
+    await customerClient.auth.signInWithPassword({ email: "customer@test.local", password: "TestPassword123!" });
+    const custRes = await customerClient.rpc("staff_respond_to_quote", {
+      p_quote_id: testQuoteId,
+      p_status: "under_review"
+    });
+    expect(custRes.error).toBeDefined();
+    expect(custRes.error?.message).toMatch(/Forbidden: Only Admin and Manager roles are authorized to manage quote pricing/i);
 
     // 3. Cashier calls staff_respond_to_quote -> MUST BE DENIED
-    const cashierClaims = JSON.stringify({ sub: "cccccccc-cccc-cccc-cccc-cccccccccccc", app_metadata: { user_role: "cashier" } }).replace(/"/g, '\\"');
-    const cashierSql = `
-      set role authenticated;
-      select set_config('request.jwt.claims', '${cashierClaims}', false);
-      select public.staff_respond_to_quote('${testQuoteId}'::uuid, 'quoted'::app.quote_status, 12000.0, (now() + interval '7 days'), 'Cashier pricing attempt');
-    `;
-    let cashierError = "";
-    try {
-      execSync(`npx supabase db query --linked "${cashierSql}"`, { encoding: "utf-8" });
-    } catch (e: any) {
-      cashierError = `${e.stdout || ""} ${e.stderr || ""} ${e.message || ""}`;
-    }
-    expect(cashierError).toMatch(/Forbidden: Only Admin and Manager roles are authorized to manage quote pricing/i);
+    const cashierClient = createClient(supabaseUrl, supabaseAnonKey, { auth: { persistSession: false } });
+    await cashierClient.auth.signInWithPassword({ email: "cashier@test.local", password: "TestPassword123!" });
+    const cashierRes = await cashierClient.rpc("staff_respond_to_quote", {
+      p_quote_id: testQuoteId,
+      p_status: "under_review"
+    });
+    expect(cashierRes.error).toBeDefined();
+    expect(cashierRes.error?.message).toMatch(/Forbidden: Only Admin and Manager roles are authorized to manage quote pricing/i);
 
-    // 4. Manager calls staff_respond_to_quote -> MUST BE ALLOWED
-    const managerSuccess = executeStaffPricing({
+    // 4. Manager calls staff_respond_to_quote (legal two-step transition: new -> under_review -> quoted) -> MUST BE ALLOWED
+    const managerSuccess = await executeStaffPricing({
       quoteId: testQuoteId,
       status: "quoted",
       offeredPrice: 16500.0,
@@ -126,8 +111,8 @@ describe("GATE 010C Live Database Integration & Security Test Suite", () => {
     });
     expect(managerSuccess).toBe(true);
 
-    // 5. Admin calls staff_respond_to_quote -> MUST BE ALLOWED
-    const adminSuccess = executeStaffPricing({
+    // 5. Admin calls staff_respond_to_quote (revising price while quoted) -> MUST BE ALLOWED
+    const adminSuccess = await executeStaffPricing({
       quoteId: testQuoteId,
       status: "quoted",
       offeredPrice: 17500.0,
@@ -159,7 +144,7 @@ describe("GATE 010C Live Database Integration & Security Test Suite", () => {
 
     // 2. Staff (Admin/Manager) legitimately prices the quote
     const validUntil = new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString();
-    const priceSuccess = executeStaffPricing({
+    const priceSuccess = await executeStaffPricing({
       quoteId,
       status: "quoted",
       offeredPrice: 18500.0,
@@ -221,7 +206,7 @@ describe("GATE 010C Live Database Integration & Security Test Suite", () => {
     const secretToken = createData[0].secret_token;
 
     // 2. Staff prices quote
-    const priceSuccess = executeStaffPricing({
+    const priceSuccess = await executeStaffPricing({
       quoteId,
       status: "quoted",
       offeredPrice: 14000.0,
@@ -272,7 +257,7 @@ describe("GATE 010C Live Database Integration & Security Test Suite", () => {
 
     // 2. Staff prices quote with expired date (1 year in the past)
     const pastDate = new Date(Date.now() - 365 * 86400000).toISOString();
-    const priceSuccess = executeStaffPricing({
+    const priceSuccess = await executeStaffPricing({
       quoteId,
       status: "quoted",
       offeredPrice: 11000.0,
