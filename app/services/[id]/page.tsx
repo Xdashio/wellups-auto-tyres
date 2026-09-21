@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPublicServiceById, getPrimaryBranch } from "@/lib/supabase/catalog";
+import { BookingButton } from "@/components/services/booking-button";
 import { QuoteButton } from "@/components/catalog/quote-button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -70,16 +71,24 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
         <div className="p-6 rounded-lg bg-blue-muted/15 border border-blue-muted/30 space-y-4">
           <h3 className="font-semibold text-lg">Book Service or Get a Quote</h3>
           <p className="text-sm text-text-secondary">
-            Service scope and pricing depend on vehicle inspection. Contact our Industrial Area team via WhatsApp to discuss or schedule your vehicle.
+            Service scope and pricing depend on vehicle inspection. Submit a booking request to schedule your vehicle, or request formal pricing from our team.
           </p>
-          <QuoteButton
-            whatsappNumber={branch?.whatsapp}
-            itemName={service.name}
-            itemSku={`SRV-${service.id.slice(0, 8)}`}
-            itemType="service"
-            serviceId={service.id}
-            className="w-full sm:w-auto"
-          />
+          <div className="flex flex-wrap gap-3">
+            <BookingButton
+              serviceId={service.id}
+              serviceName={service.name}
+              className="w-full sm:w-auto"
+            />
+            <QuoteButton
+              whatsappNumber={branch?.whatsapp}
+              itemName={service.name}
+              itemSku={`SRV-${service.id.slice(0, 8)}`}
+              itemType="service"
+              serviceId={service.id}
+              variant="secondary"
+              className="w-full sm:w-auto"
+            />
+          </div>
         </div>
       </div>
     </div>

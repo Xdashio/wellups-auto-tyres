@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "vitest run --exclude 'tests/*_live.test.ts' --exclude 'tests/e2e/**'",
-    "test:live": "vitest run tests/quotes_live.test.ts",
+    "test:live": "vitest run tests/quotes_live.test.ts tests/bookings_live.test.ts",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
     "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload"
