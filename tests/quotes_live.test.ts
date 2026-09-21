@@ -111,16 +111,176 @@ describe("GATE 010C Live Database Integration & Security Test Suite", () => {
     });
     expect(managerSuccess).toBe(true);
 
-    // 5. Admin calls staff_respond_to_quote (revising price while quoted) -> MUST BE ALLOWED
-    const adminSuccess = await executeStaffPricing({
-      quoteId: testQuoteId,
-      status: "quoted",
-      offeredPrice: 17500.0,
-      validUntil: new Date(Date.now() + 7 * 86400000).toISOString(),
-      staffNotes: "Approved Admin quote pricing revision",
-      role: "admin"
+    // 5. Staff calls staff_respond_to_quote while quoted (quoted -> quoted) -> MUST BE STRICTLY DENIED
+    const adminClient = createClient(supabaseUrl, supabaseAnonKey, { auth: { persistSession: false } });
+    await adminClient.auth.signInWithPassword({ email: "admin@test.local", password: "TestPassword123!" });
+    const reviseRes = await adminClient.rpc("staff_respond_to_quote", {
+      p_quote_id: testQuoteId,
+      p_status: "quoted",
+      p_offered_price: 17500.0
     });
-    expect(adminSuccess).toBe(true);
+    expect(reviseRes.error).toBeDefined();
+    expect(reviseRes.error?.message).toMatch(/quote is already in quoted status and cannot be modified by staff/i);
+  });
+
+  // =========================================================================
+  // AUTHORITATIVE STATE MACHINE: STRICT TRANSITION GRAPH ENFORCEMENT
+  // =========================================================================
+  it("STATE MACHINE: strictly enforces locked transition graph and rejects all invalid state transitions", async () => {
+    const adminClient = createClient(supabaseUrl, supabaseAnonKey, { auth: { persistSession: false } });
+    await adminClient.auth.signInWithPassword({ email: "admin@test.local", password: "TestPassword123!" });
+
+    // Helper to create a quote in a specific state
+    const createQuoteInState = async (targetState: "new" | "under_review" | "quoted" | "accepted" | "declined" | "expired") => {
+      const { data } = await anonClient.rpc("create_quote_request", {
+        p_branch_id: primaryBranchId,
+        p_customer_name: `State Test ${targetState}`,
+        p_customer_phone: "+254700999000",
+        p_item_type: "product"
+      });
+      const qId = data[0].id;
+      const tok = data[0].secret_token;
+
+      if (targetState === "new") return { qId, tok };
+
+      // new -> under_review
+      await adminClient.rpc("staff_respond_to_quote", { p_quote_id: qId, p_status: "under_review" });
+      if (targetState === "under_review") return { qId, tok };
+
+      // under_review -> quoted
+      const validity = targetState === "expired" ? "2020-01-01T00:00:00Z" : new Date(Date.now() + 86400000).toISOString();
+      await adminClient.rpc("staff_respond_to_quote", {
+        p_quote_id: qId,
+        p_status: "quoted",
+        p_offered_price: 10000,
+        p_valid_until: validity
+      });
+      if (targetState === "quoted" || targetState === "expired") return { qId, tok };
+
+      if (targetState === "accepted") {
+        await anonClient.rpc("customer_respond_to_quote", { p_quote_id: qId, p_action: "accept", p_token: tok });
+      } else if (targetState === "declined") {
+        await anonClient.rpc("customer_respond_to_quote", { p_quote_id: qId, p_action: "decline", p_token: tok });
+      }
+      return { qId, tok };
+    };
+
+    // 1. FROM 'new':
+    const qNew = await createQuoteInState("new");
+    // INVALID:
+    // new -> quoted (DENY)
+    const errNewToQuoted = await adminClient.rpc("staff_respond_to_quote", { p_quote_id: qNew.qId, p_status: "quoted", p_offered_price: 5000 });
+    expect(errNewToQuoted.error?.message).toMatch(/Invalid state transition from new to quoted/i);
+
+    // new -> accepted (DENY)
+    const errNewToAcc = await adminClient.rpc("staff_respond_to_quote", { p_quote_id: qNew.qId, p_status: "accepted" });
+    expect(errNewToAcc.error?.message).toMatch(/Invalid state transition from new to accepted/i);
+
+    // new -> declined (DENY)
+    const errNewToDec = await adminClient.rpc("staff_respond_to_quote", { p_quote_id: qNew.qId, p_status: "declined" });
+    expect(errNewToDec.error?.message).toMatch(/Invalid state transition from new to declined/i);
+
+    // new -> expired (DENY)
+    const errNewToExp = await adminClient.rpc("staff_respond_to_quote", { p_quote_id: qNew.qId, p_status: "expired" });
+    expect(errNewToExp.error?.message).toMatch(/Invalid state transition from new to expired/i);
+
+    // VALID:
+    // new -> under_review (ALLOW)
+    const resNewToReview = await adminClient.rpc("staff_respond_to_quote", { p_quote_id: qNew.qId, p_status: "under_review" });
+    expect(resNewToReview.error).toBeNull();
+
+    // 2. FROM 'under_review':
+    const qReview = await createQuoteInState("under_review");
+    // INVALID:
+    // under_review -> accepted (DENY)
+    const errRevToAcc = await adminClient.rpc("staff_respond_to_quote", { p_quote_id: qReview.qId, p_status: "accepted" });
+    expect(errRevToAcc.error?.message).toMatch(/Invalid state transition from under_review to accepted/i);
+
+    // under_review -> declined (DENY)
+    const errRevToDec = await adminClient.rpc("staff_respond_to_quote", { p_quote_id: qReview.qId, p_status: "declined" });
+    expect(errRevToDec.error?.message).toMatch(/Invalid state transition from under_review to declined/i);
+
+    // under_review -> expired (DENY)
+    const errRevToExp = await adminClient.rpc("staff_respond_to_quote", { p_quote_id: qReview.qId, p_status: "expired" });
+    expect(errRevToExp.error?.message).toMatch(/Invalid state transition from under_review to expired/i);
+
+    // VALID:
+    // under_review -> quoted (ALLOW)
+    const resRevToQuoted = await adminClient.rpc("staff_respond_to_quote", {
+      p_quote_id: qReview.qId,
+      p_status: "quoted",
+      p_offered_price: 12000,
+      p_valid_until: new Date(Date.now() + 86400000).toISOString()
+    });
+    expect(resRevToQuoted.error).toBeNull();
+
+    // 3. FROM 'quoted':
+    const qQuoted = await createQuoteInState("quoted");
+    // INVALID:
+    // quoted -> under_review (DENY)
+    const errQuoToRev = await adminClient.rpc("staff_respond_to_quote", { p_quote_id: qQuoted.qId, p_status: "under_review" });
+    expect(errQuoToRev.error?.message).toMatch(/quote is already in quoted status and cannot be modified by staff/i);
+
+    // quoted -> new (DENY)
+    const errQuoToNew = await adminClient.rpc("staff_respond_to_quote", { p_quote_id: qQuoted.qId, p_status: "new" });
+    expect(errQuoToNew.error?.message).toMatch(/quote is already in quoted status and cannot be modified by staff/i);
+
+    // quoted -> quoted (DENY)
+    const errQuoToQuo = await adminClient.rpc("staff_respond_to_quote", { p_quote_id: qQuoted.qId, p_status: "quoted", p_offered_price: 13000 });
+    expect(errQuoToQuo.error?.message).toMatch(/quote is already in quoted status and cannot be modified by staff/i);
+
+    // CUSTOMER VALID:
+    // quoted -> accepted (ALLOW)
+    const resCustAcc = await anonClient.rpc("customer_respond_to_quote", { p_quote_id: qQuoted.qId, p_action: "accept", p_token: qQuoted.tok });
+    expect(resCustAcc.error).toBeNull();
+
+    // 4. FROM 'accepted' (terminal):
+    const qAccepted = await createQuoteInState("accepted");
+    // Staff transitions DENIED:
+    const errAccToQuo = await adminClient.rpc("staff_respond_to_quote", { p_quote_id: qAccepted.qId, p_status: "quoted", p_offered_price: 14000 });
+    expect(errAccToQuo.error?.message).toMatch(/Cannot transition quote in status accepted/i);
+
+    const errAccToDec = await adminClient.rpc("staff_respond_to_quote", { p_quote_id: qAccepted.qId, p_status: "declined" });
+    expect(errAccToDec.error?.message).toMatch(/Cannot transition quote in status accepted/i);
+
+    const errAccToExp = await adminClient.rpc("staff_respond_to_quote", { p_quote_id: qAccepted.qId, p_status: "expired" });
+    expect(errAccToExp.error?.message).toMatch(/Cannot transition quote in status accepted/i);
+
+    // Customer transition on accepted DENIED:
+    const errCustOnAcc = await anonClient.rpc("customer_respond_to_quote", { p_quote_id: qAccepted.qId, p_action: "decline", p_token: qAccepted.tok });
+    expect(errCustOnAcc.error?.message).toMatch(/Quote cannot be updated in its current status/i);
+
+    // 5. FROM 'declined' (terminal):
+    const qDeclined = await createQuoteInState("declined");
+    // Staff transitions DENIED:
+    const errDecToQuo = await adminClient.rpc("staff_respond_to_quote", { p_quote_id: qDeclined.qId, p_status: "quoted", p_offered_price: 15000 });
+    expect(errDecToQuo.error?.message).toMatch(/Cannot transition quote in status declined/i);
+
+    const errDecToAcc = await adminClient.rpc("staff_respond_to_quote", { p_quote_id: qDeclined.qId, p_status: "accepted" });
+    expect(errDecToAcc.error?.message).toMatch(/Cannot transition quote in status declined/i);
+
+    const errDecToExp = await adminClient.rpc("staff_respond_to_quote", { p_quote_id: qDeclined.qId, p_status: "expired" });
+    expect(errDecToExp.error?.message).toMatch(/Cannot transition quote in status declined/i);
+
+    // Customer transition on declined DENIED:
+    const errCustOnDec = await anonClient.rpc("customer_respond_to_quote", { p_quote_id: qDeclined.qId, p_action: "accept", p_token: qDeclined.tok });
+    expect(errCustOnDec.error?.message).toMatch(/Quote cannot be updated in its current status/i);
+
+    // 6. FROM 'expired' (terminal):
+    const qExpired = await createQuoteInState("expired");
+    // Staff transitions DENIED:
+    const errExpToQuo = await adminClient.rpc("staff_respond_to_quote", { p_quote_id: qExpired.qId, p_status: "quoted", p_offered_price: 16000 });
+    expect(errExpToQuo.error?.message).toMatch(/Cannot transition quote in status|quote is already in quoted status/i);
+
+    const errExpToAcc = await adminClient.rpc("staff_respond_to_quote", { p_quote_id: qExpired.qId, p_status: "accepted" });
+    expect(errExpToAcc.error?.message).toMatch(/Cannot transition quote in status|quote is already in quoted status/i);
+
+    const errExpToDec = await adminClient.rpc("staff_respond_to_quote", { p_quote_id: qExpired.qId, p_status: "declined" });
+    expect(errExpToDec.error?.message).toMatch(/Cannot transition quote in status|quote is already in quoted status/i);
+
+    // Customer accept attempt on expired quote DENIED:
+    const errCustOnExp = await anonClient.rpc("customer_respond_to_quote", { p_quote_id: qExpired.qId, p_action: "accept", p_token: qExpired.tok });
+    expect(errCustOnExp.error?.message).toMatch(/Quote has expired and can no longer be accepted/i);
   });
 
   // =========================================================================

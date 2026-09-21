@@ -224,10 +224,10 @@ begin
   end if;
 
   -- 3. Authoritative State-Machine Validation:
-  -- Allowed staff transitions:
+  -- Allowed staff transitions ONLY:
   -- new -> under_review
   -- under_review -> quoted
-  -- quoted -> quoted (revising price/notes while remaining in quoted status)
+  -- ALL other transitions, including quoted -> quoted, quoted -> under_review, terminal states, etc. are strictly FORBIDDEN.
   if v_current_status = 'new' then
     if p_status != 'under_review' then
       raise exception 'Invalid state transition from new to %: quotes must be moved to under_review before pricing', p_status;
@@ -237,9 +237,7 @@ begin
       raise exception 'Invalid state transition from under_review to %', p_status;
     end if;
   elsif v_current_status = 'quoted' then
-    if p_status != 'quoted' then
-      raise exception 'Invalid state transition from quoted to %: staff cannot directly transition quoted quotes to %', p_status, p_status;
-    end if;
+    raise exception 'Invalid state transition: quote is already in quoted status and cannot be modified by staff';
   else
     raise exception 'Cannot transition quote in status %: quote is in a terminal or customer-managed state', v_current_status;
   end if;

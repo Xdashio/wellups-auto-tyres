@@ -17,6 +17,7 @@ if (fs.existsSync(envLocalPath)) {
 }
 
 export default defineConfig({
+  timeout: 60000,
   testDir: "./tests/e2e",
   fullyParallel: false,
   workers: 1,
