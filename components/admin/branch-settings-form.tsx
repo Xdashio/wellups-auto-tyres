@@ -4,6 +4,8 @@ import React, { useState } from "react";
 import { BranchData, BranchSettingsInput, BranchSettingsSchema } from "@/lib/supabase/branch";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 interface BranchSettingsFormProps {
   initialBranch: BranchData;
@@ -79,13 +81,13 @@ export function BranchSettingsForm({ initialBranch, onSave }: BranchSettingsForm
       </div>
 
       {successMessage && (
-        <div className="p-4 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-emerald-700 text-sm font-medium">
+        <div className="p-4 rounded-md bg-success/10 border border-success/20 text-success text-sm font-medium">
           {successMessage}
         </div>
       )}
 
       {errorMessage && (
-        <div className="p-4 rounded-md bg-rose-500/15 border border-rose-500/30 text-rose-700 text-sm font-medium">
+        <div className="p-4 rounded-md bg-destructive/10 border border-destructive/20 text-destructive text-sm font-medium">
           {errorMessage}
         </div>
       )}
@@ -95,14 +97,13 @@ export function BranchSettingsForm({ initialBranch, onSave }: BranchSettingsForm
           <label htmlFor="name" className="block text-sm font-medium text-navy">
             Branch Name *
           </label>
-          <input
+          <Input
             id="name"
             name="name"
             type="text"
             required
             value={formData.name}
             onChange={handleChange}
-            className="w-full px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             placeholder="WELL LUPS AUTO TYRES — Industrial Area"
           />
         </div>
@@ -111,13 +112,13 @@ export function BranchSettingsForm({ initialBranch, onSave }: BranchSettingsForm
           <label htmlFor="whatsapp" className="block text-sm font-medium text-navy">
             WhatsApp Business Number
           </label>
-          <input
+          <Input
             id="whatsapp"
             name="whatsapp"
             type="text"
             value={formData.whatsapp || ""}
             onChange={handleChange}
-            className="w-full px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary font-mono"
+            className="font-mono"
             placeholder="e.g. 254712345678"
           />
           <p className="text-xs text-text-secondary">
@@ -129,13 +130,12 @@ export function BranchSettingsForm({ initialBranch, onSave }: BranchSettingsForm
           <label htmlFor="phone" className="block text-sm font-medium text-navy">
             Phone Number
           </label>
-          <input
+          <Input
             id="phone"
             name="phone"
             type="text"
             value={formData.phone || ""}
             onChange={handleChange}
-            className="w-full px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             placeholder="+254 700 000000"
           />
         </div>
@@ -144,13 +144,12 @@ export function BranchSettingsForm({ initialBranch, onSave }: BranchSettingsForm
           <label htmlFor="address" className="block text-sm font-medium text-navy">
             Physical Address
           </label>
-          <textarea
+          <Textarea
             id="address"
             name="address"
             rows={2}
             value={formData.address || ""}
             onChange={handleChange}
-            className="w-full px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             placeholder="Industrial Area, Nairobi, Kenya"
           />
         </div>
@@ -159,13 +158,12 @@ export function BranchSettingsForm({ initialBranch, onSave }: BranchSettingsForm
           <label htmlFor="opening_hours" className="block text-sm font-medium text-navy">
             Opening Hours
           </label>
-          <input
+          <Input
             id="opening_hours"
             name="opening_hours"
             type="text"
             value={formData.opening_hours || ""}
             onChange={handleChange}
-            className="w-full px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             placeholder="Mon - Sat: 8:00 AM - 6:00 PM"
           />
         </div>

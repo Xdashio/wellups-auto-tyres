@@ -124,7 +124,7 @@ export default function AdminQuotesPage() {
             data-testid="staff-signout-btn"
             variant="ghost"
             onClick={handleSignOut}
-            className="text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50 border border-rose-200 min-h-8 py-1 px-3"
+            className="text-xs text-destructive hover:text-destructive/90 min-h-8 py-1 px-3"
           >
             Sign Out
           </Button>
@@ -151,7 +151,7 @@ export default function AdminQuotesPage() {
                 data-testid="login-manager-quick"
                 onClick={() => handleSignIn("mgr@test.local", "TestPassword123!")}
                 disabled={authLoading}
-                className="px-2.5 py-1 text-xs font-semibold bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                className="px-2.5 py-1 text-xs font-semibold bg-primary text-primary-foreground rounded hover:bg-primary/90 transition-colors"
               >
                 Sign In as Manager
               </button>
@@ -160,7 +160,7 @@ export default function AdminQuotesPage() {
                 data-testid="login-cashier-quick"
                 onClick={() => handleSignIn("cashier@test.local", "TestPassword123!")}
                 disabled={authLoading}
-                className="px-2.5 py-1 text-xs font-semibold bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+                className="px-2.5 py-1 text-xs font-semibold bg-muted text-foreground rounded hover:bg-muted/80 transition-colors"
               >
                 Sign In as Cashier
               </button>
@@ -168,7 +168,7 @@ export default function AdminQuotesPage() {
           </div>
 
           {loginError && (
-            <div className="p-2 text-xs font-medium text-rose-600 bg-rose-50 border border-rose-200 rounded">
+            <div className="p-2 text-xs font-medium text-destructive bg-destructive/10 border border-destructive/20 rounded">
               {loginError}
             </div>
           )}
@@ -226,7 +226,7 @@ export default function AdminQuotesPage() {
                   className={`px-3 py-1.5 text-xs font-semibold rounded transition-colors uppercase ${
                     selectedStatus === status
                       ? "bg-navy text-white"
-                      : "bg-white dark:bg-gray-800 text-navy hover:bg-gray-100"
+                      : "bg-card text-navy hover:bg-muted"
                   }`}
                 >
                   {status.replace("_", " ")}

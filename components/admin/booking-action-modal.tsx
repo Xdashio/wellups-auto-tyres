@@ -5,6 +5,9 @@ import { BookingStaff, BookingStatus, manageStaffBooking } from "@/lib/supabase/
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 
 interface BookingActionModalProps {
   isOpen: boolean;
@@ -106,7 +109,7 @@ export function BookingActionModal({
         </div>
 
         {errorMessage && (
-          <div className="p-3 text-xs font-medium text-rose-600 bg-rose-50 border border-rose-200 rounded" data-testid="modal-error-message">
+          <div className="p-3 text-xs font-medium text-destructive bg-destructive/10 border border-destructive/20 rounded" data-testid="modal-error-message">
             {errorMessage}
           </div>
         )}
@@ -141,7 +144,7 @@ export function BookingActionModal({
 
         {/* Role Notice for Cashier */}
         {isCashier && !isTerminal && booking.status !== "scheduled" && (
-          <div className="p-3 bg-amber-50 border border-amber-200 text-amber-900 rounded text-xs" data-testid="cashier-readonly-notice">
+          <div className="p-3 bg-warning/10 border border-warning/20 text-warning rounded text-xs" data-testid="cashier-readonly-notice">
             <p className="font-semibold">Cashier Operational View</p>
             <p>Cashiers are restricted from scheduling, declining, or modifying notes. Cashiers may only mark bookings as completed once work is finished in the workshop.</p>
           </div>
@@ -149,7 +152,7 @@ export function BookingActionModal({
 
         {/* Terminal State Notice */}
         {isTerminal && (
-          <div className="p-4 bg-gray-100 border border-gray-200 text-gray-700 rounded text-center text-xs space-y-1" data-testid="terminal-status-notice">
+          <div className="p-4 bg-muted border border-border text-muted-foreground rounded text-center text-xs space-y-1" data-testid="terminal-status-notice">
             <p className="font-bold uppercase">Terminal State: {booking.status}</p>
             <p>This booking has reached a final state and cannot be modified.</p>
           </div>
@@ -181,7 +184,7 @@ export function BookingActionModal({
                         variant="secondary"
                         onClick={() => handleAction("declined")}
                         disabled={isSubmitting}
-                        className="text-rose-600 hover:text-rose-700"
+                        className="text-destructive hover:text-destructive/90"
                         data-testid="decline-booking-btn"
                       >
                         Decline Request
@@ -202,16 +205,16 @@ export function BookingActionModal({
                 {isAdminOrManager ? (
                   <div className="space-y-3">
                     <div>
-                      <label className="block text-xs font-semibold text-navy mb-1">
-                        Confirmed Appointment Date & Time <span className="text-rose-500">*</span>
-                      </label>
-                      <input
+                      <Label htmlFor="booking-scheduled-at-input" className="mb-1">
+                        Confirmed Appointment Date & Time <span className="text-destructive">*</span>
+                      </Label>
+                      <Input
+                        id="booking-scheduled-at-input"
+                        data-testid="booking-scheduled-at-input"
                         type="datetime-local"
                         required
                         value={scheduledAt}
                         onChange={(e) => setScheduledAt(e.target.value)}
-                        className="w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                        data-testid="booking-scheduled-at-input"
                       />
                       <p className="text-[11px] text-text-secondary mt-0.5">
                         Sets the authoritative appointment timestamp for the customer and workshop.
@@ -219,16 +222,16 @@ export function BookingActionModal({
                     </div>
 
                     <div>
-                      <label className="block text-xs font-semibold text-navy mb-1">
-                        Internal Staff Notes <span className="text-text-secondary font-normal">(Optional)</span>
-                      </label>
-                      <textarea
+                      <Label htmlFor="booking-staff-notes-input" className="mb-1">
+                        Internal Staff Notes <span className="text-muted-foreground font-normal">(Optional)</span>
+                      </Label>
+                      <Textarea
+                        id="booking-staff-notes-input"
+                        data-testid="booking-staff-notes-input"
                         rows={2}
                         placeholder="e.g. Assigned Bay 2, Technician David"
                         value={staffNotes}
                         onChange={(e) => setStaffNotes(e.target.value)}
-                        className="w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none"
-                        data-testid="booking-staff-notes-input"
                       />
                     </div>
 
@@ -247,7 +250,7 @@ export function BookingActionModal({
                         variant="secondary"
                         onClick={() => handleAction("declined")}
                         disabled={isSubmitting}
-                        className="text-rose-600 hover:text-rose-700"
+                        className="text-destructive hover:text-destructive/90"
                         data-testid="decline-booking-btn"
                       >
                         Decline
@@ -265,7 +268,7 @@ export function BookingActionModal({
             {/* Status = SCHEDULED */}
             {booking.status === "scheduled" && (
               <div className="space-y-3">
-                <div className="p-3 bg-emerald-50 border border-emerald-200 rounded text-xs text-emerald-900">
+                <div className="p-3 bg-success/10 border border-success/20 rounded text-xs text-success">
                   <p className="font-semibold">Scheduled Appointment:</p>
                   <p className="font-bold text-sm">
                     {booking.scheduled_at
@@ -283,7 +286,8 @@ export function BookingActionModal({
                     type="button"
                     onClick={() => handleAction("completed")}
                     disabled={isSubmitting}
-                    className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+                    variant="success"
+                    className="flex-1"
                     data-testid="mark-completed-btn"
                   >
                     {isSubmitting ? "Completing..." : "Mark Service Completed"}
@@ -295,7 +299,7 @@ export function BookingActionModal({
                       variant="secondary"
                       onClick={() => handleAction("cancelled")}
                       disabled={isSubmitting}
-                      className="text-rose-600 hover:text-rose-700"
+                      className="text-destructive hover:text-destructive/90"
                       data-testid="cancel-booking-btn"
                     >
                       Cancel Appointment

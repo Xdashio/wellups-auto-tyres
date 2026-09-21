@@ -26,6 +26,10 @@
   --color-muted: #e8e9ec;          /* subtle surface tint */
   --color-muted-foreground: #777878; /* resolves text-muted-foreground */
 
+  /* ─── Legacy aliases (call-sites rely on these token names) ─── */
+  --color-text-primary: #1a1b1d;    /* = --color-foreground */
+  --color-text-secondary: #777878; /* = --color-muted-foreground */
+
   --color-border: #d1d2d3;          /* light border / divider */
   --color-input: #ffffff;
 

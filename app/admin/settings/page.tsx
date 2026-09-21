@@ -11,7 +11,7 @@ export default async function AdminSettingsPage() {
   if (!branch) {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
-        <h1 className="text-2xl font-bold text-rose-600">Branch Configuration Not Found</h1>
+        <h1 className="text-2xl font-bold text-destructive">Branch Configuration Not Found</h1>
         <p className="text-sm text-text-secondary mt-2">
           Unable to load primary branch configuration.
         </p>

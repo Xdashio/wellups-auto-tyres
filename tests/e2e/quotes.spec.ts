@@ -66,7 +66,7 @@ test.describe("GATE 010C Playwright E2E Browser Certification Suite", () => {
     // 6. Staff moves new -> under_review
     await expect(page.locator("h2:has-text('Quote Response')")).toBeVisible();
     const statusSelect = page.locator("[data-testid='quote-status-select']");
-    await expect(statusSelect).toHaveValue("under_review");
+    await expect(statusSelect).toContainText("Under Review");
     const saveBtn = page.locator("[data-testid='save-quote-response-btn']");
     await expect(saveBtn).toContainText("Move to Under Review");
     await saveBtn.click();
@@ -78,7 +78,7 @@ test.describe("GATE 010C Playwright E2E Browser Certification Suite", () => {
     await reviewManageBtn.click();
 
     await expect(page.locator("h2:has-text('Quote Response')")).toBeVisible();
-    await expect(statusSelect).toHaveValue("quoted");
+    await expect(statusSelect).toContainText("Quoted");
     await page.fill("[data-testid='quote-offered-price-input']", "25000");
     await saveBtn.click();
     await expect(page.locator("h2:has-text('Quote Response')")).not.toBeVisible({ timeout: 15000 });

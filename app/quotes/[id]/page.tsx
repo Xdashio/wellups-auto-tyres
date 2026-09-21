@@ -60,7 +60,7 @@ export default function GuestQuotePage({ params }: GuestQuotePageProps) {
   if (!quote) {
     return (
       <div className="container mx-auto px-4 py-16 text-center max-w-md">
-        <h1 className="text-2xl font-bold text-rose-600">Quote Not Found</h1>
+        <h1 className="text-2xl font-bold text-destructive">Quote Not Found</h1>
         <p className="text-sm text-text-secondary mt-2">
           The requested quote reference or security token is invalid or expired.
         </p>
@@ -93,7 +93,7 @@ export default function GuestQuotePage({ params }: GuestQuotePageProps) {
       </div>
 
       {actionSuccess && (
-        <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm font-medium rounded-md">
+        <div className="p-4 bg-success/10 border border-success/20 text-success text-sm font-medium rounded-md">
           {actionSuccess}
         </div>
       )}
@@ -135,13 +135,13 @@ export default function GuestQuotePage({ params }: GuestQuotePageProps) {
                 KES {quote.offered_price.toLocaleString()}
               </p>
               {quote.valid_until && (
-                <p className={`text-xs mt-1 font-medium ${expired ? "text-rose-600" : "text-emerald-700"}`}>
+                <p className={`text-xs mt-1 font-medium ${expired ? "text-destructive" : "text-success"}`}>
                   {expired ? "expired on " : "valid until "}{new Date(quote.valid_until).toLocaleDateString()}
                 </p>
               )}
             </div>
           ) : (
-            <p className="text-sm font-semibold text-amber-600">
+            <p className="text-sm font-semibold text-warning">
               Staff review in progress. Offered price will appear here once ready.
             </p>
           )}
@@ -151,10 +151,10 @@ export default function GuestQuotePage({ params }: GuestQuotePageProps) {
         {quote.status === "quoted" && !expired && (
           <div className="flex gap-3 pt-4 border-t">
             <Button
-              variant="primary"
+              variant="success"
               onClick={() => handleUpdateStatus("accepted")}
               disabled={updating}
-              className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white"
+              className="flex-1"
             >
               {updating ? "Updating..." : "Accept Quote"}
             </Button>
@@ -162,7 +162,7 @@ export default function GuestQuotePage({ params }: GuestQuotePageProps) {
               variant="secondary"
               onClick={() => handleUpdateStatus("declined")}
               disabled={updating}
-              className="flex-1 text-rose-600 border-rose-200 hover:bg-rose-50"
+              className="flex-1 text-destructive hover:text-destructive/90"
             >
               {updating ? "Updating..." : "Decline Quote"}
             </Button>

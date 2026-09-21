@@ -2,11 +2,17 @@ import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cn } from "@/lib/ui/cn";
 
-type ButtonVariant = "primary" | "secondary" | "outline" | "ghost" | "destructive";
+type ButtonVariant =
+  | "primary"
+  | "secondary"
+  | "outline"
+  | "ghost"
+  | "destructive"
+  | "success";
 type ButtonSize = "sm" | "md" | "lg";
 
 const base =
-  "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors";
+  "inline-flex items-center justify-center rounded-md text-sm font-medium no-underline transition-colors";
 
 const variants: Record<ButtonVariant, string> = {
   primary:
@@ -18,6 +24,7 @@ const variants: Record<ButtonVariant, string> = {
   ghost: "text-navy hover:bg-blue-muted/15",
   destructive:
     "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+  success: "bg-success text-success-foreground hover:bg-success/90",
 };
 
 const sizes: Record<ButtonSize, string> = {
@@ -45,8 +52,24 @@ export function Button({
   ...props
 }: ButtonProps) {
   const Comp = asChild ? Slot : "button";
+  // When `asChild`, Radix Slot must receive exactly one element child to clone.
+  // Rendering the spinner as a sibling would turn `children` into an array
+  // (e.g. [null, <Link>]) and Slot throws "failed to slot onto its children".
+  // Only real <button> elements may carry the spinner + children as siblings.
+  if (asChild) {
+    return (
+      <Comp
+        className={cn(base, variants[variant], sizes[size], className)}
+        disabled={disabled || loading}
+        aria-busy={loading || undefined}
+        {...props}
+      >
+        {children}
+      </Comp>
+    );
+  }
   return (
-    <Comp
+    <button
       className={cn(base, variants[variant], sizes[size], className)}
       disabled={disabled || loading}
       aria-busy={loading || undefined}
@@ -59,6 +82,6 @@ export function Button({
         />
       ) : null}
       {children}
-    </Comp>
+    </button>
   );
 }

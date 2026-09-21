@@ -4,6 +4,16 @@ import React, { useState } from "react";
 import { QuoteRequestStaff, updateStaffQuoteResponse, QuoteStatus } from "@/lib/supabase/quotes";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface QuoteResponseFormProps {
   quote: QuoteRequestStaff;
@@ -94,10 +104,15 @@ export function QuoteResponseForm({ quote, userRole, onSuccess, onCancel }: Quot
   const waUrl = getWhatsAppMessageUrl();
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 bg-white dark:bg-gray-950 p-6 rounded-lg border">
-      <div className="flex items-center justify-between border-b pb-4">
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-6 bg-card border border-border p-6 rounded-lg"
+    >
+      <div className="flex items-center justify-between border-b border-border pb-4">
         <div>
-          <h2 className="text-xl font-bold">Quote Response — {quote.quote_number}</h2>
+          <h2 className="text-xl font-bold">
+            Quote Response: {quote.quote_number}
+          </h2>
           <p className="text-xs text-text-secondary mt-0.5">
             Submitted {new Date(quote.created_at).toLocaleString()}
           </p>
@@ -123,7 +138,7 @@ export function QuoteResponseForm({ quote, userRole, onSuccess, onCancel }: Quot
       {isCashier && (
         <div
           data-testid="cashier-readonly-notice"
-          className="p-3 text-xs font-semibold text-amber-800 bg-amber-50 border border-amber-200 rounded"
+          className="p-3 text-xs font-semibold text-warning bg-warning/10 border border-warning/20 rounded"
         >
           Cashier Access: Read-only. Pricing controls and status transitions are disabled for Cashier role.
         </div>
@@ -132,7 +147,7 @@ export function QuoteResponseForm({ quote, userRole, onSuccess, onCancel }: Quot
       {isAlreadyQuoted && (
         <div
           data-testid="quoted-locked-notice"
-          className="p-3 text-xs font-semibold text-sky-800 bg-sky-50 border border-sky-200 rounded"
+          className="p-3 text-xs font-semibold text-info bg-info/10 border border-info/20 rounded"
         >
           This quote has been QUOTED and is awaiting customer response. Staff cannot directly modify the pricing or status.
         </div>
@@ -141,26 +156,26 @@ export function QuoteResponseForm({ quote, userRole, onSuccess, onCancel }: Quot
       {isTerminal && (
         <div
           data-testid="terminal-locked-notice"
-          className="p-3 text-xs font-semibold text-gray-700 bg-gray-100 border border-gray-200 rounded"
+          className="p-3 text-xs font-semibold text-muted-foreground bg-muted border border-border rounded"
         >
           This quote is in a terminal state ({quote.status.toUpperCase()}). Further modifications are prohibited.
         </div>
       )}
 
       {quote.status === "new" && !isCashier && (
-        <div className="p-3 text-xs font-medium text-blue-800 bg-blue-50 border border-blue-200 rounded">
+        <div className="p-3 text-xs font-medium text-navy bg-blue-muted/10 border border-blue-muted/20 rounded">
           Step 1: Move quote to <strong>Under Review</strong> to triage request before pricing.
         </div>
       )}
 
       {quote.status === "under_review" && !isCashier && (
-        <div className="p-3 text-xs font-medium text-emerald-800 bg-emerald-50 border border-emerald-200 rounded">
+        <div className="p-3 text-xs font-medium text-navy bg-blue-muted/10 border border-blue-muted/20 rounded">
           Step 2: Enter offered price and validity date, then move status to <strong>Quoted</strong>.
         </div>
       )}
 
       {errorMessage && (
-        <div className="p-3 text-xs font-medium text-rose-600 bg-rose-50 border border-rose-200 rounded">
+        <div className="p-3 text-xs font-medium text-destructive bg-destructive/10 border border-destructive/20 rounded">
           {errorMessage}
         </div>
       )}
@@ -191,34 +206,52 @@ export function QuoteResponseForm({ quote, userRole, onSuccess, onCancel }: Quot
       <div className="space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
-            <label className="block text-xs font-semibold text-navy mb-1">Update Status</label>
-            <select
-              data-testid="quote-status-select"
+            <Label htmlFor="quote-status-select-trigger" className="mb-1">
+              Update Status
+            </Label>
+            <Select
               value={status}
+              onValueChange={(val) => setStatus(val as QuoteStatus)}
               disabled={controlsDisabled}
-              onChange={(e) => setStatus(e.target.value as QuoteStatus)}
-              className="w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:bg-gray-100 disabled:cursor-not-allowed"
             >
-              {quote.status === "new" && (
-                <option value="under_review">Under Review (Triage Quote)</option>
-              )}
-              {quote.status === "under_review" && (
-                <option value="quoted">Quoted (Provide Price & Validity)</option>
-              )}
-              {quote.status === "quoted" && (
-                <option value="quoted">Quoted (Awaiting Customer)</option>
-              )}
-              {isTerminal && (
-                <option value={quote.status}>{quote.status.toUpperCase()}</option>
-              )}
-            </select>
+              <SelectTrigger
+                id="quote-status-select-trigger"
+                data-testid="quote-status-select"
+                className="w-full"
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {quote.status === "new" && (
+                  <SelectItem value="under_review">
+                    Under Review (Triage Quote)
+                  </SelectItem>
+                )}
+                {quote.status === "under_review" && (
+                  <SelectItem value="quoted">
+                    Quoted (Provide Price & Validity)
+                  </SelectItem>
+                )}
+                {quote.status === "quoted" && (
+                  <SelectItem value="quoted">
+                    Quoted (Awaiting Customer)
+                  </SelectItem>
+                )}
+                {isTerminal && (
+                  <SelectItem value={quote.status}>
+                    {quote.status.toUpperCase()}
+                  </SelectItem>
+                )}
+              </SelectContent>
+            </Select>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-navy mb-1">
+            <Label htmlFor="quote-offered-price-input" className="mb-1">
               Offered Price (KES)
-            </label>
-            <input
+            </Label>
+            <Input
+              id="quote-offered-price-input"
               data-testid="quote-offered-price-input"
               type="number"
               step="0.01"
@@ -226,51 +259,56 @@ export function QuoteResponseForm({ quote, userRole, onSuccess, onCancel }: Quot
               value={offeredPrice}
               disabled={controlsDisabled || status === "under_review"}
               onChange={(e) => setOfferedPrice(e.target.value)}
-              className="w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:bg-gray-100 disabled:cursor-not-allowed"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-navy mb-1">
+            <Label htmlFor="quote-valid-until-input" className="mb-1">
               Valid Until Date
-            </label>
-            <input
+            </Label>
+            <Input
+              id="quote-valid-until-input"
               data-testid="quote-valid-until-input"
               type="date"
               value={validUntilDate}
               disabled={controlsDisabled || status === "under_review"}
               onChange={(e) => setValidUntilDate(e.target.value)}
-              className="w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:bg-gray-100 disabled:cursor-not-allowed"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-navy mb-1">
+          <Label htmlFor="quote-staff-notes-input" className="mb-1">
             Internal Staff Notes (Optional)
-          </label>
-          <textarea
+          </Label>
+          <Textarea
+            id="quote-staff-notes-input"
             data-testid="quote-staff-notes-input"
             rows={2}
             placeholder="Internal pricing rationale, customer phone discussion notes..."
             value={staffNotes}
             disabled={controlsDisabled}
             onChange={(e) => setStaffNotes(e.target.value)}
-            className="w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:bg-gray-100 disabled:cursor-not-allowed"
           />
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-3 pt-4 border-t">
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-3 pt-4 border-t border-border">
         {waUrl && !controlsDisabled && status === "quoted" ? (
-          <a
-            href={waUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 py-2 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs rounded transition-colors"
+          <Button
+            asChild
+            variant="success"
+            size="sm"
+            className="w-full sm:w-auto gap-2"
           >
-            Send Quote to Customer via WhatsApp
-          </a>
+            <a
+              href={waUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Send Quote to Customer via WhatsApp
+            </a>
+          </Button>
         ) : (
           <div />
         )}

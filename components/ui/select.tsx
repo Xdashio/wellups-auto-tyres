@@ -32,7 +32,6 @@ export function SelectTrigger({
         "group inline-flex w-full items-center justify-between gap-2 rounded-md border bg-input px-3 py-2 text-sm text-text-primary",
         size === "md" ? "min-h-11" : "min-h-9 text-xs",
         isError ? "border-destructive" : "border-border",
-        "outline-none focus:border-primary",
         "disabled:cursor-not-allowed disabled:opacity-50",
         "[&[data-placeholder]>span]:text-muted-foreground",
         className,

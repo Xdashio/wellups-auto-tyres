@@ -43,7 +43,7 @@ export default function GuestBookingPage({ params }: GuestBookingPageProps) {
   if (!booking) {
     return (
       <div className="container mx-auto px-4 py-16 text-center max-w-md" data-testid="booking-not-found">
-        <h1 className="text-2xl font-bold text-rose-600">Booking Not Found</h1>
+        <h1 className="text-2xl font-bold text-destructive">Booking Not Found</h1>
         <p className="text-sm text-text-secondary mt-2">
           The requested booking reference or security token is invalid. Please check your link or contact the workshop.
         </p>
@@ -85,16 +85,16 @@ export default function GuestBookingPage({ params }: GuestBookingPageProps) {
       {/* Confirmed Appointment Banner (Only when scheduled or completed) */}
       {(booking.status === "scheduled" || booking.status === "completed") && booking.scheduled_at && (
         <div
-          className="p-5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 rounded-lg space-y-1"
+          className="p-5 bg-success/10 border border-success/20 rounded-lg space-y-1"
           data-testid="confirmed-appointment-banner"
         >
           <div className="flex items-center gap-2">
             <span className="text-lg">🗓️</span>
-            <span className="text-xs uppercase font-bold text-emerald-800 dark:text-emerald-300 tracking-wider">
+            <span className="text-xs uppercase font-bold text-success tracking-wider">
               Confirmed Workshop Appointment
             </span>
           </div>
-          <p className="text-lg font-bold text-navy dark:text-gray-100" data-testid="confirmed-datetime-display">
+          <p className="text-lg font-bold text-navy" data-testid="confirmed-datetime-display">
             {new Date(booking.scheduled_at).toLocaleString("en-KE", {
               dateStyle: "full",
               timeStyle: "short",
@@ -118,9 +118,9 @@ export default function GuestBookingPage({ params }: GuestBookingPageProps) {
 
       {/* New Request Notice */}
       {booking.status === "new" && (
-        <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-900 space-y-1">
+        <div className="p-4 bg-warning/10 border border-warning/20 rounded-lg text-sm text-warning space-y-1">
           <p className="font-semibold">Request Submitted</p>
-          <p className="text-xs text-amber-800">
+          <p className="text-xs text-warning">
             Submitting this request sends your preferred date and time to our workshop team. Your appointment is not confirmed until our team reviews the request and schedules it.
           </p>
         </div>
@@ -128,18 +128,18 @@ export default function GuestBookingPage({ params }: GuestBookingPageProps) {
 
       {/* Declined / Cancelled Notice */}
       {booking.status === "declined" && (
-        <div className="p-4 bg-gray-100 border border-gray-300 rounded-lg text-sm text-gray-700 space-y-1">
+        <div className="p-4 bg-muted border border-border rounded-lg text-sm text-muted-foreground space-y-1">
           <p className="font-semibold">Booking Request Declined</p>
-          <p className="text-xs text-gray-600">
+          <p className="text-xs text-muted-foreground">
             Our workshop is unable to accommodate this booking request at the requested time. Please submit a new request with an alternate date or contact us.
           </p>
         </div>
       )}
 
       {booking.status === "cancelled" && (
-        <div className="p-4 bg-gray-100 border border-gray-300 rounded-lg text-sm text-gray-700 space-y-1">
+        <div className="p-4 bg-muted border border-border rounded-lg text-sm text-muted-foreground space-y-1">
           <p className="font-semibold">Appointment Cancelled</p>
-          <p className="text-xs text-gray-600">
+          <p className="text-xs text-muted-foreground">
             This scheduled appointment has been cancelled by our workshop.
           </p>
         </div>

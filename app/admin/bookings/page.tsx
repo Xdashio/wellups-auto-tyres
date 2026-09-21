@@ -159,7 +159,7 @@ export default function AdminBookingsPage() {
             data-testid="staff-signout-btn"
             variant="ghost"
             onClick={handleSignOut}
-            className="text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50 border border-rose-200 min-h-8 py-1 px-3"
+            className="text-xs text-destructive hover:text-destructive/90 min-h-8 py-1 px-3"
           >
             Sign Out
           </Button>
@@ -191,7 +191,7 @@ export default function AdminBookingsPage() {
                 data-testid="login-manager-quick"
                 onClick={() => handleSignIn("mgr@test.local", "TestPassword123!")}
                 disabled={authLoading}
-                className="px-2.5 py-1 text-xs font-semibold bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                className="px-2.5 py-1 text-xs font-semibold bg-primary text-primary-foreground rounded hover:bg-primary/90 transition-colors"
               >
                 Sign In as Manager
               </button>
@@ -200,7 +200,7 @@ export default function AdminBookingsPage() {
                 data-testid="login-cashier-quick"
                 onClick={() => handleSignIn("cashier@test.local", "TestPassword123!")}
                 disabled={authLoading}
-                className="px-2.5 py-1 text-xs font-semibold bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+                className="px-2.5 py-1 text-xs font-semibold bg-muted text-foreground rounded hover:bg-muted/80 transition-colors"
               >
                 Sign In as Cashier
               </button>
@@ -208,7 +208,7 @@ export default function AdminBookingsPage() {
           </div>
 
           {loginError && (
-            <div className="p-2 text-xs font-medium text-rose-600 bg-rose-50 border border-rose-200 rounded">
+            <div className="p-2 text-xs font-medium text-destructive bg-destructive/10 border border-destructive/20 rounded">
               {loginError}
             </div>
           )}
@@ -284,7 +284,7 @@ export default function AdminBookingsPage() {
               <button
                 type="button"
                 onClick={() => setSelectedDate("")}
-                className="text-xs text-text-secondary hover:text-rose-600 px-1"
+                className="text-xs text-text-secondary hover:text-destructive px-1"
                 title="Clear date filter"
               >
                 ✕
@@ -345,7 +345,7 @@ export default function AdminBookingsPage() {
                 </div>
 
                 {booking.scheduled_at && (
-                  <div className="text-xs bg-emerald-50 text-emerald-900 border border-emerald-200 rounded px-2.5 py-1 inline-block">
+                  <div className="text-xs bg-success/10 text-success border border-success/20 rounded px-2.5 py-1 inline-block">
                     <span className="font-semibold">Confirmed Appointment: </span>
                     {new Date(booking.scheduled_at).toLocaleString("en-KE", {
                       dateStyle: "medium",
