@@ -4,9 +4,13 @@ import React, { useState } from "react";
 import {
   Dialog,
   DialogContent,
-  DialogTitle
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { CheckCircle2, MessageCircle } from "lucide-react";
 import { createQuoteRequest, QuoteItemType } from "@/lib/supabase/quotes";
 import { getWhatsAppQuoteUrl } from "@/lib/supabase/catalog";
 
@@ -31,7 +35,7 @@ export function QuoteRequestModal({
   productId,
   serviceId,
   sizeSpec,
-  whatsappNumber
+  whatsappNumber,
 }: QuoteRequestModalProps) {
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
@@ -39,7 +43,7 @@ export function QuoteRequestModal({
   const [vehicleSummary, setVehicleSummary] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [customerNotes, setCustomerNotes] = useState("");
-  
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [submittedQuote, setSubmittedQuote] = useState<{
@@ -68,7 +72,7 @@ export function QuoteRequestModal({
       serviceId,
       vehicleSummary,
       quantity,
-      customerNotes
+      customerNotes,
     });
 
     setIsSubmitting(false);
@@ -85,7 +89,7 @@ export function QuoteRequestModal({
       quoteNumber: res.quoteNumber,
       quoteId: res.quoteId,
       secretToken: res.secretToken,
-      waUrl
+      waUrl,
     });
   };
 
@@ -105,138 +109,134 @@ export function QuoteRequestModal({
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleReset()}>
       <DialogContent className="sm:max-w-lg">
         <div>
-          <DialogTitle className="text-xl font-bold">Request a Quote — {itemName}</DialogTitle>
-          <p className="text-xs text-text-secondary mt-1">
+          <DialogTitle className="text-xl font-bold">Request a Quote: {itemName}</DialogTitle>
+          <p className="text-sm text-muted-foreground mt-1">
             Submit your contact details for formal staff pricing and instant branch assistance.
           </p>
         </div>
 
         {submittedQuote ? (
           <div className="space-y-4 py-4">
-            <div className="p-4 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-lg text-center space-y-2">
-              <span className="inline-block text-2xl font-extrabold text-emerald-600 dark:text-emerald-400">
-                ✓ Quote Submitted
+            <div className="p-4 bg-success/10 border border-success/20 rounded-lg text-center space-y-3">
+              <CheckCircle2 className="mx-auto h-6 w-6 text-success" aria-hidden="true" />
+              <span className="inline-block text-2xl font-extrabold text-success">
+                Quote Submitted
               </span>
-              <p className="text-sm font-mono font-bold text-navy dark:text-gray-200">
+              <p className="text-sm font-mono font-bold text-navy">
                 Quote Reference: {submittedQuote.quoteNumber}
               </p>
-              <p className="text-xs text-text-secondary">
+              <p className="text-xs text-muted-foreground">
                 Our team at Well Lups Auto Tyres will review your request and contact you shortly.
               </p>
             </div>
 
-            <a
-              href={`/quotes/${submittedQuote.quoteId}?token=${submittedQuote.secretToken}`}
-              className="w-full inline-flex justify-center items-center gap-2 py-2.5 px-4 bg-primary hover:bg-primary-hover text-white font-medium text-sm rounded-md transition-colors"
-            >
-              <span>View & Track Quote Status</span>
-            </a>
+            <Button asChild variant="primary" className="w-full">
+              <a
+                href={`/quotes/${submittedQuote.quoteId}?token=${submittedQuote.secretToken}`}
+              >
+                View & Track Quote Status
+              </a>
+            </Button>
 
             {submittedQuote.waUrl && (
-              <a
-                href={submittedQuote.waUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full inline-flex justify-center items-center gap-2 py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-sm rounded-md transition-colors"
-              >
-                <span>Continue on WhatsApp with Quote Reference</span>
-              </a>
+              <Button asChild variant="outline" className="w-full">
+                <a
+                  href={submittedQuote.waUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <MessageCircle className="mr-2 h-4 w-4" />
+                  Continue on WhatsApp with Quote Reference
+                </a>
+              </Button>
             )}
 
-            <Button onClick={handleReset} variant="secondary" className="w-full">
+            <Button variant="secondary" className="w-full" onClick={handleReset}>
               Close
             </Button>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4 py-2">
             {errorMessage && (
-              <div className="p-3 text-xs font-medium text-rose-600 bg-rose-50 border border-rose-200 rounded">
+              <div className="p-3 text-xs font-medium text-destructive bg-destructive/10 border border-destructive/20 rounded">
                 {errorMessage}
               </div>
             )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-semibold text-navy mb-1">
-                  Full Name <span className="text-rose-500">*</span>
-                </label>
-                <input
+                <Label htmlFor="quote-name">
+                  Full Name <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="quote-name"
                   type="text"
                   required
                   placeholder="e.g. John Kamau"
                   value={customerName}
                   onChange={(e) => setCustomerName(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-navy mb-1">
-                  Phone Number <span className="text-rose-500">*</span>
-                </label>
-                <input
+                <Label htmlFor="quote-phone">
+                  Phone Number <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="quote-phone"
                   type="tel"
                   required
                   placeholder="e.g. 0712 345 678"
                   value={customerPhone}
                   onChange={(e) => setCustomerPhone(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-semibold text-navy mb-1">
-                  Email Address (Optional)
-                </label>
-                <input
+                <Label htmlFor="quote-email">Email Address (Optional)</Label>
+                <Input
+                  id="quote-email"
                   type="email"
                   placeholder="e.g. john@example.com"
                   value={customerEmail}
                   onChange={(e) => setCustomerEmail(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-navy mb-1">
-                  Quantity Required
-                </label>
-                <input
+                <Label htmlFor="quote-quantity">Quantity Required</Label>
+                <Input
+                  id="quote-quantity"
                   type="number"
                   min="1"
                   max="100"
                   value={quantity}
                   onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
-                  className="w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-navy mb-1">
-                Vehicle Make / Model (Optional)
-              </label>
-              <input
+              <Label htmlFor="quote-vehicle">Vehicle Make / Model (Optional)</Label>
+              <Input
+                id="quote-vehicle"
                 type="text"
                 placeholder="e.g. Toyota Hilux 2020 2.8L"
                 value={vehicleSummary}
                 onChange={(e) => setVehicleSummary(e.target.value)}
-                className="w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-navy mb-1">
-                Additional Notes / Questions (Optional)
-              </label>
-              <textarea
+              <Label htmlFor="quote-notes">Additional Notes / Questions (Optional)</Label>
+              <Textarea
+                id="quote-notes"
                 rows={2}
                 placeholder="Specific requirements, fitment check, delivery preferences..."
                 value={customerNotes}
                 onChange={(e) => setCustomerNotes(e.target.value)}
-                className="w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50"
               />
             </div>
 

@@ -1,14 +1,25 @@
 import * as React from "react";
 import { cn } from "@/lib/ui/cn";
 
-type BadgeTone = "info" | "success" | "warning" | "error" | "neutral";
+type BadgeTone =
+  | "primary"
+  | "secondary"
+  | "info"
+  | "success"
+  | "warning"
+  | "error"
+  | "neutral"
+  | "outline";
 
 const tones: Record<BadgeTone, string> = {
-  info: "bg-blue-muted/15 text-navy",
-  success: "bg-green-100 text-green-800",
-  warning: "bg-yellow-100 text-yellow-800",
-  error: "bg-red-100 text-red-800",
-  neutral: "bg-text-secondary/15 text-text-primary",
+  primary: "bg-primary text-primary-foreground",
+  secondary: "bg-secondary/15 text-navy",
+  info: "bg-secondary/10 text-navy",
+  success: "bg-success/15 text-success",
+  warning: "bg-warning/15 text-warning",
+  error: "bg-destructive/15 text-destructive",
+  neutral: "bg-muted text-muted-foreground",
+  outline: "border border-border text-muted-foreground bg-transparent",
 };
 
 export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
@@ -18,7 +29,11 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
 export function Badge({ tone = "neutral", className, ...props }: BadgeProps) {
   return (
     <span
-      className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium", tones[tone], className)}
+      className={cn(
+        "inline-flex items-center rounded-sm px-2.5 py-0.5 text-xs font-medium",
+        tones[tone],
+        className,
+      )}
       {...props}
     />
   );

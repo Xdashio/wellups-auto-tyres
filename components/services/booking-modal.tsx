@@ -4,9 +4,14 @@ import React, { useState } from "react";
 import {
   Dialog,
   DialogContent,
-  DialogTitle
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { CheckCircle2 } from "lucide-react";
 import { createServiceBooking } from "@/lib/supabase/bookings";
 
 interface BookingModalProps {
@@ -25,7 +30,7 @@ export function BookingModal({
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
-  
+
   // Default requested date to tomorrow in local time
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
@@ -109,166 +114,210 @@ export function BookingModal({
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleReset()}>
       <DialogContent className="sm:max-w-lg">
         <div>
-          <DialogTitle className="text-xl font-bold">Book Service — {serviceName}</DialogTitle>
-          <p className="text-xs text-text-secondary mt-1">
+          <DialogTitle className="text-xl font-bold">
+            Book Service: {serviceName}
+          </DialogTitle>
+          <p className="mt-1 text-sm text-muted-foreground">
             Request an appointment with our workshop technicians.
           </p>
         </div>
 
         {submittedBooking ? (
-          <div className="space-y-4 py-4" data-testid="booking-success-view">
-            <div className="p-4 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-lg text-center space-y-2">
-              <span className="inline-block text-2xl font-extrabold text-emerald-600 dark:text-emerald-400">
-                ✓ Booking Request Submitted
+          <div
+            className="space-y-4 py-4"
+            data-testid="booking-success-view"
+          >
+            <div className="border border-success/20 bg-success/10 rounded-lg p-4 text-center space-y-3">
+              <CheckCircle2
+                className="mx-auto h-6 w-6 text-success"
+                aria-hidden="true"
+              />
+              <span className="block text-2xl font-extrabold text-success">
+                Booking Request Submitted
               </span>
-              <p className="text-sm font-mono font-bold text-navy dark:text-gray-200" data-testid="booking-reference-display">
+              <p
+                className="text-sm font-mono font-bold text-navy"
+                data-testid="booking-reference-display"
+              >
                 Booking Reference: {submittedBooking.bookingNumber}
               </p>
-              <div className="inline-block px-3 py-1 text-xs font-semibold uppercase bg-amber-100 text-amber-800 rounded-full">
-                Status: PENDING REVIEW
-              </div>
-              <p className="text-xs text-text-secondary mt-2">
-                Submitting this request sends your preferred date and time to our workshop team. Your appointment is not confirmed until our team reviews the request and schedules it.
+              <Badge tone="warning" className="px-3 py-1 tracking-wider">
+                PENDING REVIEW
+              </Badge>
+              <p className="text-xs text-muted-foreground mt-2">
+                Submitting this request sends your preferred date and time to
+                our workshop team. Your appointment is not confirmed until our
+                team reviews the request and schedules it.
               </p>
             </div>
 
-            <a
-              href={`/bookings/${submittedBooking.bookingId}?token=${submittedBooking.secretToken}`}
-              data-testid="track-booking-link"
-              className="w-full inline-flex justify-center items-center gap-2 py-2.5 px-4 bg-primary hover:bg-primary-hover text-white font-medium text-sm rounded-md transition-colors"
-            >
-              <span>View & Track Booking Status</span>
-            </a>
+            <Button asChild variant="primary" className="w-full">
+              <a
+                href={`/bookings/${submittedBooking.bookingId}?token=${submittedBooking.secretToken}`}
+                data-testid="track-booking-link"
+              >
+                View & Track Booking Status
+              </a>
+            </Button>
 
-            <Button onClick={handleReset} variant="secondary" className="w-full">
+            <Button
+              variant="secondary"
+              className="w-full"
+              onClick={handleReset}
+            >
               Close
             </Button>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-4 py-2" data-testid="booking-request-form">
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-4 py-2"
+            data-testid="booking-request-form"
+          >
             {errorMessage && (
-              <div className="p-3 text-xs font-medium text-rose-600 bg-rose-50 border border-rose-200 rounded" data-testid="booking-error-message">
+              <div
+                className="border border-destructive/20 bg-destructive/10 rounded p-3 text-xs font-medium text-destructive"
+                data-testid="booking-error-message"
+              >
                 {errorMessage}
               </div>
             )}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
-                <label className="block text-xs font-semibold text-navy mb-1">
-                  Full Name <span className="text-rose-500">*</span>
-                </label>
-                <input
+                <Label htmlFor="booking-name">
+                  Full Name <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="booking-name"
                   type="text"
                   required
                   placeholder="e.g. John Kamau"
                   value={customerName}
                   onChange={(e) => setCustomerName(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                   data-testid="booking-name-input"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-navy mb-1">
-                  Phone Number <span className="text-rose-500">*</span>
-                </label>
-                <input
+                <Label htmlFor="booking-phone">
+                  Phone Number <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="booking-phone"
                   type="tel"
                   required
                   placeholder="e.g. 0712 345 678"
                   value={customerPhone}
                   onChange={(e) => setCustomerPhone(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                   data-testid="booking-phone-input"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-navy mb-1">
-                Email Address <span className="text-text-secondary font-normal">(Optional)</span>
-              </label>
-              <input
+              <Label htmlFor="booking-email">
+                Email Address{" "}
+                <span className="text-muted-foreground font-normal">(Optional)</span>
+              </Label>
+              <Input
+                id="booking-email"
                 type="email"
                 placeholder="e.g. john@example.com"
                 value={customerEmail}
                 onChange={(e) => setCustomerEmail(e.target.value)}
-                className="w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                 data-testid="booking-email-input"
               />
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
-                <label className="block text-xs font-semibold text-navy mb-1">
-                  Preferred Date <span className="text-rose-500">*</span>
-                </label>
-                <input
+                <Label htmlFor="booking-date">
+                  Preferred Date <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="booking-date"
                   type="date"
                   required
                   min={todayStr}
                   value={requestedDate}
                   onChange={(e) => setRequestedDate(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                   data-testid="booking-date-input"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-navy mb-1">
-                  Preferred Time (HH:MM) <span className="text-rose-500">*</span>
-                </label>
-                <input
+                <Label htmlFor="booking-time">
+                  Preferred Time (HH:MM){" "}
+                  <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="booking-time"
                   type="time"
                   required
                   value={requestedTime}
                   onChange={(e) => setRequestedTime(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                   data-testid="booking-time-input"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-navy mb-1">
-                Vehicle Details <span className="text-text-secondary font-normal">(Optional)</span>
-              </label>
-              <input
+              <Label htmlFor="booking-vehicle">
+                Vehicle Details{" "}
+                <span className="text-muted-foreground font-normal">(Optional)</span>
+              </Label>
+              <Input
+                id="booking-vehicle"
                 type="text"
-                placeholder="e.g. Toyota Prado KCA 123X"
+                placeholder="e.g. Toyota Hilux KCC 789D"
                 value={vehicleSummary}
                 onChange={(e) => setVehicleSummary(e.target.value)}
-                className="w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                 data-testid="booking-vehicle-input"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-navy mb-1">
-                Service Notes / Issues <span className="text-text-secondary font-normal">(Optional)</span>
-              </label>
-              <textarea
+              <Label htmlFor="booking-notes">
+                Service Notes / Issues{" "}
+                <span className="text-muted-foreground font-normal">(Optional)</span>
+              </Label>
+              <Textarea
+                id="booking-notes"
                 rows={2}
                 placeholder="Describe any symptoms, issues, or specific requests..."
                 value={customerNotes}
                 onChange={(e) => setCustomerNotes(e.target.value)}
-                className="w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none"
                 data-testid="booking-notes-input"
               />
             </div>
 
-            <div className="p-3 bg-blue-muted/20 border border-blue-muted/40 rounded text-xs text-text-secondary">
-              <p className="font-semibold text-navy mb-0.5">Please Note:</p>
+            <div className="rounded-md border border-border bg-muted/40 p-3 text-xs text-muted-foreground">
+              <p className="font-semibold text-foreground mb-0.5">
+                Please Note:
+              </p>
               <p data-testid="booking-clarification-notice">
-                Submitting this request sends your preferred date and time to our workshop team. Your appointment is not confirmed until our team reviews the request and schedules it.
+                Submitting this request sends your preferred date and time to our
+                workshop team. Your appointment is not confirmed until our team
+                reviews the request and schedules it.
               </p>
             </div>
 
-            <div className="flex justify-end gap-2 pt-2 border-t">
-              <Button type="button" variant="secondary" onClick={handleReset} disabled={isSubmitting}>
+            <div className="flex justify-end gap-2 pt-2 border-t border-border">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={handleReset}
+                disabled={isSubmitting}
+              >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isSubmitting} data-testid="submit-booking-btn">
+              <Button
+                type="submit"
+                variant="primary"
+                disabled={isSubmitting}
+                data-testid="submit-booking-btn"
+              >
                 {isSubmitting ? "Submitting..." : "Submit Booking Request"}
               </Button>
             </div>
