@@ -77,7 +77,7 @@ export interface StaffQuoteResponseInput {
 }
 
 /**
- * Creates a persistent Quote Request record in Supabase database.
+ * Creates a persistent Quote Request record via public RPC function.
  */
 export async function createQuoteRequest(input: CreateQuoteRequestInput): Promise<{
   success: boolean;
@@ -93,7 +93,6 @@ export async function createQuoteRequest(input: CreateQuoteRequestInput): Promis
     return { success: false, error: "Customer phone number is required." };
   }
 
-  // Get primary branch ID if not explicitly provided
   let branchId = input.branchId;
   if (!branchId) {
     const { data: branchData } = await publicSupabase.from("branches_public").select("id").limit(1).single();
@@ -106,41 +105,36 @@ export async function createQuoteRequest(input: CreateQuoteRequestInput): Promis
     return { success: false, error: "Branch configuration error. Please try again." };
   }
 
-  const payload = {
-    branch_id: branchId,
-    customer_name: input.customerName.trim(),
-    customer_phone: input.customerPhone.trim(),
-    customer_email: input.customerEmail?.trim() || null,
-    item_type: input.itemType,
-    product_id: input.productId || null,
-    service_id: input.serviceId || null,
-    vehicle_fitment_id: input.vehicleFitmentId || null,
-    vehicle_summary: input.vehicleSummary?.trim() || null,
-    quantity: input.quantity && input.quantity > 0 ? input.quantity : 1,
-    customer_notes: input.customerNotes?.trim() || null
-  };
+  const { data, error } = await publicSupabase.rpc("create_quote_request", {
+    p_branch_id: branchId,
+    p_customer_name: input.customerName.trim(),
+    p_customer_phone: input.customerPhone.trim(),
+    p_customer_email: input.customerEmail?.trim() || null,
+    p_item_type: input.itemType,
+    p_product_id: input.productId || null,
+    p_service_id: input.serviceId || null,
+    p_vehicle_fitment_id: input.vehicleFitmentId || null,
+    p_vehicle_summary: input.vehicleSummary?.trim() || null,
+    p_quantity: input.quantity && input.quantity > 0 ? input.quantity : 1,
+    p_customer_notes: input.customerNotes?.trim() || null
+  });
 
-  const { data, error } = await publicSupabase
-    .from("quote_requests")
-    .insert(payload)
-    .select("id, quote_number, secret_token")
-    .single();
-
-  if (error) {
+  if (error || !data || data.length === 0) {
     console.error("Error creating quote request:", error);
-    return { success: false, error: error.message };
+    return { success: false, error: error?.message || "Failed to create quote request" };
   }
 
+  const row = data[0];
   return {
     success: true,
-    quoteId: data.id,
-    quoteNumber: data.quote_number,
-    secretToken: data.secret_token
+    quoteId: row.id,
+    quoteNumber: row.quote_number,
+    secretToken: row.secret_token
   };
 }
 
 /**
- * Fetches a guest quote by ID and Secret Token via RPC function.
+ * Fetches a guest quote by ID and Secret Token via public RPC function.
  */
 export async function getGuestQuote(quoteId: string, secretToken: string): Promise<QuoteRequestCustomer | null> {
   const { data, error } = await publicSupabase.rpc("get_guest_quote", {
@@ -207,34 +201,19 @@ export async function getStaffQuoteQueue(params?: {
 }
 
 /**
- * Updates staff quote response (pricing, status, notes).
+ * Updates staff quote response via staff_respond_to_quote RPC (Admin & Manager ONLY).
  */
 export async function updateStaffQuoteResponse(input: StaffQuoteResponseInput): Promise<{
   success: boolean;
   error?: string;
 }> {
-  const updatePayload: Record<string, unknown> = {
-    status: input.status,
-    updated_at: new Date().toISOString()
-  };
-
-  if (input.offeredPrice !== undefined) {
-    updatePayload.offered_price = input.offeredPrice;
-  }
-  if (input.validUntil !== undefined) {
-    updatePayload.valid_until = input.validUntil;
-  }
-  if (input.staffNotes !== undefined) {
-    updatePayload.staff_notes = input.staffNotes;
-  }
-  if (input.status === "quoted") {
-    updatePayload.responded_at = new Date().toISOString();
-  }
-
-  const { error } = await publicSupabase
-    .from("quote_requests")
-    .update(updatePayload)
-    .eq("id", input.quoteId);
+  const { error } = await publicSupabase.rpc("staff_respond_to_quote", {
+    p_quote_id: input.quoteId,
+    p_status: input.status,
+    p_offered_price: input.offeredPrice || null,
+    p_valid_until: input.validUntil || null,
+    p_staff_notes: input.staffNotes || null
+  });
 
   if (error) {
     console.error("Error updating staff quote response:", error);
@@ -245,16 +224,18 @@ export async function updateStaffQuoteResponse(input: StaffQuoteResponseInput): 
 }
 
 /**
- * Updates customer quote status (accept/decline).
+ * Updates customer quote status via customer_respond_to_quote RPC (accept/decline ONLY).
  */
 export async function updateCustomerQuoteStatus(
   quoteId: string,
-  status: "accepted" | "declined"
+  status: "accepted" | "declined",
+  secretToken?: string
 ): Promise<{ success: boolean; error?: string }> {
-  const { error } = await publicSupabase
-    .from("quote_requests")
-    .update({ status, updated_at: new Date().toISOString() })
-    .eq("id", quoteId);
+  const { error } = await publicSupabase.rpc("customer_respond_to_quote", {
+    p_quote_id: quoteId,
+    p_action: status === "accepted" ? "accept" : "decline",
+    p_token: secretToken || null
+  });
 
   if (error) {
     console.error("Error updating customer quote status:", error);

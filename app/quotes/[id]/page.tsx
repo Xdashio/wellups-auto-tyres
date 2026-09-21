@@ -37,12 +37,14 @@ export default function GuestQuotePage({ params }: GuestQuotePageProps) {
   const handleUpdateStatus = async (status: "accepted" | "declined") => {
     if (!quote) return;
     setUpdating(true);
-    const res = await updateCustomerQuoteStatus(quote.id, status);
+    const res = await updateCustomerQuoteStatus(quote.id, status, token);
     setUpdating(false);
 
     if (res.success) {
       setQuote({ ...quote, status });
       setActionSuccess(`Quote successfully marked as ${status}.`);
+    } else {
+      alert(res.error || "Failed to update quote status.");
     }
   };
 
