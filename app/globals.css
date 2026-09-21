@@ -1,11 +1,92 @@
 @import "tailwindcss";
 
 @theme {
+  /* ─── Brand palette (preserved) ────────────────────────────── */
   --color-primary: #045cb4;
   --color-primary-dark: #043d8b;
+  --color-primary-hover: #043d8b;   /* = primary-dark; resolves broken hover:bg-primary-hover */
+  --color-primary-active: #032a6a;
+  --color-primary-foreground: #ffffff;
+
   --color-navy: #144177;
+  --color-navy-foreground: #ffffff;
+
   --color-blue-muted: #658ebe;
-  --color-background: #f1f0ef;
-  --color-text-primary: #1a1b1b;
-  --color-text-secondary: #777878;
+  --color-blue-muted-foreground: #ffffff;
+
+  --color-secondary: #658ebe;       /* blue-muted acts as the secondary accent */
+  --color-secondary-foreground: #ffffff;
+
+  /* ─── Neutrals ─────────────────────────────────────────────── */
+  --color-background: #f1f0ef;      /* page background (off-white) */
+  --color-foreground: #1a1b1b;      /* body / heading text */
+
+  --color-card: #ffffff;           /* resolves transparent bg-card */
+  --color-card-foreground: #1a1b1b;
+  --color-muted: #e8e9ec;          /* subtle surface tint */
+  --color-muted-foreground: #777878; /* resolves text-muted-foreground */
+
+  --color-border: #d1d2d3;          /* light border / divider */
+  --color-input: #ffffff;
+
+  /* ─── Focus / ring ─────────────────────────────────────────── */
+  --color-ring: #045cb4;
+  --color-ring-offset: #ffffff;
+
+  /* ─── Functional (existing emerald/amber/rose hues, named) ─── */
+  --color-success: #16a34a;
+  --color-success-foreground: #ffffff;
+  --color-warning: #d97706;
+  --color-warning-foreground: #ffffff;
+  --color-destructive: #dc2626;
+  --color-destructive-foreground: #ffffff;
+  --color-info: #2563eb;
+  --color-info-foreground: #ffffff;
+
+  --color-disabled: #cbd2d7;
+
+  /* ─── Shape ───────────────────────────────────────────────── */
+  --radius: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-sm: 0.25rem;
+}
+
+/* ─── Base element styles ────────────────────────────────────── */
+@layer base {
+  html {
+    font-family: var(--font-sans, ui-sans-serif), system-ui, sans-serif;
+    scroll-behavior: smooth;
+  }
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Consistent, WCAG-visible focus ring for every focusable element,
+     including native date/time selects the shared Input can't style. */
+  :focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+  }
+
+  a {
+    color: var(--color-primary);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    text-decoration-thickness: 1px;
+  }
+  a:hover {
+    color: var(--color-primary-dark);
+  }
+
+  /* Native date/time controls inherit the app typeface */
+  input[type="date"],
+  input[type="time"],
+  input[type="datetime-local"],
+  select {
+    font-family: inherit;
+  }
 }
