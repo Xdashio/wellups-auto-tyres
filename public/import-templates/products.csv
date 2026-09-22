@@ -1,0 +1,2 @@
+name,sku,category,brand,size_spec,cost_price,sell_price,stock_quantity,status
+SAMPLE All-Terrain Tyre 265/65R17,SAMPLE-SKU-001,Tyres,SAMPLE-BRAND,"265/65R17, LT",0,0,0,active
