@@ -4,6 +4,15 @@ Status: DESIGN. No production deployment is authorized. No release tags exist
 beyond historical milestone markers (`v0.1-foundation`, `v0.2-public-catalog`,
 local-only `v0.3`), none of which are release artifacts.
 
+> CI AVAILABILITY NOTE (GATE 021): automated CI (GitHub Actions) is
+> currently unable to execute jobs because of an EXTERNAL account
+> billing lock — not a repository defect. Until it is restored, release
+> verification uses the deterministic local equivalent
+> (`scripts/release-check.sh`), which runs the same checks CI would run.
+> Local verification does NOT constitute a claim that GitHub Actions
+> tag-CI has passed. The requirement for eventual automated tag-CI
+> certification stands.
+
 ## Branch model
 
 | Branch | Role |
