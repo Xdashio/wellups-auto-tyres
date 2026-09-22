@@ -2,7 +2,7 @@
 -- repo pattern: SET ROLE + request.jwt.claims GUC, exactly as PostgREST
 -- presents claims. All fixtures roll back with the transaction.
 begin;
-select plan(43);
+select plan(58);
 
 -- Fixtures.
 select lives_ok(
@@ -174,6 +174,9 @@ select throws_ok(
   '42501', null, 'anon category create denied'
 );
 
+-- Privilege boundary pins (GATE 012A §4/§6): anon/public stripped on every
+-- staff/admin view touched by 016; intended authenticated grants intact.
+-- has_table_privilege evaluates the named role's effective privileges.
 select ok(
   (select not has_table_privilege('anon', 'public.branches_admin', 'SELECT')),
   'anon holds no SELECT on branches_admin'
@@ -185,6 +188,54 @@ select ok(
 select ok(
   (select not has_table_privilege('anon', 'public.services_admin', 'SELECT')),
   'anon holds no SELECT on services_admin'
+);
+select ok(
+  (select not has_table_privilege('anon', 'public.categories_admin', 'SELECT')),
+  'anon holds no SELECT on categories_admin'
+);
+select ok(
+  (select not has_table_privilege('anon', 'public.products_cashier', 'SELECT')),
+  'anon holds no SELECT on products_cashier'
+);
+select ok(
+  (select not has_table_privilege('anon', 'public.products_manager', 'SELECT')),
+  'anon holds no SELECT on products_manager'
+);
+select ok(
+  (select not has_table_privilege('anon', 'public.quote_requests_staff', 'SELECT')),
+  'anon holds no SELECT on quote_requests_staff'
+);
+select ok(
+  (select not has_table_privilege('anon', 'public.service_bookings_staff', 'SELECT')),
+  'anon holds no SELECT on service_bookings_staff'
+);
+select ok(
+  (select not has_table_privilege('anon', 'public.service_bookings_customer', 'SELECT')),
+  'anon holds no SELECT on service_bookings_customer'
+);
+select ok(
+  (select has_table_privilege('authenticated', 'public.branches_admin', 'SELECT')),
+  'authenticated keeps SELECT on branches_admin'
+);
+select ok(
+  (select has_table_privilege('authenticated', 'public.products_admin', 'SELECT')),
+  'authenticated keeps SELECT on products_admin'
+);
+select ok(
+  (select has_table_privilege('authenticated', 'public.quote_requests_staff', 'SELECT')),
+  'authenticated keeps SELECT on quote_requests_staff'
+);
+select ok(
+  (select has_table_privilege('authenticated', 'public.service_bookings_staff', 'SELECT')),
+  'authenticated keeps SELECT on service_bookings_staff'
+);
+select ok(
+  (select has_table_privilege('authenticated', 'public.products_cashier', 'SELECT')),
+  'authenticated keeps SELECT on products_cashier'
+);
+select ok(
+  (select has_table_privilege('authenticated', 'public.products_manager', 'SELECT')),
+  'authenticated keeps SELECT on products_manager'
 );
 
 -- branches_admin visibility matrix.
@@ -268,6 +319,29 @@ select results_eq(
     where customer_name = 'Probe Guest'$$,
   $$values ('new|-'::text)$$,
   'RPC forces server-controlled status, no injected pricing'
+);
+
+-- Booking security regression (GATE 012A §9): 016 must not weaken booking
+-- creation, staff management, or the state machine. End-to-end at SQL level.
+set local role anon;
+select lives_ok(
+  $$select public.create_service_booking(
+    '44444444-4444-4444-4444-444444444444', 'Probe Guest', '0700000000', null,
+    (current_date + 1)::date, '10:00', null, null, null)$$,
+  'guest create_service_booking still works'
+);
+set local role authenticated;
+do $$ begin perform set_config('request.jwt.claims', current_setting('g012.claim_admin'), true); end $$;
+select lives_ok(
+  $$select public.staff_manage_booking(
+    (select id from app.service_bookings where customer_name = 'Probe Guest'),
+    'under_review', null, null)$$,
+  'admin staff_manage_booking still works (new -> under_review)'
+);
+select results_eq(
+  $$select status::text from app.service_bookings where customer_name = 'Probe Guest'$$,
+  $$values ('under_review'::text)$$,
+  'booking state machine transition stored'
 );
 
 rollback;

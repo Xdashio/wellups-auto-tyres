@@ -192,3 +192,36 @@ grant execute on function public.admin_update_branch_settings(
 -- RPC grants.
 drop policy if exists quote_requests_insert on app.quote_requests;
 revoke insert on app.quote_requests from anon, authenticated;
+
+-- ─── (g) staff/booking view privilege boundaries ───────────────────────────
+-- Live probing (GATE 012A) showed anon holding SELECT on staff views whose
+-- migrations grant authenticated-only access (quote_requests_staff,
+-- service_bookings_staff/customer): RLS/base grants currently return zero
+-- rows, but the privilege boundary itself must be correct — RLS-emptiness is
+-- not a grant. Strip anon/public explicitly, then restore the intended
+-- authenticated grants (revoking PUBLIC also strips authenticated, hence the
+-- revoke-then-grant order). quote_requests_customer keeps its explicit 012
+-- anon grant (intended guest/customer access pattern); all *_public views
+-- keep their explicit public grants.
+revoke all on public.quote_requests_staff from anon, public;
+revoke all on public.service_bookings_staff from anon, public;
+revoke all on public.service_bookings_customer from anon, public;
+revoke all on public.products_cashier from anon, public;
+revoke all on public.products_manager from anon, public;
+grant select on public.quote_requests_staff to authenticated;
+grant select on public.service_bookings_staff to authenticated;
+grant select on public.service_bookings_customer to authenticated;
+grant select on public.products_cashier to authenticated;
+grant select on public.products_manager to authenticated;
+
+-- ─── (h) default-privilege hardening ────────────────────────────────────────
+-- Leading-hypothesis mechanism for the out-of-band grants: default
+-- privileges granting future public-schema objects to anon/public (every
+-- view created after the v0.1 tiered set is anon-readable at grant level).
+-- This cannot be confirmed without superuser catalog access, so it is applied
+-- as belt-and-braces hardening, not as the primary fix (the explicit revokes
+-- above are). It removes only anon/public defaults; every intended anon or
+-- authenticated grant is issued explicitly by its own migration and is
+-- unaffected. A dashboard audit of role grants remains recommended.
+alter default privileges for role postgres in schema public
+  revoke all on tables from anon, public;
