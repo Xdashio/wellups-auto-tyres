@@ -198,12 +198,23 @@ describe.skipIf(!RUN_POST_016)("GATE 012 live — post-016 matrix (requires 016 
     expect(admin, "admin@test.local must exist for post-016 verification").not.toBeNull();
     if (!admin) return;
 
-    const { data: branch } = await admin.from("branches_admin").select("id,name").limit(1).single();
+    const { data: branch } = await admin.from("branches_admin").select("*").limit(1).single();
     expect(branch).not.toBeNull();
 
+    // NOTE: the RPC is full-replacement (omitted fields become NULL), so the
+    // success case round-trips the complete current row. Never call it with
+    // a partial payload in tests — that would wipe contact fields live.
     const ok = await admin.rpc("admin_update_branch_settings", {
       p_branch_id: branch!.id,
       p_name: branch!.name,
+      p_address: branch!.address,
+      p_phone: branch!.phone,
+      p_whatsapp: branch!.whatsapp,
+      p_opening_hours: branch!.opening_hours,
+      p_mpesa_channel_type: branch!.mpesa_channel_type,
+      p_mpesa_paybill_number: branch!.mpesa_paybill_number,
+      p_mpesa_till_number: branch!.mpesa_till_number,
+      p_mpesa_account_number: branch!.mpesa_account_number,
     });
     expect(ok.error).toBeNull();
 
