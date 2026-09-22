@@ -21,7 +21,12 @@ on:
 
 jobs:
   deploy-production:
-    runs-on: ubuntu-latest
+    # Same runner routing as ci.yml (repository variable CI_RUNS_ON).
+    # Fail-closed behavior is UNCHANGED: the refusal step below still exits
+    # 1 on every run. This only controls where the refusal executes, so the
+    # refusal is still observed even while GitHub-hosted runners are
+    # billing-locked.
+    runs-on: ${{ fromJSON(vars.CI_RUNS_ON || '["ubuntu-latest"]') }}
     steps:
       - name: Refuse deployment (not authorized)
         run: |
