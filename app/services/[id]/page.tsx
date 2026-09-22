@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getPublicServiceById, getPrimaryBranch } from "@/lib/supabase/catalog";
 import { BookingButton } from "@/components/services/booking-button";
@@ -8,6 +9,19 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 
 export const revalidate = 60;
+
+export async function generateMetadata({ params }: ServiceDetailPageProps): Promise<Metadata> {
+  const { id } = await params;
+  const service = await getPublicServiceById(id);
+  if (!service) return { title: "Service not found" };
+  return {
+    title: service.name,
+    description:
+      `${service.name} at WELL LUPS AUTO TYRES LIMITED` +
+      `${service.description ? ` — ${service.description}` : ""} ` +
+      `Book a slot or request a quote. Priced by quote after inspection.`,
+  };
+}
 
 interface ServiceDetailPageProps {
   params: Promise<{ id: string }>;

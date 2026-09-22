@@ -1,9 +1,16 @@
 import React from "react";
 import Link from "next/link";
+import type { Metadata } from "next";
 import { getPublicServices, getPrimaryBranch } from "@/lib/supabase/catalog";
 import { ServiceCard } from "@/components/catalog/service-card";
 
 export const revalidate = 60;
+
+export const metadata: Metadata = {
+  title: "Garage Services",
+  description:
+    "Garage services — tyre fitting, wheel alignment, balancing, brake servicing and battery checks. Priced by quote after inspection.",
+};
 
 export default async function ServicesPage() {
   const services = await getPublicServices();

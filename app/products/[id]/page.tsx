@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getPublicProductById, getQualitativeStockStatus, getPrimaryBranch } from "@/lib/supabase/catalog";
 import { QuoteButton } from "@/components/catalog/quote-button";
@@ -7,6 +8,19 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 
 export const revalidate = 60;
+
+export async function generateMetadata({ params }: ProductDetailPageProps): Promise<Metadata> {
+  const { id } = await params;
+  const product = await getPublicProductById(id);
+  if (!product) return { title: "Product not found" };
+  const spec = [product.brand, product.size_spec].filter(Boolean).join(" ");
+  return {
+    title: product.name,
+    description:
+      `${product.name}${spec ? ` (${spec})` : ""} — request a quote ` +
+      `from WELL LUPS AUTO TYRES LIMITED. Quote-based pricing, no listed price.`,
+  };
+}
 
 interface ProductDetailPageProps {
   params: Promise<{ id: string }>;
