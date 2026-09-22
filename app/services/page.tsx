@@ -15,7 +15,7 @@ export default async function ServicesPage() {
       <div className="border-b pb-6">
         <h1 className="text-3xl font-extrabold tracking-tight">Garage Services</h1>
         <p className="text-muted-foreground mt-1">
-          Professional auto services performed at our Industrial Area branch. Equal weight to retail products.
+          Professional auto services{branch?.address ? ` performed at our ${branch.address} branch` : ""}. Equal weight to retail products.
         </p>
       </div>
 
@@ -27,7 +27,7 @@ export default async function ServicesPage() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {services.map((service) => (
-            <ServiceCard key={service.id} service={service} whatsappNumber={branch?.whatsapp} />
+            <ServiceCard key={service.id} service={service} whatsappNumber={branch?.whatsapp} branchAddress={branch?.address} />
           ))}
         </div>
       )}

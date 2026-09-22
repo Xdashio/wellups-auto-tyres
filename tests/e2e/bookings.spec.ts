@@ -27,6 +27,9 @@ test.describe("v0.4 Service Booking Playwright E2E Browser Certification Suite",
   test("TEST A — FULL LIFECYCLE: Guest submit -> Admin triage (new -> under_review) -> Admin schedule (under_review -> scheduled) -> Guest verify scheduled -> Cashier complete (scheduled -> completed) -> Guest verify completed", async ({
     page,
   }) => {
+    // 15-step cross-role flow exceeds the 60s default on a cold dev server
+    // (route compilation happens on demand); the steps themselves are fast.
+    test.setTimeout(180000);
     // 1. Guest opens services catalogue and navigates to service detail
     await page.goto("/services");
     await expect(page.locator("h1")).toContainText("Garage Services");

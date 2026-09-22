@@ -8,9 +8,10 @@ import { PublicService } from "@/lib/supabase/catalog";
 interface ServiceCardProps {
   service: PublicService;
   whatsappNumber?: string | null;
+  branchAddress?: string | null;
 }
 
-export function ServiceCard({ service, whatsappNumber }: ServiceCardProps) {
+export function ServiceCard({ service, whatsappNumber, branchAddress }: ServiceCardProps) {
   return (
     <Card data-testid="service-card" className="flex flex-col justify-between hover:shadow-lg transition-shadow">
       <div className="space-y-3">
@@ -26,7 +27,8 @@ export function ServiceCard({ service, whatsappNumber }: ServiceCardProps) {
         </h3>
 
         <p className="text-sm text-text-secondary line-clamp-2">
-          {service.description || "Professional garage service performed at our Industrial Area branch."}
+          {service.description ||
+            `Professional garage service${branchAddress ? ` performed at our ${branchAddress} branch` : ""}.`}
         </p>
 
         {service.vehicle_types && service.vehicle_types.length > 0 && (

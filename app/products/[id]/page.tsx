@@ -73,7 +73,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
           <div className="p-4 rounded-lg bg-blue-muted/15 border border-blue-muted/30 space-y-3">
             <h3 className="font-semibold text-sm">Need pricing or installation details?</h3>
             <p className="text-xs text-text-secondary">
-              Request an instant quote directly with our team at the Industrial Area branch via WhatsApp.
+              Request an instant quote directly with our team{branch?.address ? ` at our ${branch.address} branch` : ""} via WhatsApp.
             </p>
             <QuoteButton
               whatsappNumber={branch?.whatsapp}

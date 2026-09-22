@@ -27,13 +27,13 @@ export default async function Home() {
               <Button asChild size="lg" className="w-full sm:w-auto">
                 <Link href="/products">Shop the Catalogue</Link>
               </Button>
-              <Button asChild variant="secondary" size="lg" className="w-full sm:w-auto">
+              <Button asChild variant="outline" size="lg" className="w-full sm:w-auto border-white/40 text-navy-foreground hover:bg-white/10">
                 <Link href="/services">Book a Service</Link>
               </Button>
             </div>
           </div>
 
-          <div className="relative aspect-square max-w-sm mx-auto">
+          <div className="relative aspect-square w-full max-w-sm mx-auto">
             <Image
               src="/images/hero-wheel.webp"
               alt="Alloy wheel and tyre"
@@ -89,7 +89,7 @@ export default async function Home() {
           <div className="space-y-2">
             <h3 className="font-bold">Book Ahead</h3>
             <p className="text-sm text-muted-foreground">
-              Reserve a service slot online and pay in-shop once the work is done.
+              Reserve a service slot online. Our team will confirm your appointment.
             </p>
           </div>
         </div>

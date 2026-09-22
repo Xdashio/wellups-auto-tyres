@@ -28,6 +28,12 @@ export default function AdminQuotesPage() {
   const [loginError, setLoginError] = useState("");
 
   const fetchQueue = useCallback(async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      setQuotes([]);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     const filterStatus = selectedStatus === "all" ? undefined : (selectedStatus as QuoteStatus);
     const data = await getStaffQuoteQueue({ status: filterStatus, search: searchTerm });

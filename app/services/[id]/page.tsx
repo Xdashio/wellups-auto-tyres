@@ -48,7 +48,7 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
               Description
             </h3>
             <p className="text-base text-navy leading-relaxed">
-              {service.description || "Professional vehicle inspection and installation service by certified technicians."}
+              {service.description || "Professional vehicle inspection and installation service."}
             </p>
           </div>
 
