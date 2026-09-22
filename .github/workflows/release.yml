@@ -1,0 +1,31 @@
+name: release
+
+# Future production deployment control. NOT ACTIVE.
+#
+# Design (authorized separately by a release gate, never by branch push):
+#   1. work lands on v0.1-implementation via PR (ci.yml validates)
+#   2. release/vX.Y cut from the implementation line, frozen (ci.yml validates)
+#   3. immutable tag vX.Y created on the frozen, green release commit
+#      (ci.yml validates the exact tagged commit via the tags trigger)
+#   4. production deploy runs ONLY from an approved tag, via manual
+#      workflow_dispatch on THIS workflow after explicit release approval
+#
+# Until that approval exists, every job below fails closed.
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to deploy (e.g. v0.4.0). Deployment is NOT authorized until a release gate approves it."
+        required: true
+        type: string
+
+jobs:
+  deploy-production:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Refuse deployment (not authorized)
+        run: |
+          echo "::error::Production deployment of '${{ inputs.tag }}' is NOT authorized."
+          echo "Release gates have not approved any production deployment."
+          echo "See docs/RELEASE.md for the required sequence."
+          exit 1

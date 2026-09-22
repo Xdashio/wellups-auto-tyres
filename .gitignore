@@ -63,3 +63,6 @@ Thumbs.db
 
 # Vercel (unused, kept for safety)
 .vercel
+
+# misc build output
+dist/
