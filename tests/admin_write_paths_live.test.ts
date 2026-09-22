@@ -57,7 +57,7 @@ async function signIn(email: string): Promise<SupabaseClient | null> {
   return client;
 }
 
-describe("GATE 012 live — public boundary (remote 015)", () => {
+describe("GATE 012 live — public boundary (remote 016)", () => {
   beforeAll(() => {
     anonClient = createClient(supabaseUrl, supabaseAnonKey!);
   });
@@ -90,19 +90,17 @@ describe("GATE 012 live — public boundary (remote 015)", () => {
     expect(error).not.toBeNull();
   });
 
-  it("DEMONSTRATES defect: anon reads the full branches_admin row (pre-016 leak)", async () => {
-    // Live evidence for the GATE 011 §4 finding, worse than audited: anon
-    // receives the whole admin row (both M-Pesa numbers), not just the
-    // inactive one. No migration grants this; 016 revokes + predicates it.
-    const { data, error } = await anonClient.from("branches_admin").select("*").limit(1);
-    expect(error).toBeNull();
-    expect(Array.isArray(data) && data.length > 0).toBe(true);
-    expect(data![0]).toHaveProperty("mpesa_paybill_number");
-    expect(data![0]).toHaveProperty("mpesa_till_number");
+  it("anon is denied on branches_admin (016 leak closure verified live)", async () => {
+    // Pre-016 this view leaked the full admin row to anon (defect evidence
+    // captured in the GATE 012A report). Post-016 the privilege boundary
+    // denies at view level.
+    const { error } = await anonClient.from("branches_admin").select("*").limit(1);
+    expect(error).not.toBeNull();
+    expect(error!.code).toBe("42501");
   });
 });
 
-describe("GATE 012 live — guest quote creation path (remote 015)", () => {
+describe("GATE 012 live — guest quote creation path (remote 016)", () => {
   beforeAll(() => {
     anonClient = createClient(supabaseUrl, supabaseAnonKey!);
   });
