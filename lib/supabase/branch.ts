@@ -7,6 +7,10 @@ export const BranchSettingsSchema = z.object({
   phone: z.string().nullable().optional(),
   whatsapp: z.string().nullable().optional(),
   opening_hours: z.string().nullable().optional(),
+  mpesa_channel_type: z.enum(["paybill", "till"]).nullable().optional(),
+  mpesa_paybill_number: z.string().nullable().optional(),
+  mpesa_till_number: z.string().nullable().optional(),
+  mpesa_account_number: z.string().nullable().optional(),
 });
 
 export type BranchSettingsInput = z.infer<typeof BranchSettingsSchema>;
@@ -18,12 +22,18 @@ export interface BranchData {
   phone: string | null;
   whatsapp: string | null;
   opening_hours: string | null;
+  mpesa_channel_type: "paybill" | "till" | null;
+  mpesa_paybill_number: string | null;
+  mpesa_till_number: string | null;
+  mpesa_account_number: string | null;
 }
 
 export async function getBranchForAdmin(client: SupabaseClient): Promise<BranchData | null> {
   const { data, error } = await client
-    .from("branches_public")
-    .select("id, name, address, phone, whatsapp, opening_hours")
+    .from("branches_admin")
+    .select(
+      "id, name, address, phone, whatsapp, opening_hours, mpesa_channel_type, mpesa_paybill_number, mpesa_till_number, mpesa_account_number"
+    )
     .limit(1)
     .single();
 
@@ -56,9 +66,15 @@ export async function updateBranchSettings(
       phone: validatedData.phone || null,
       whatsapp: validatedData.whatsapp || null,
       opening_hours: validatedData.opening_hours || null,
+      mpesa_channel_type: validatedData.mpesa_channel_type || null,
+      mpesa_paybill_number: validatedData.mpesa_paybill_number || null,
+      mpesa_till_number: validatedData.mpesa_till_number || null,
+      mpesa_account_number: validatedData.mpesa_account_number || null,
     })
     .eq("id", branchId)
-    .select("id, name, address, phone, whatsapp, opening_hours")
+    .select(
+      "id, name, address, phone, whatsapp, opening_hours, mpesa_channel_type, mpesa_paybill_number, mpesa_till_number, mpesa_account_number"
+    )
     .single();
 
   if (error) {

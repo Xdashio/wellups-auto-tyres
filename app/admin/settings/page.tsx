@@ -1,12 +1,12 @@
 import React from "react";
-import { getPrimaryBranch } from "@/lib/supabase/catalog";
-import { updateBranchSettings, BranchSettingsInput } from "@/lib/supabase/branch";
+import { getBranchForAdmin, updateBranchSettings, BranchSettingsInput } from "@/lib/supabase/branch";
+import { publicSupabase } from "@/lib/supabase/catalog";
 import { BranchSettingsForm } from "@/components/admin/branch-settings-form";
 
 export const revalidate = 0;
 
 export default async function AdminSettingsPage() {
-  const branch = await getPrimaryBranch();
+  const branch = await getBranchForAdmin(publicSupabase);
 
   if (!branch) {
     return (

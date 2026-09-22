@@ -62,6 +62,9 @@ export interface PublicBranch {
   phone: string | null;
   whatsapp: string | null;
   opening_hours: string | null;
+  mpesa_channel_type: "paybill" | "till" | null;
+  mpesa_active_number: string | null;
+  mpesa_account_number: string | null;
 }
 
 export function getWhatsAppQuoteUrl(

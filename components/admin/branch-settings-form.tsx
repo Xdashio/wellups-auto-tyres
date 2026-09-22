@@ -19,16 +19,31 @@ export function BranchSettingsForm({ initialBranch, onSave }: BranchSettingsForm
     phone: initialBranch.phone || "",
     whatsapp: initialBranch.whatsapp || "",
     opening_hours: initialBranch.opening_hours || "",
+    mpesa_channel_type: initialBranch.mpesa_channel_type || null,
+    mpesa_paybill_number: initialBranch.mpesa_paybill_number || "",
+    mpesa_till_number: initialBranch.mpesa_till_number || "",
+    mpesa_account_number: initialBranch.mpesa_account_number || "",
   });
 
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     setFormData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
+    }));
+    setSuccessMessage(null);
+    setErrorMessage(null);
+  };
+
+  const handleChannelToggle = (channel: "paybill" | "till") => {
+    setFormData((prev) => ({
+      ...prev,
+      mpesa_channel_type: prev.mpesa_channel_type === channel ? null : channel,
     }));
     setSuccessMessage(null);
     setErrorMessage(null);
@@ -59,6 +74,10 @@ export function BranchSettingsForm({ initialBranch, onSave }: BranchSettingsForm
             phone: res.data.phone || "",
             whatsapp: res.data.whatsapp || "",
             opening_hours: res.data.opening_hours || "",
+            mpesa_channel_type: res.data.mpesa_channel_type || null,
+            mpesa_paybill_number: res.data.mpesa_paybill_number || "",
+            mpesa_till_number: res.data.mpesa_till_number || "",
+            mpesa_account_number: res.data.mpesa_account_number || "",
           });
         }
       } else {
@@ -166,6 +185,78 @@ export function BranchSettingsForm({ initialBranch, onSave }: BranchSettingsForm
             onChange={handleChange}
             placeholder="Mon - Sat: 8:00 AM - 6:00 PM"
           />
+        </div>
+
+        <div className="pt-4 border-t space-y-4">
+          <div>
+            <h3 className="text-lg font-bold tracking-tight">M-Pesa Payment Channel</h3>
+            <p className="text-xs text-text-secondary mt-1">
+              Only one channel is ever live at a time. Toggle which one is active — the
+              inactive number stays saved here but is never shown to customers.
+            </p>
+          </div>
+
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant={formData.mpesa_channel_type === "paybill" ? "primary" : "secondary"}
+              onClick={() => handleChannelToggle("paybill")}
+            >
+              Paybill {formData.mpesa_channel_type === "paybill" ? "(Active)" : ""}
+            </Button>
+            <Button
+              type="button"
+              variant={formData.mpesa_channel_type === "till" ? "primary" : "secondary"}
+              onClick={() => handleChannelToggle("till")}
+            >
+              Till {formData.mpesa_channel_type === "till" ? "(Active)" : ""}
+            </Button>
+          </div>
+
+          <div className="space-y-1">
+            <label htmlFor="mpesa_paybill_number" className="block text-sm font-medium text-navy">
+              Paybill Number
+            </label>
+            <Input
+              id="mpesa_paybill_number"
+              name="mpesa_paybill_number"
+              type="text"
+              value={formData.mpesa_paybill_number || ""}
+              onChange={handleChange}
+              className="font-mono"
+              placeholder="e.g. 400200"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label htmlFor="mpesa_account_number" className="block text-sm font-medium text-navy">
+              Paybill Account Number
+            </label>
+            <Input
+              id="mpesa_account_number"
+              name="mpesa_account_number"
+              type="text"
+              value={formData.mpesa_account_number || ""}
+              onChange={handleChange}
+              className="font-mono"
+              placeholder="Only needed if using Paybill"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label htmlFor="mpesa_till_number" className="block text-sm font-medium text-navy">
+              Till Number
+            </label>
+            <Input
+              id="mpesa_till_number"
+              name="mpesa_till_number"
+              type="text"
+              value={formData.mpesa_till_number || ""}
+              onChange={handleChange}
+              className="font-mono"
+              placeholder="e.g. 123456"
+            />
+          </div>
         </div>
 
         <div className="pt-4 border-t flex justify-end">

@@ -84,9 +84,26 @@ describe("PROMPT 008B — Configurable Business Settings Verification", () => {
       phone: "+254 700 000000",
       whatsapp: "254712345678",
       opening_hours: "Mon - Sat: 8am - 6pm",
+      mpesa_channel_type: "till",
+      mpesa_active_number: "123456",
+      mpesa_account_number: null,
     };
 
-    const allowedKeys = new Set(["id", "name", "address", "phone", "whatsapp", "opening_hours"]);
+    // Note: mpesa_active_number is a derived field (branches_public exposes
+    // only whichever channel is active, never both raw numbers — see
+    // migration 015) so this list intentionally omits the raw
+    // mpesa_paybill_number / mpesa_till_number columns.
+    const allowedKeys = new Set([
+      "id",
+      "name",
+      "address",
+      "phone",
+      "whatsapp",
+      "opening_hours",
+      "mpesa_channel_type",
+      "mpesa_active_number",
+      "mpesa_account_number",
+    ]);
     const sampleKeys = Object.keys(publicBranchSample);
 
     for (const key of sampleKeys) {
