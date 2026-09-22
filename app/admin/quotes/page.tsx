@@ -136,6 +136,7 @@ export default function AdminQuotesPage() {
               <h2 className="text-sm font-bold text-navy">Staff Authentication</h2>
               <p className="text-xs text-text-secondary">Sign in to manage quotes, update review status, and set customer pricing.</p>
             </div>
+            {process.env.NODE_ENV === "development" && (
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
@@ -165,6 +166,7 @@ export default function AdminQuotesPage() {
                 Sign In as Cashier
               </button>
             </div>
+            )}
           </div>
 
           {loginError && (

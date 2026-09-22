@@ -176,6 +176,7 @@ export default function AdminBookingsPage() {
                 Sign in to manage bookings, review requests, schedule appointments, and complete services.
               </p>
             </div>
+            {process.env.NODE_ENV === "development" && (
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
@@ -205,6 +206,7 @@ export default function AdminBookingsPage() {
                 Sign In as Cashier
               </button>
             </div>
+            )}
           </div>
 
           {loginError && (
