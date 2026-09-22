@@ -12,7 +12,12 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "WELL LUPS AUTO TYRES LIMITED",
+  title: {
+    default: "WELL LUPS AUTO TYRES LIMITED",
+    template: "%s | WELL LUPS AUTO TYRES LIMITED",
+  },
+  description:
+    "Tyres, alloy wheels, batteries, auto parts and professional garage services. Quote-based pricing.",
 };
 
 export default function RootLayout({

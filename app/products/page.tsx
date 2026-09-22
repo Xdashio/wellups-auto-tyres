@@ -1,5 +1,6 @@
 import React, { Suspense } from "react";
 import Link from "next/link";
+import type { Metadata } from "next";
 import {
   getPublicProducts,
   getPublicCategories,
@@ -13,6 +14,12 @@ import { SearchBar } from "@/components/catalog/search-bar";
 import { Badge } from "@/components/ui/badge";
 
 export const revalidate = 60;
+
+export const metadata: Metadata = {
+  title: "Product Catalogue",
+  description:
+    "Browse tyres, alloy wheels, batteries, brake parts, filters and engine fluids. Quote-based pricing — request a quote on anything you need.",
+};
 
 interface ProductsPageProps {
   searchParams: Promise<{
