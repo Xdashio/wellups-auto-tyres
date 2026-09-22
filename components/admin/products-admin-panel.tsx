@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { AdminProduct, AdminCategory, ProductInput, ProductInputSchema } from "@/lib/supabase/catalog-admin";
+import { supabase } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -21,9 +22,9 @@ interface ProductsAdminPanelProps {
   initialProducts: AdminProduct[];
   categories: AdminCategory[];
   branchId: string;
-  onCreate: (input: ProductInput) => Promise<SaveResult>;
-  onUpdate: (id: string, input: ProductInput) => Promise<SaveResult>;
-  onDelete: (id: string) => Promise<SaveResult>;
+  onCreate: (accessToken: string, input: ProductInput) => Promise<SaveResult>;
+  onUpdate: (accessToken: string, id: string, input: ProductInput) => Promise<SaveResult>;
+  onDelete: (accessToken: string, id: string) => Promise<SaveResult>;
 }
 
 const STATUS_OPTIONS = ["active", "in_stock", "low_stock", "out_of_stock"] as const;
@@ -55,6 +56,13 @@ export function ProductsAdminPanel({
   const [form, setForm] = useState<ProductInput>(EMPTY_FORM(branchId));
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+
+  // The browser holds the staff session; its access token is passed to the
+  // server action so the write runs as the signed-in actor (RLS-enforced).
+  const getAccessToken = async (): Promise<string | null> => {
+    const { data } = await supabase.auth.getSession();
+    return data.session?.access_token ?? null;
+  };
 
   const openCreate = () => {
     setEditingId(null);
@@ -90,9 +98,15 @@ export function ProductsAdminPanel({
     }
     setSaving(true);
     setError(null);
+    const accessToken = await getAccessToken();
+    if (!accessToken) {
+      setSaving(false);
+      setError("Sign in as a staff member before saving. Catalog writes are admin-only.");
+      return;
+    }
     const res = editingId
-      ? await onUpdate(editingId, validation.data)
-      : await onCreate(validation.data);
+      ? await onUpdate(accessToken, editingId, validation.data)
+      : await onCreate(accessToken, validation.data);
     setSaving(false);
     if (!res.success) {
       setError(res.error || "Failed to save product.");
@@ -114,7 +128,12 @@ export function ProductsAdminPanel({
 
   const handleDelete = async (id: string) => {
     if (!confirm("Remove this product from the catalogue?")) return;
-    const res = await onDelete(id);
+    const accessToken = await getAccessToken();
+    if (!accessToken) {
+      alert("Sign in as a staff member before deleting.");
+      return;
+    }
+    const res = await onDelete(accessToken, id);
     if (res.success) {
       setProducts((prev) => prev.filter((p) => p.id !== id));
     } else {

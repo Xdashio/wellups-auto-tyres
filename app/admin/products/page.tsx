@@ -8,9 +8,26 @@ import {
   deleteProduct,
   ProductInput,
 } from "@/lib/supabase/catalog-admin";
+import {
+  clientWithAccessToken,
+  verifiedStaffActor,
+} from "@/lib/supabase/scoped-client";
 import { ProductsAdminPanel } from "@/components/admin/products-admin-panel";
+import { StaffAuthGate } from "@/components/admin/staff-auth-gate";
 
 export const revalidate = 0;
+
+// Every action runs as the signed-in staff member: the browser passes its
+// session access token, the action validates it with the Auth server, and
+// PostgREST/RLS enforces the real actor. No token (or a forged one) →
+// server-side denial before any mutation. RLS remains authoritative.
+async function scopedClientOrError(accessToken: string) {
+  const scoped = clientWithAccessToken(accessToken);
+  if (!scoped) return { error: "Not authenticated. Sign in as a staff member first." };
+  const actor = await verifiedStaffActor(scoped);
+  if ("error" in actor) return { error: actor.error };
+  return { scoped };
+}
 
 export default async function AdminProductsPage() {
   const { publicSupabase } = await import("@/lib/supabase/catalog");
@@ -20,22 +37,25 @@ export default async function AdminProductsPage() {
     listCategoriesForAdmin(publicSupabase),
   ]);
 
-  async function handleCreate(input: ProductInput) {
+  async function handleCreate(accessToken: string, input: ProductInput) {
     "use server";
-    const { publicSupabase } = await import("@/lib/supabase/catalog");
-    return createProduct(publicSupabase, input);
+    const gate = await scopedClientOrError(accessToken);
+    if ("error" in gate) return { success: false, error: gate.error };
+    return createProduct(gate.scoped, input);
   }
 
-  async function handleUpdate(id: string, input: ProductInput) {
+  async function handleUpdate(accessToken: string, id: string, input: ProductInput) {
     "use server";
-    const { publicSupabase } = await import("@/lib/supabase/catalog");
-    return updateProduct(publicSupabase, id, input);
+    const gate = await scopedClientOrError(accessToken);
+    if ("error" in gate) return { success: false, error: gate.error };
+    return updateProduct(gate.scoped, id, input);
   }
 
-  async function handleDelete(id: string) {
+  async function handleDelete(accessToken: string, id: string) {
     "use server";
-    const { publicSupabase } = await import("@/lib/supabase/catalog");
-    return deleteProduct(publicSupabase, id);
+    const gate = await scopedClientOrError(accessToken);
+    if ("error" in gate) return { success: false, error: gate.error };
+    return deleteProduct(gate.scoped, id);
   }
 
   return (
@@ -48,6 +68,8 @@ export default async function AdminProductsPage() {
           populate accepted quotes.
         </p>
       </div>
+
+      <StaffAuthGate context="Sign in as an Admin to manage the product catalogue. Catalog writes are admin-only." />
 
       <ProductsAdminPanel
         initialProducts={products}

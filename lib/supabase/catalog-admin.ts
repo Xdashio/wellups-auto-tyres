@@ -150,8 +150,10 @@ export interface AdminCategory {
 }
 
 export async function listCategoriesForAdmin(client: SupabaseClient): Promise<AdminCategory[]> {
+  // Dedicated admin view (016): category writes must not ride the
+  // anon-readable categories_public view.
   const { data, error } = await client
-    .from("categories_public")
+    .from("categories_admin")
     .select("*")
     .order("name", { ascending: true });
 
@@ -170,7 +172,7 @@ export async function createCategory(
   if (!name || name.trim().length < 2) {
     return { success: false, error: "Category name must be at least 2 characters" };
   }
-  const { error } = await client.from("categories_public").insert({ name: name.trim(), description: description || null });
+  const { error } = await client.from("categories_admin").insert({ name: name.trim(), description: description || null });
   if (error) return { success: false, error: error.message };
   return { success: true };
 }

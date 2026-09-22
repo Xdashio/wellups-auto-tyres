@@ -1,7 +1,12 @@
 import React from "react";
 import { getBranchForAdmin, updateBranchSettings, BranchSettingsInput } from "@/lib/supabase/branch";
 import { publicSupabase } from "@/lib/supabase/catalog";
+import {
+  clientWithAccessToken,
+  verifiedStaffActor,
+} from "@/lib/supabase/scoped-client";
 import { BranchSettingsForm } from "@/components/admin/branch-settings-form";
+import { StaffAuthGate } from "@/components/admin/staff-auth-gate";
 
 export const revalidate = 0;
 
@@ -21,12 +26,20 @@ export default async function AdminSettingsPage() {
 
   const branchId = branch.id;
 
-  // Typed save handler passed to Client Form component
-  async function handleSaveSettings(input: BranchSettingsInput) {
+  // Typed save handler passed to Client Form component. Runs as the signed-in
+  // staff member (token validated server-side); the branch RPC enforces the
+  // admin role from the caller's JWT.
+  async function handleSaveSettings(accessToken: string, input: BranchSettingsInput) {
     "use server";
-    // In Server Action context, we invoke publicSupabase / server client
-    const { publicSupabase } = await import("@/lib/supabase/catalog");
-    return updateBranchSettings(publicSupabase, branchId, input);
+    const scoped = clientWithAccessToken(accessToken);
+    if (!scoped) {
+      return { success: false, error: "Not authenticated. Sign in as a staff member first." };
+    }
+    const actor = await verifiedStaffActor(scoped);
+    if ("error" in actor) {
+      return { success: false, error: actor.error };
+    }
+    return updateBranchSettings(scoped, branchId, input);
   }
 
   return (
@@ -37,6 +50,8 @@ export default async function AdminSettingsPage() {
           Configure business details and public contact settings for Well Lups Auto Tyres.
         </p>
       </div>
+
+      <StaffAuthGate context="Sign in as an Admin to change branch and M-Pesa settings. Settings writes are admin-only." />
 
       <BranchSettingsForm initialBranch={branch} onSave={handleSaveSettings} />
     </div>

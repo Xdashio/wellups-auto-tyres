@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { AdminService, ServiceInput, ServiceInputSchema } from "@/lib/supabase/catalog-admin";
+import { supabase } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -14,9 +15,9 @@ type SaveResult = { success: boolean; error?: string };
 
 interface ServicesAdminPanelProps {
   initialServices: AdminService[];
-  onCreate: (input: ServiceInput) => Promise<SaveResult>;
-  onUpdate: (id: string, input: ServiceInput) => Promise<SaveResult>;
-  onDelete: (id: string) => Promise<SaveResult>;
+  onCreate: (accessToken: string, input: ServiceInput) => Promise<SaveResult>;
+  onUpdate: (accessToken: string, id: string, input: ServiceInput) => Promise<SaveResult>;
+  onDelete: (accessToken: string, id: string) => Promise<SaveResult>;
 }
 
 const EMPTY_FORM: ServiceInput = {
@@ -39,6 +40,13 @@ export function ServicesAdminPanel({
   const [vehicleTypesText, setVehicleTypesText] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+
+  // The browser holds the staff session; its access token is passed to the
+  // server action so the write runs as the signed-in actor (RLS-enforced).
+  const getAccessToken = async (): Promise<string | null> => {
+    const { data } = await supabase.auth.getSession();
+    return data.session?.access_token ?? null;
+  };
 
   const openCreate = () => {
     setEditingId(null);
@@ -77,9 +85,15 @@ export function ServicesAdminPanel({
     }
     setSaving(true);
     setError(null);
+    const accessToken = await getAccessToken();
+    if (!accessToken) {
+      setSaving(false);
+      setError("Sign in as a staff member before saving. Catalog writes are admin-only.");
+      return;
+    }
     const res = editingId
-      ? await onUpdate(editingId, validation.data)
-      : await onCreate(validation.data);
+      ? await onUpdate(accessToken, editingId, validation.data)
+      : await onCreate(accessToken, validation.data);
     setSaving(false);
     if (!res.success) {
       setError(res.error || "Failed to save service.");
@@ -98,7 +112,12 @@ export function ServicesAdminPanel({
 
   const handleDelete = async (id: string) => {
     if (!confirm("Remove this service permanently? Consider toggling availability off instead.")) return;
-    const res = await onDelete(id);
+    const accessToken = await getAccessToken();
+    if (!accessToken) {
+      alert("Sign in as a staff member before deleting.");
+      return;
+    }
+    const res = await onDelete(accessToken, id);
     if (res.success) {
       setServices((prev) => prev.filter((s) => s.id !== id));
     } else {
@@ -108,7 +127,12 @@ export function ServicesAdminPanel({
 
   const toggleAvailability = async (s: AdminService) => {
     const updated = { name: s.name, description: s.description, vehicle_types: s.vehicle_types, is_available: !s.is_available };
-    const res = await onUpdate(s.id, updated);
+    const accessToken = await getAccessToken();
+    if (!accessToken) {
+      alert("Sign in as a staff member before changing availability.");
+      return;
+    }
+    const res = await onUpdate(accessToken, s.id, updated);
     if (res.success) {
       setServices((prev) => prev.map((x) => (x.id === s.id ? { ...x, is_available: updated.is_available } : x)));
     } else {

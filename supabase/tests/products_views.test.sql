@@ -33,8 +33,8 @@ select is(
   (select array_to_string(array_agg(relname::text order by relname::text), ',') from pg_class
     where relnamespace = 'public'::regnamespace and relkind = 'v'
       and relname like 'products\_%' and reloptions = array['security_invoker=true']),
-  'products_admin,products_cashier,products_manager',
-  'all three tiered views are security_invoker with no view policies'
+  'products_admin,products_cashier,products_manager,products_public',
+  'all tiered + public product views are security_invoker with no view policies'
 );
 select is_empty(
   $$select policyname from pg_policies where schemaname = 'public' and tablename like 'products\_%'$$,

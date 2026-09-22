@@ -13,24 +13,31 @@ describe("PROMPT 008B — Configurable Business Settings Verification", () => {
       phone: "+254 700 123456",
       whatsapp: "254712345678",
       opening_hours: "Mon - Sat: 8:00 AM - 6:00 PM",
+      mpesa_channel_type: null,
+      mpesa_paybill_number: null,
+      mpesa_till_number: null,
+      mpesa_account_number: null,
     };
 
     const parseResult = BranchSettingsSchema.safeParse(validInput);
     expect(parseResult.success).toBe(true);
 
-    // Mock client returning updated branch data
+    // Mock client returning the RPC-updated branch row as jsonb
     const mockAdminClient = {
-      from: (table: string) => ({
-        update: (data: any) => ({
-          eq: (field: string, value: string) => ({
-            select: () => ({
-              single: async () => ({
-                data: { id: "10000000-0000-0000-0000-000000000001", ...data },
-                error: null,
-              }),
-            }),
-          }),
-        }),
+      rpc: async () => ({
+        data: {
+          id: "10000000-0000-0000-0000-000000000001",
+          name: validInput.name,
+          address: validInput.address,
+          phone: validInput.phone,
+          whatsapp: validInput.whatsapp,
+          opening_hours: validInput.opening_hours,
+          mpesa_channel_type: null,
+          mpesa_paybill_number: null,
+          mpesa_till_number: null,
+          mpesa_account_number: null,
+        },
+        error: null,
       }),
     } as any;
 
@@ -48,21 +55,17 @@ describe("PROMPT 008B — Configurable Business Settings Verification", () => {
     const validInput = {
       name: "WELL LUPS AUTO TYRES — Industrial Area",
       whatsapp: "254799999999",
+      mpesa_channel_type: null,
+      mpesa_paybill_number: null,
+      mpesa_till_number: null,
+      mpesa_account_number: null,
     };
 
-    // Mock client returning RLS permission error (42501)
+    // Mock client returning the RPC's 42501 admin-only denial
     const mockCashierClient = {
-      from: (table: string) => ({
-        update: () => ({
-          eq: () => ({
-            select: () => ({
-              single: async () => ({
-                data: null,
-                error: { code: "42501", message: "new row violates row-level security policy for table branches" },
-              }),
-            }),
-          }),
-        }),
+      rpc: async () => ({
+        data: null,
+        error: { code: "42501", message: "forbidden: admin only" },
       }),
     } as any;
 
@@ -72,7 +75,7 @@ describe("PROMPT 008B — Configurable Business Settings Verification", () => {
       validInput
     );
     expect(res.success).toBe(false);
-    expect(res.error).toContain("row-level security policy");
+    expect(res.error).toContain("admin only");
   });
 
   // 3. Public users can read only approved branch fields

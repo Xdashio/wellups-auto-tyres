@@ -6,30 +6,46 @@ import {
   deleteService,
   ServiceInput,
 } from "@/lib/supabase/catalog-admin";
+import {
+  clientWithAccessToken,
+  verifiedStaffActor,
+} from "@/lib/supabase/scoped-client";
 import { ServicesAdminPanel } from "@/components/admin/services-admin-panel";
+import { StaffAuthGate } from "@/components/admin/staff-auth-gate";
 
 export const revalidate = 0;
+
+async function scopedClientOrError(accessToken: string) {
+  const scoped = clientWithAccessToken(accessToken);
+  if (!scoped) return { error: "Not authenticated. Sign in as a staff member first." };
+  const actor = await verifiedStaffActor(scoped);
+  if ("error" in actor) return { error: actor.error };
+  return { scoped };
+}
 
 export default async function AdminServicesPage() {
   const { publicSupabase } = await import("@/lib/supabase/catalog");
   const services = await listServicesForAdmin(publicSupabase);
 
-  async function handleCreate(input: ServiceInput) {
+  async function handleCreate(accessToken: string, input: ServiceInput) {
     "use server";
-    const { publicSupabase } = await import("@/lib/supabase/catalog");
-    return createService(publicSupabase, input);
+    const gate = await scopedClientOrError(accessToken);
+    if ("error" in gate) return { success: false, error: gate.error };
+    return createService(gate.scoped, input);
   }
 
-  async function handleUpdate(id: string, input: ServiceInput) {
+  async function handleUpdate(accessToken: string, id: string, input: ServiceInput) {
     "use server";
-    const { publicSupabase } = await import("@/lib/supabase/catalog");
-    return updateService(publicSupabase, id, input);
+    const gate = await scopedClientOrError(accessToken);
+    if ("error" in gate) return { success: false, error: gate.error };
+    return updateService(gate.scoped, id, input);
   }
 
-  async function handleDelete(id: string) {
+  async function handleDelete(accessToken: string, id: string) {
     "use server";
-    const { publicSupabase } = await import("@/lib/supabase/catalog");
-    return deleteService(publicSupabase, id);
+    const gate = await scopedClientOrError(accessToken);
+    if ("error" in gate) return { success: false, error: gate.error };
+    return deleteService(gate.scoped, id);
   }
 
   return (
@@ -41,6 +57,8 @@ export default async function AdminServicesPage() {
           request. Toggle availability instead of deleting when a service is paused.
         </p>
       </div>
+
+      <StaffAuthGate context="Sign in as an Admin to manage garage services. Catalog writes are admin-only." />
 
       <ServicesAdminPanel
         initialServices={services}

@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { BranchData, BranchSettingsInput, BranchSettingsSchema } from "@/lib/supabase/branch";
+import { supabase } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 interface BranchSettingsFormProps {
   initialBranch: BranchData;
-  onSave: (input: BranchSettingsInput) => Promise<{ success: boolean; error?: string; data?: BranchData }>;
+  onSave: (accessToken: string, input: BranchSettingsInput) => Promise<{ success: boolean; error?: string; data?: BranchData }>;
 }
 
 export function BranchSettingsForm({ initialBranch, onSave }: BranchSettingsFormProps) {
@@ -64,7 +65,13 @@ export function BranchSettingsForm({ initialBranch, onSave }: BranchSettingsForm
 
     setLoading(true);
     try {
-      const res = await onSave(validation.data);
+      const { data } = await supabase.auth.getSession();
+      const accessToken = data.session?.access_token ?? null;
+      if (!accessToken) {
+        setErrorMessage("Sign in as a staff member before saving. Settings writes are admin-only.");
+        return;
+      }
+      const res = await onSave(accessToken, validation.data);
       if (res.success) {
         setSuccessMessage("Branch business settings updated successfully!");
         if (res.data) {
