@@ -5,6 +5,7 @@ const ADMIN_LINKS = [
   { href: "/admin/bookings", label: "Bookings" },
   { href: "/admin/products", label: "Products" },
   { href: "/admin/services", label: "Services" },
+  { href: "/admin/staff", label: "Staff" },
   { href: "/admin/settings", label: "Settings" },
 ];
 
