@@ -12,19 +12,25 @@ on any disagreement). Loading procedure: `supabase/production/README.md`.
 
 ## A. BRANCH IDENTITY (exactly one operational branch)
 
+> GATE 016C: SUPPLIED by Simon and applied live 2026-09-22 (see contract).
+> Hours + M-Pesa remain NULL (not supplied) — rendered only when set.
+
 | # | Field | Value (Simon fills in) |
 |---|---|---|
-| A1 | Official branch display name | [ENTER REAL BRANCH NAME — do NOT confirm "Industrial Area" unless it is the real name] |
-| A2 | Physical address (as shown to customers) | [ENTER REAL ADDRESS, or NOT SUPPLIED] |
-| A3 | Primary phone number | [ENTER REAL PHONE, or NOT SUPPLIED] |
-| A4 | WhatsApp number (for quote links) | [ENTER REAL WHATSAPP, or NOT SUPPLIED] |
-| A5 | Opening days/hours (free text) | [ENTER REAL HOURS, or NOT SUPPLIED] |
-| A6 | Branch active? | [YES / NO] |
+| A1 | Official branch display name | [Location is donholm Greenspan mall at shell petrol station — do NOT confirm "Industrial Area" unless it is the real name] |
+| A2 | Physical address (as shown to customers) | [Location is donholm Greenspan mall at shell petrol station, or NOT SUPPLIED] |
+| A3 | Primary phone number | [+254 719 322835, or NOT SUPPLIED] |
+| A4 | WhatsApp number (for quote links) | [+254 719 322835, or NOT SUPPLIED] |
+| A5 | Opening days/hours (free text) | [NOT SUPPLIED] |
+| A6 | Branch active? | [YES ] |
 
 Rules: Kenyan phone/WhatsApp accepted in `07...`, `254...`, or `+254...`
 shape (validated for shape only once supplied). No invented hours.
 
 ## B. PRODUCT CATALOG
+
+> GATE 016C: CONFIGURABLE LATER. Table retained for future use; catalog is
+> intentionally EMPTY until Simon supplies real rows (Admin UI or loader).
 
 Copy the table below — one row per real launch product. Every column is
 required except where marked optional. Status must be one of: `active`,
@@ -40,6 +46,9 @@ Stock-model note: the schema binds every product to the single branch
 In/Low/Out badge. See decision Q1 below if that model is wrong.
 
 ## C. SERVICE CATALOG
+
+> GATE 016C: CONFIGURABLE LATER. Table retained for future use; list is
+> intentionally EMPTY until Simon supplies real rows.
 
 One row per real launch service. Services are global (no branch link) and
 carry no price by design. There is no duration field in the schema — do not
@@ -83,6 +92,7 @@ are development-only and never become production staff.
 
 ## G. WARRANTY / RETURNS
 
+> GATE 016C: unpublished until approved.
 | # | Field | Value |
 |---|---|---|
 | G1 | Exact warranty wording (or NOT IN LAUNCH SCOPE) | [ENTER APPROVED WORDING or NOT IN LAUNCH SCOPE] |
@@ -93,6 +103,7 @@ Do not approve drafted copy you have not written — paste only final wording.
 
 ## H. DOMAIN
 
+> GATE 016C: configure later.
 | # | Field | Value |
 |---|---|---|
 | H1 | Production domain | [ENTER DOMAIN or NOT DECIDED] |
@@ -118,16 +129,16 @@ No domain is registered or configured by the implementation team.
 
 | Input | Required for launch? | Status | Who supplies | Notes |
 |---|---|---|---|---|
-| A1 branch name | REQUIRED | MISSING | Simon | Replaces placeholder everywhere |
-| A2–A5 address/phone/WhatsApp/hours | REQUIRED if public-facing | MISSING | Simon | NULL-safe; rendered only when set |
-| A6 active decision | REQUIRED | MISSING | Simon | Trivial once A1 known |
-| B product rows | REQUIRED | MISSING | Simon | Table above; no SEED-prefix names |
-| C service rows | REQUIRED | MISSING | Simon | Table above; descriptions must be real |
-| D categories decision | REQUIRED | REQUIRES DECISION | Simon | Keep/rename/remove + descriptions |
+| A1 branch name | REQUIRED | RESOLVED (applied live 2026-09-22) | Simon | `Greenspan Mall, Donholm` |
+| A2–A4 address/phone/WhatsApp | REQUIRED if public-facing | RESOLVED (applied live) | Simon | Real values live; A5 hours still NULL (not supplied) |
+| A6 active decision | REQUIRED | RESOLVED (YES) | Simon | Branch active |
+| B product rows | CONFIGURABLE LATER | OPEN (catalog intentionally empty) | Simon | Add via Admin UI when supplied |
+| C service rows | CONFIGURABLE LATER | OPEN (list intentionally empty) | Simon | Add via Admin UI when supplied |
+| D categories decision | CONFIGURABLE LATER | REQUIRES DECISION | Simon | Admin-editable; SEED descriptions pending |
 | E fitment retention | NOT REQUIRED FOR LAUNCH | REQUIRES DECISION | Simon | Safe to defer; reference-only |
-| F role sign-off | REQUIRED | MISSING | Simon | Real people + emails; no account creation here |
+| F role sign-off | CONFIGURABLE LATER | MISSING | Simon | Test accounts exist; real provisioning later |
 | G warranty scope | REQUIRED (scope answer) | MISSING | Simon | "NOT IN LAUNCH SCOPE" is a valid answer |
-| H domain | REQUIRED | MISSING | Simon | Blocks production URL, not build |
+| H domain | CONFIGURABLE LATER | MISSING | Simon | Configure later |
 | I1–I6 M-Pesa config | REQUIRED (answers) | MISSING | Simon | "NOT CONFIGURED" valid; display-only |
 
 ## Business decision questions for Simon (numbered)
