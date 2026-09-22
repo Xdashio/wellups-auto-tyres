@@ -9,8 +9,17 @@ on:
   pull_request:
 
 jobs:
+  # Runner routing: GitHub-hosted runners are currently unusable on this
+  # account (billing lock — see docs/RELEASE.md "CI AVAILABILITY NOTE").
+  # Self-hosted runners are free and need no billing. Both jobs read their
+  # runner label set from the repository variable CI_RUNS_ON (a JSON array,
+  # e.g. ["self-hosted"]), defaulting to ["ubuntu-latest"] when unset. Set
+  # the variable to route CI — including tag validation — to a self-hosted
+  # runner; delete it to restore the default. This changes WHERE jobs run,
+  # never WHAT they run: tag validation is never skipped.
+  # Setup steps: docs/CI_SELF_HOSTED.md.
   app:
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(vars.CI_RUNS_ON || '["ubuntu-latest"]') }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -25,7 +34,10 @@ jobs:
       - run: npx opennextjs-cloudflare build
 
   db:
-    runs-on: ubuntu-latest
+    # Same runner routing as the app job above. NOTE: this job uses a
+    # postgres:18 service container, so a self-hosted runner must have
+    # Docker available or this job will fail — see docs/CI_SELF_HOSTED.md.
+    runs-on: ${{ fromJSON(vars.CI_RUNS_ON || '["ubuntu-latest"]') }}
     services:
       postgres:
         image: postgres:18
