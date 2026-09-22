@@ -1,0 +1,2 @@
+name,description,vehicle_types,is_available
+SAMPLE Wheel Alignment Check,SAMPLE example row — replace with real service data before importing,Sedan;SUV,true
