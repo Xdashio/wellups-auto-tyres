@@ -2,7 +2,10 @@ name: ci
 
 on:
   push:
-    branches: [main, v0.1-implementation]
+    branches: [main, v0.1-implementation, "release/*"]
+    # Tags are validated on the exact tagged commit. Tag CI never deploys;
+    # production deployment is tag-gated separately (see release.yml).
+    tags: ["v*"]
   pull_request:
 
 jobs:

@@ -1,7 +1,10 @@
--- SEED DATA — development/test only. Every row in this file is placeholder
--- content for exercising the v0.1 schema. Nothing here describes the real
--- company: the branch carries no address/phone/WhatsApp/hours (all NULL),
--- product names are generic stand-ins, and no statistics or claims are made.
+-- SEED DATA — DEVELOPMENT/TEST ONLY. NEVER apply this file to a production
+-- project. Every row here is placeholder content for exercising the schema:
+-- the branch carries no address/phone/WhatsApp/hours (all NULL), product and
+-- service names carry the mandatory `SEED ` prefix (enforced by
+-- tests/seed_hygiene.test.ts), and no statistics or claims are made.
+-- Production data loading uses supabase/production/ (retire script +
+-- placeholder template) — see supabase/production/README.md.
 -- Safe to re-run: inserts use fixed UUIDs with ON CONFLICT DO NOTHING.
 -- Staff accounts are NOT seeded here (they require real Supabase Auth users);
 -- see seed_staff.sql, which refuses to run until real auth user IDs are supplied.
