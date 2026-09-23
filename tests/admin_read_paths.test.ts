@@ -198,9 +198,15 @@ describe("GATE 023 unit — source audit: repaired pages use the authenticated p
     expect(src).not.toMatch(/getBranchForAdmin\(publicSupabase\)/);
     // The save path stays the full-replacement RPC via updateBranchSettings.
     const panel = readSrc("components/admin/branch-settings-panel.tsx");
-    expect(panel).toMatch(/data-testid="settings-unauthorized"/);
-    expect(panel).toMatch(/data-testid="settings-error"/);
-    expect(panel).toMatch(/data-testid="settings-missing"/);
+    // GATE 026: states render through the shared ErrorState/EmptyState/
+    // LoadingState (testId prop) instead of hand-rolled divs — the three
+    // outcomes stay visually distinct with the same honest copy.
+    expect(panel).toMatch(/LoadingState/);
+    expect(panel).toMatch(/ErrorState/);
+    expect(panel).toMatch(/EmptyState/);
+    expect(panel).toMatch(/testId="settings-unauthorized"/);
+    expect(panel).toMatch(/testId="settings-error"/);
+    expect(panel).toMatch(/testId="settings-missing"/);
     expect(panel).toMatch(/Could not read branch settings — access denied/);
     expect(panel).toMatch(/Branch Configuration Not Found/);
   });
@@ -224,22 +230,25 @@ describe("GATE 023 unit — source audit: repaired pages use the authenticated p
   });
 
   it("panels distinguish access-denied and unexpected-error from honest empty", () => {
+    // GATE 026: the three outcomes render through the shared
+    // ErrorState/EmptyState/LoadingState (testId prop) with the same
+    // honest copy — distinct states, no hand-rolled duplicates.
     const products = readSrc("components/admin/products-admin-panel.tsx");
-    expect(products).toMatch(/data-testid="products-unauthorized"/);
+    expect(products).toMatch(/testId="products-unauthorized"/);
     expect(products).toMatch(/Could not read products — access denied/);
     expect(products).toMatch(/Could not read products — unexpected database error/);
     expect(products).toMatch(/data-testid="products-empty"/);
     expect(products).toMatch(/No products configured yet/);
 
     const services = readSrc("components/admin/services-admin-panel.tsx");
-    expect(services).toMatch(/data-testid="services-unauthorized"/);
+    expect(services).toMatch(/testId="services-unauthorized"/);
     expect(services).toMatch(/Could not read services — access denied/);
     expect(services).toMatch(/Could not read services — unexpected database error/);
     expect(services).toMatch(/data-testid="services-empty"/);
     expect(services).toMatch(/No services configured yet/);
 
     const staff = readSrc("components/admin/staff-admin-panel.tsx");
-    expect(staff).toMatch(/data-testid="staff-unauthorized"/);
+    expect(staff).toMatch(/testId="staff-unauthorized"/);
     expect(staff).toMatch(/Could not read staff roster — access denied/);
     expect(staff).toMatch(/Could not read staff roster — unexpected database error/);
     expect(staff).toMatch(/data-testid="staff-empty"/);
