@@ -9,7 +9,7 @@ export function RadioGroup({ className, ...props }: React.ComponentProps<typeof 
 export function RadioItem({ className, ...props }: React.ComponentProps<typeof RadioGroupPrimitive.Item>) {
   return (
     <RadioGroupPrimitive.Item
-      className={cn("flex h-5 w-5 items-center justify-center rounded-full border border-text-secondary/60 bg-white", className)}
+      className={cn("flex h-5 w-5 items-center justify-center rounded-full border border-muted-foreground/60 bg-input", className)}
       {...props}
     />
   );

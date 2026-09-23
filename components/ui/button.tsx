@@ -12,7 +12,7 @@ type ButtonVariant =
 type ButtonSize = "sm" | "md" | "lg";
 
 const base =
-  "inline-flex items-center justify-center rounded-md text-sm font-medium no-underline transition-colors";
+  "inline-flex items-center justify-center whitespace-nowrap rounded-none text-sm font-medium no-underline transition-colors";
 
 const variants: Record<ButtonVariant, string> = {
   primary:

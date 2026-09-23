@@ -24,14 +24,21 @@
   --color-card: #ffffff;           /* resolves transparent bg-card */
   --color-card-foreground: #1a1b1b;
   --color-muted: #e8e9ec;          /* subtle surface tint */
-  --color-muted-foreground: #777878; /* resolves text-muted-foreground */
+  --color-muted-foreground: #777878; /* secondary text */
 
-  /* ─── Legacy aliases (call-sites rely on these token names) ─── */
-  --color-text-primary: #1a1b1d;    /* = --color-foreground */
-  --color-text-secondary: #777878; /* = --color-muted-foreground */
-
-  --color-border: #d1d2d3;          /* light border / divider */
+  --color-border: #e0dfdd;          /* canonical prototype border */
   --color-input: #ffffff;
+
+  /* ─── Dialog/drawer scrim ──────────────────────────────────── */
+  --color-overlay: rgba(10, 25, 47, 0.6);
+
+  /* ─── WhatsApp actions only ────────────────────────────────── */
+  --color-whatsapp: #25d366;
+  --color-whatsapp-dark: #1eb954;
+
+  /* ─── Stock-out solid (prototype #9CA3AF; in/low reuse
+       success/warning per the design contract) ───────────────── */
+  --color-stock-out: #9ca3af;
 
   /* ─── Focus / ring ─────────────────────────────────────────── */
   --color-ring: #045cb4;
@@ -49,10 +56,28 @@
 
   --color-disabled: #cbd2d7;
 
-  /* ─── Shape ───────────────────────────────────────────────── */
-  --radius: 0.5rem;
-  --radius-lg: 0.75rem;
+  /* ─── Type ─────────────────────────────────────────────────── */
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* ─── Elevation (three levels per the design contract) ─────── */
+  --shadow-sm: 0 2px 16px rgba(0, 0, 0, 0.07);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
+  --shadow-lg: 0 18px 44px rgba(20, 65, 119, 0.2);
+
+  /* ─── Shape (square-first per the prototype) ───────────────── */
+  --radius: 0rem;
+  --radius-lg: 0rem;
   --radius-sm: 0.25rem;
+}
+
+/* Prototype card hover: inset brand ring, never a lifted shadow. */
+@layer components {
+  .proto-ring-hover {
+    transition: box-shadow 0.15s ease;
+  }
+  .proto-ring-hover:hover {
+    box-shadow: 0 0 0 2px var(--color-primary);
+  }
 }
 
 /* ─── Base element styles ────────────────────────────────────── */

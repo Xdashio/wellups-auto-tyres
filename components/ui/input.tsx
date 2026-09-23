@@ -11,7 +11,7 @@ export function Input({ className, type, isError, ...props }: InputProps) {
     <input
       type={type}
       className={cn(
-        "w-full min-h-11 rounded-md border border-border bg-input px-3 py-2 text-sm text-foreground",
+        "w-full min-h-11 rounded-none border border-border bg-input px-3 py-2 text-sm text-foreground",
         "placeholder-muted-foreground/60 transition-colors",
         "file:border-0 file:bg-transparent file:text-sm file:font-medium",
         "disabled:cursor-not-allowed disabled:opacity-60 disabled:bg-disabled/50",

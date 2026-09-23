@@ -5,29 +5,32 @@
 html { scroll-behavior: smooth; }
 body {
   font-family: 'Plus Jakarta Sans', sans-serif;
-  background: #F1F0EF;
-  color: #1A1B1B;
+  background: var(--color-background);
+  color: var(--color-foreground);
   font-size: 16px;
   line-height: 1.6;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
 }
 
-/* ─── TOKENS ────────────────────────────────────────── */
+/* ─── TOKENS ──────────────────────────────────────────
+   Aliases to the canonical @theme tokens in app/globals.css (the single
+   source of color truth). This file keeps its layout/motion system but
+   must not define competing values. */
 :root {
-  --primary: #045CB4;
-  --primary-dark: #043D8B;
-  --navy: #144177;
-  --blue-muted: #658EBE;
-  --bg: #F1F0EF;
-  --bg-card: #FFFFFF;
-  --border: #E0DFDD;
-  --text: #1A1B1B;
-  --text-secondary: #777878;
-  --stock-in: #16A34A;
-  --stock-low: #D97706;
-  --stock-out: #9CA3AF;
-  --whatsapp: #25D366;
+  --primary: var(--color-primary);
+  --primary-dark: var(--color-primary-dark);
+  --navy: var(--color-navy);
+  --blue-muted: var(--color-blue-muted);
+  --bg: var(--color-background);
+  --bg-card: var(--color-card);
+  --border: var(--color-border);
+  --text: var(--color-foreground);
+  --text-secondary: var(--color-muted-foreground);
+  --stock-in: var(--color-success);
+  --stock-low: var(--color-warning);
+  --stock-out: var(--color-stock-out);
+  --whatsapp: var(--color-whatsapp);
 }
 
 /* ─── TREAD TEXTURE SVG ─────────────────────────────── */
@@ -50,7 +53,7 @@ body {
 /* ─── ANNOUNCEMENT BAR ──────────────────────────────── */
 .announcement-bar {
   background: var(--navy);
-  color: white;
+  color: var(--color-primary-foreground);
   text-align: center;
   padding: 9px 24px;
   font-size: 13px;
@@ -72,7 +75,7 @@ body {
   border-bottom: 1px solid var(--border);
   transition: box-shadow 0.2s ease;
 }
-.nav.scrolled { box-shadow: 0 2px 16px rgba(0,0,0,0.07); }
+.nav.scrolled { box-shadow: var(--shadow-sm); }
 .nav-inner {
   width: 100%;
   max-width: 1240px;
@@ -135,7 +138,7 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: white;
+  background: var(--color-card);
   border: 1px solid var(--border);
   padding: 7px 14px;
   font-size: 13px;
@@ -167,7 +170,7 @@ body {
   width: 18px;
   height: 18px;
   background: var(--primary);
-  color: white;
+  color: var(--color-primary-foreground);
   font-size: 10px;
   font-weight: 700;
   border-radius: 50%;
@@ -203,7 +206,7 @@ body {
   width: min(340px, 86vw);
   height: 100vh;
   height: 100dvh;
-  background: #FFFFFF;
+  background: var(--color-card);
   z-index: 999;
   display: flex;
   flex-direction: column;
@@ -232,7 +235,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: white;
+  background: var(--color-card);
   border: 1px solid var(--border);
   color: var(--text);
   cursor: pointer;
@@ -241,7 +244,7 @@ body {
 }
 .mobile-menu-close:hover {
   background: var(--primary);
-  color: white;
+  color: var(--color-primary-foreground);
   border-color: var(--primary);
 }
 .mobile-menu-body {
@@ -290,13 +293,13 @@ body {
 }
 .mobile-nav-link:hover {
   background: var(--primary);
-  color: white;
+  color: var(--color-primary-foreground);
   border-color: var(--primary);
 }
 .mobile-nav-link:hover .mobile-nav-arrow,
 .mobile-nav-link:hover .mobile-nav-icon,
 .mobile-nav-link:hover .mobile-nav-badge {
-  color: white;
+  color: var(--color-primary-foreground);
 }
 .mobile-nav-icon {
   display: flex;
@@ -352,14 +355,14 @@ body {
   gap: 8px;
   height: 44px;
   background: #25D366;
-  color: white;
+  color: var(--color-primary-foreground);
   text-decoration: none;
   font-size: 13.5px;
   font-weight: 700;
   transition: background 0.15s ease;
 }
 .mobile-menu-wa-btn:hover {
-  background: #1eb954;
+  background: var(--color-whatsapp-dark);
 }
 .mobile-menu-branches-info {
   font-size: 12px;
@@ -424,7 +427,7 @@ body {
   height: 50px;
   padding: 0 28px;
   background: var(--primary);
-  color: white;
+  color: var(--color-primary-foreground);
   font-family: inherit;
   font-size: 15px;
   font-weight: 700;
@@ -452,7 +455,7 @@ body {
   text-decoration: none;
   transition: background 0.15s ease, color 0.15s ease;
 }
-.btn-secondary:hover { background: var(--primary); color: white; }
+.btn-secondary:hover { background: var(--primary); color: var(--color-primary-foreground); }
 
 /* ─── HERO WHEEL · roll-in & settle ─────────────────────
    The wheel is drawn on .hero-stage (covers the whole hero) so it can roll
@@ -512,8 +515,8 @@ body {
 }
 .hero-card {
   position: absolute; right: calc(var(--hx) - 14px); bottom: 26px;
-  width: min(250px, 60vw); background: white; border: 1px solid var(--border);
-  padding: 14px 18px 18px; box-shadow: 0 18px 44px rgba(20, 65, 119, 0.2);
+  width: min(250px, 60vw); background: var(--color-card); border: 1px solid var(--border);
+  padding: 14px 18px 18px; box-shadow: var(--shadow-lg);
   pointer-events: auto; opacity: 0;
   transform: translate3d(30px, 26px, 0) scale(0.94);
   transition: transform 0.6s cubic-bezier(0.2, 1.25, 0.3, 1), opacity 0.35s ease;
@@ -552,7 +555,7 @@ body {
 
 /* ─── VEHICLE FIT FINDER ────────────────────────────── */
 .fit-finder {
-  background: white;
+  background: var(--color-card);
   border-bottom: 1px solid var(--border);
   padding: 48px 40px;
 }
@@ -579,7 +582,7 @@ body {
 .fit-finder-form {
   display: flex;
   align-items: stretch;
-  background: white;
+  background: var(--color-card);
   border: 1px solid var(--border);
   box-shadow: 0 4px 18px rgba(20, 65, 119, 0.04);
 }
@@ -649,7 +652,7 @@ body {
   min-height: 56px;
   padding: 0 28px;
   background: var(--primary);
-  color: white;
+  color: var(--color-primary-foreground);
   font-family: inherit;
   font-size: 14.5px;
   font-weight: 700;
@@ -703,7 +706,7 @@ body {
   border-radius: 0;
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease;
-  background: white;
+  background: var(--color-card);
   color: var(--text-secondary);
   display: flex;
   align-items: center;
@@ -712,7 +715,7 @@ body {
 .catalog-tab:first-child { border-right: 1px solid var(--border); }
 .catalog-tab.active {
   background: var(--primary);
-  color: white;
+  color: var(--color-primary-foreground);
 }
 .catalog-tab .count {
   font-size: 11px;
@@ -729,7 +732,7 @@ body {
   border: 1px solid var(--border);
 }
 .product-card {
-  background: white;
+  background: var(--color-card);
   display: flex;
   flex-direction: column;
   position: relative;
@@ -782,26 +785,9 @@ body {
   font-weight: 700;
   border-radius: 0 0 4px 0;
 }
-.stock-in { background: var(--stock-in); color: white; }
-.stock-low { background: var(--stock-low); color: white; }
-.stock-out { background: var(--stock-out); color: white; }
-.wishlist-btn {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 32px;
-  height: 32px;
-  background: white;
-  border: 1px solid var(--border);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: border-color 0.15s ease;
-}
-.wishlist-btn:hover { border-color: #ef4444; }
-.wishlist-btn.active svg { fill: #ef4444; color: #ef4444; }
+.stock-in { background: var(--stock-in); color: var(--color-primary-foreground); }
+.stock-low { background: var(--stock-low); color: var(--color-primary-foreground); }
+.stock-out { background: var(--stock-out); color: var(--color-primary-foreground); }
 
 .product-card-body {
   padding: 16px 20px 20px;
@@ -860,7 +846,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: var(--color-primary-foreground);
   transition: background 0.15s ease;
   flex-shrink: 0;
 }
@@ -914,7 +900,7 @@ body {
 .dark-band-heading {
   font-size: clamp(28px, 3.5vw, 46px);
   font-weight: 800;
-  color: white;
+  color: var(--color-primary-foreground);
   letter-spacing: -0.025em;
   line-height: 1.1;
   margin-bottom: 20px;
@@ -933,7 +919,7 @@ body {
   height: 50px;
   padding: 0 28px;
   background: transparent;
-  color: white;
+  color: var(--color-primary-foreground);
   font-family: inherit;
   font-size: 15px;
   font-weight: 700;
@@ -943,7 +929,7 @@ body {
   text-decoration: none;
   transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
-.btn-ghost:hover { background: white; color: var(--navy); border-color: white; }
+.btn-ghost:hover { background: var(--color-card); color: var(--navy); border-color: var(--color-primary-foreground); }
 
 .dark-band-stats {
   display: flex;
@@ -959,7 +945,7 @@ body {
 .stat-number {
   font-size: clamp(40px, 4.5vw, 60px);
   font-weight: 800;
-  color: white;
+  color: var(--color-primary-foreground);
   line-height: 1;
   letter-spacing: -0.03em;
   margin-bottom: 6px;
@@ -1009,7 +995,7 @@ body {
 
 /* ─── BRANCHES ──────────────────────────────────────── */
 .branches {
-  background: white;
+  background: var(--color-card);
   padding: 80px 0;
 }
 .branches-heading {
@@ -1102,7 +1088,7 @@ body {
 .footer-brand-name {
   font-size: 14px;
   font-weight: 800;
-  color: white;
+  color: var(--color-primary-foreground);
   letter-spacing: -0.01em;
 }
 .footer-brand-tagline {
@@ -1131,7 +1117,7 @@ body {
   transition: color 0.15s ease;
   font-weight: 500;
 }
-.footer-links a:hover { color: white; }
+.footer-links a:hover { color: var(--color-primary-foreground); }
 .footer-bottom {
   max-width: 1240px;
   margin: 0 auto;
@@ -1176,7 +1162,7 @@ body {
   left: 50%;
   transform: translateX(-50%) translateY(80px);
   background: var(--text);
-  color: white;
+  color: var(--color-card);
   padding: 12px 20px;
   font-size: 14px;
   font-weight: 500;
@@ -1222,7 +1208,7 @@ body {
 }
 .featured-head { position: relative; z-index: 2; text-align: center; padding: 72px 24px 36px; }
 .featured-heading {
-  font-size: clamp(30px, 3.8vw, 50px); font-weight: 800; color: white;
+  font-size: clamp(30px, 3.8vw, 50px); font-weight: 800; color: var(--color-primary-foreground);
   letter-spacing: -0.025em; line-height: 1.1;
 }
 .featured-sub { font-size: 14px; color: rgba(255,255,255,0.6); margin-top: 8px; }
@@ -1244,21 +1230,21 @@ body {
 .fc-card .product-card:hover .tyre-img { filter: none; }
 .fc-ctl { position: relative; z-index: 2; display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 4px; }
 .fc-arrow {
-  width: 46px; height: 46px; background: transparent; color: white; cursor: pointer;
+  width: 46px; height: 46px; background: transparent; color: var(--color-primary-foreground); cursor: pointer;
   border: 2px solid rgba(255,255,255,0.6); border-radius: 0; font-family: inherit;
   display: grid; place-items: center; transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
-.fc-arrow:hover { background: white; color: var(--navy); border-color: white; }
-.fc-arrow:disabled { opacity: 0.35; cursor: default; background: transparent; color: white; border-color: rgba(255,255,255,0.6); }
+.fc-arrow:hover { background: var(--color-card); color: var(--navy); border-color: var(--color-primary-foreground); }
+.fc-arrow:disabled { opacity: 0.35; cursor: default; background: transparent; color: var(--color-primary-foreground); border-color: rgba(255,255,255,0.6); }
 .fc-ticks { display: flex; gap: 6px; }
 .fc-ticks i { display: block; width: 24px; height: 4px; background: rgba(255,255,255,0.25); transition: background 0.2s ease, transform 0.2s ease; }
-.fc-ticks i.on { background: white; transform: scaleY(1.5); }
+.fc-ticks i.on { background: var(--color-card); transform: scaleY(1.5); }
 
 /* ─── ROAD SCENE · wheel drives right, world moves left ─ */
 .roadscene {
   --rw: clamp(190px, 17vw, 250px);
   --road: 78px; --contact: 26px;   /* road height, and how far the tyre sits below the road's top edge */
-  position: relative; overflow: hidden; background: white;
+  position: relative; overflow: hidden; background: var(--color-card);
 }
 .rs-sky { position: relative; height: 300px; overflow: hidden; background: linear-gradient(#ffffff, #EAF1FA); }
 .rs-layer { position: absolute; left: 0; bottom: 0; background-repeat: repeat-x; background-position: 0 100%; will-change: transform; }
@@ -1326,7 +1312,7 @@ body {
     border: 1px solid var(--border);
     border-radius: 0;
     padding: 10px 16px;
-    background: white;
+    background: var(--color-card);
   }
   .fit-field .fit-trigger {
     height: 32px;
@@ -1406,16 +1392,6 @@ body {
   .stock-badge {
     padding: 2px 6px;
     font-size: 9px;
-  }
-  .wishlist-btn {
-    width: 26px;
-    height: 26px;
-    top: 6px;
-    right: 6px;
-  }
-  .wishlist-btn svg {
-    width: 12px;
-    height: 12px;
   }
   .footer-inner { grid-template-columns: 1fr; }
   .stat-number { font-size: 36px; }
