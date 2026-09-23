@@ -4,7 +4,10 @@ const ADMIN_LINKS = [
   { href: "/admin/quotes", label: "Quotes" },
   { href: "/admin/bookings", label: "Bookings" },
   { href: "/admin/products", label: "Products" },
+  { href: "/admin/products/import", label: "Import Products" },
   { href: "/admin/services", label: "Services" },
+  { href: "/admin/services/import", label: "Import Services" },
+  { href: "/admin/staff", label: "Staff" },
   { href: "/admin/settings", label: "Settings" },
 ];
 

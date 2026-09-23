@@ -1,16 +1,60 @@
 import Link from "next/link";
 import Image from "next/image";
+import type { Metadata } from "next";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { getPrimaryBranch } from "@/lib/supabase/catalog";
 
 export const revalidate = 0;
 
+// Single-sourced branch facts: the title/description below are built from
+// the SAME getPrimaryBranch() row that Header/Footer render — business
+// data is never hardcoded a second time.
+export async function generateMetadata(): Promise<Metadata> {
+  const branch = await getPrimaryBranch();
+  const place = branch?.address ?? branch?.name ?? "Kenya";
+  const contact = branch?.phone ?? branch?.whatsapp;
+  return {
+    title: "Tyres, Auto Parts & Garage Services",
+    description:
+      `WELL LUPS AUTO TYRES LIMITED at ${place} — tyres, alloy wheels, ` +
+      `batteries, auto parts and garage services with quote-based pricing.` +
+      (contact ? ` Call/WhatsApp ${contact}.` : ""),
+  };
+}
+
+function LocalBusinessJsonLd({ branch }: { branch: Awaited<ReturnType<typeof getPrimaryBranch>> }) {
+  if (!branch) return null;
+  // AutoPartsStore (a schema.org LocalBusiness subtype) backed only by
+  // real branch fields. NULL fields are omitted, never guessed: no hours,
+  // no geo, no ratings, no reviews markup of any kind.
+  const jsonLd: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "AutoPartsStore",
+    name: "WELL LUPS AUTO TYRES LIMITED",
+  };
+  if (branch.name) jsonLd.branchName = branch.name;
+  if (branch.address) {
+    jsonLd.address = {
+      "@type": "PostalAddress",
+      streetAddress: branch.address,
+    };
+  }
+  if (branch.phone) jsonLd.telephone = branch.phone;
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+    />
+  );
+}
+
 export default async function Home() {
   const branch = await getPrimaryBranch();
 
   return (
     <main>
+      <LocalBusinessJsonLd branch={branch} />
       {/* Hero */}
       <section className="relative overflow-hidden bg-navy text-navy-foreground">
         <div className="container mx-auto px-4 py-16 sm:py-24 grid gap-10 sm:grid-cols-2 items-center">

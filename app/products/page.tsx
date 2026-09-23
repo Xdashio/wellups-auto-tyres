@@ -1,5 +1,6 @@
 import React, { Suspense } from "react";
 import Link from "next/link";
+import type { Metadata } from "next";
 import {
   getPublicProducts,
   getPublicCategories,
@@ -7,11 +8,18 @@ import {
   getPrimaryBranch
 } from "@/lib/supabase/catalog";
 import { ProductCard } from "@/components/catalog/product-card";
+import { CatalogEmptyState } from "@/components/catalog/catalog-empty-state";
 import { VehicleFilterBar } from "@/components/catalog/vehicle-filter-bar";
 import { SearchBar } from "@/components/catalog/search-bar";
 import { Badge } from "@/components/ui/badge";
 
 export const revalidate = 60;
+
+export const metadata: Metadata = {
+  title: "Product Catalogue",
+  description:
+    "Browse tyres, alloy wheels, batteries, brake parts, filters and engine fluids. Quote-based pricing — request a quote on anything you need.",
+};
 
 interface ProductsPageProps {
   searchParams: Promise<{
@@ -72,18 +80,22 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       </div>
 
       {products.length === 0 ? (
-        <div className="text-center py-16 border rounded-lg bg-blue-muted/10">
-          <p className="text-lg font-semibold text-text-secondary">No products found</p>
-          <p className="text-sm text-text-secondary mt-1">
-            Try resetting search or vehicle fitment filters.
-          </p>
-          <Link
-            href="/products"
-            className="inline-block mt-4 text-sm font-medium text-primary hover:underline"
-          >
-            Reset Filters
-          </Link>
-        </div>
+        resolvedParams.categoryId || resolvedParams.brand || resolvedParams.sizeSpec || resolvedParams.search ? (
+          <div className="text-center py-16 border rounded-lg bg-blue-muted/10">
+            <p className="text-lg font-semibold text-text-secondary">No products found</p>
+            <p className="text-sm text-text-secondary mt-1">
+              Try resetting search or vehicle fitment filters.
+            </p>
+            <Link
+              href="/products"
+              className="inline-block mt-4 text-sm font-medium text-primary hover:underline"
+            >
+              Reset Filters
+            </Link>
+          </div>
+        ) : (
+          <CatalogEmptyState kind="products" whatsappNumber={branch?.whatsapp} />
+        )
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {products.map((product) => (

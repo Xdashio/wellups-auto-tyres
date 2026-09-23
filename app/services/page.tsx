@@ -1,9 +1,17 @@
 import React from "react";
 import Link from "next/link";
+import type { Metadata } from "next";
 import { getPublicServices, getPrimaryBranch } from "@/lib/supabase/catalog";
 import { ServiceCard } from "@/components/catalog/service-card";
+import { CatalogEmptyState } from "@/components/catalog/catalog-empty-state";
 
 export const revalidate = 60;
+
+export const metadata: Metadata = {
+  title: "Garage Services",
+  description:
+    "Garage services — tyre fitting, wheel alignment, balancing, brake servicing and battery checks. Priced by quote after inspection.",
+};
 
 export default async function ServicesPage() {
   const services = await getPublicServices();
@@ -21,9 +29,7 @@ export default async function ServicesPage() {
 
       {/* Services Grid */}
       {services.length === 0 ? (
-        <div className="text-center py-16 border rounded-lg bg-muted/20">
-          <p className="text-lg font-semibold text-muted-foreground">No services listed</p>
-        </div>
+        <CatalogEmptyState kind="services" whatsappNumber={branch?.whatsapp} />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {services.map((service) => (

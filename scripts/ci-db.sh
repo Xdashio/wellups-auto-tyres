@@ -31,6 +31,10 @@ for t in "${REPO_ROOT}"/supabase/tests/*.test.sql; do
   out="$(psql -d "${DB_NAME}" -f "$t" 2>&1)" || { echo "$out"; fail=1; continue; }
   echo "$out" | grep -aE '^ ?ok [0-9]+ -' > /dev/null
   if echo "$out" | grep -aq 'not ok'; then echo "$out" | grep -a 'not ok'; fail=1; fi
+  # A hard SQL ERROR aborts the suite's transaction: pgTAP never prints
+  # "not ok" for the cascaded assertions, so catch psql errors explicitly
+  # (fail-closed direction — this only ever turns silent aborts into FAIL).
+  if echo "$out" | grep -aq '^psql:.*ERROR'; then echo "$out" | grep -a '^psql:.*ERROR' | head -5; fail=1; fi
 done
 
 echo "== seed + seed assertions"
