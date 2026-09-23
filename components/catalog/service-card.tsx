@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { QuoteButton } from "@/components/catalog/quote-button";
 import { PublicService } from "@/lib/supabase/catalog";
 
@@ -13,11 +14,11 @@ interface ServiceCardProps {
 
 export function ServiceCard({ service, whatsappNumber, branchAddress }: ServiceCardProps) {
   return (
-    <Card data-testid="service-card" className="flex flex-col justify-between hover:shadow-lg transition-shadow">
+    <Card data-testid="service-card" className="flex flex-col justify-between proto-ring-hover">
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <Badge tone="info">Garage Service</Badge>
-          <span className="text-xs text-text-secondary font-medium">Quote on Inspection</span>
+          <span className="text-xs text-muted-foreground font-medium">Quote on Inspection</span>
         </div>
 
         <h3 className="text-lg font-bold">
@@ -26,7 +27,7 @@ export function ServiceCard({ service, whatsappNumber, branchAddress }: ServiceC
           </Link>
         </h3>
 
-        <p className="text-sm text-text-secondary line-clamp-2">
+        <p className="text-sm text-muted-foreground line-clamp-2">
           {service.description ||
             `Professional garage service${branchAddress ? ` performed at our ${branchAddress} branch` : ""}.`}
         </p>
@@ -34,7 +35,7 @@ export function ServiceCard({ service, whatsappNumber, branchAddress }: ServiceC
         {service.vehicle_types && service.vehicle_types.length > 0 && (
           <div className="flex flex-wrap gap-1">
             {service.vehicle_types.map((v, i) => (
-              <span key={i} className="text-xs bg-blue-muted/15 text-navy px-2 py-0.5 rounded">
+              <span key={i} className="text-xs bg-blue-muted/15 text-navy px-2 py-0.5 rounded-sm">
                 {v}
               </span>
             ))}
@@ -42,12 +43,10 @@ export function ServiceCard({ service, whatsappNumber, branchAddress }: ServiceC
         )}
       </div>
 
-      <div className="pt-4 border-t border-text-secondary/15 mt-4 flex gap-2">
-        <Link href={`/services/${service.id}`} className="w-1/2">
-          <button className="w-full text-sm font-medium py-2 px-3 rounded bg-blue-muted/15 hover:bg-blue-muted/25 text-navy transition-colors">
-            View Details
-          </button>
-        </Link>
+      <div className="pt-4 border-t border-border mt-4 flex gap-2">
+        <Button asChild variant="secondary" className="w-1/2">
+          <Link href={`/services/${service.id}`}>View Details</Link>
+        </Button>
         <QuoteButton
           whatsappNumber={whatsappNumber}
           itemName={service.name}

@@ -28,7 +28,7 @@ export function Toaster() {
 
   return (
     <div className={`toast${show ? " show" : ""}`} id="toast" role="alert" aria-live="polite">
-      <span id="toastMsg">{msg ?? "Item added to cart"}</span>
+      <span id="toastMsg">{msg ?? "Notification"}</span>
       <button className="toast-close" onClick={hide} aria-label="Dismiss">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <line x1="18" y1="6" x2="6" y2="18" />

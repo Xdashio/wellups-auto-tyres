@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import "../components/landing/landing.css";
 import {
   getPrimaryBranch,
   getPublicBranches,
@@ -20,16 +19,17 @@ export const revalidate = 60;
 
 // Single-sourced branch facts: the title/description below are built from
 // the SAME getPrimaryBranch() row that the footer renders — business
-// data is never hardcoded a second time.
+// data is never hardcoded a second time. No city is claimed: only the
+// stored address/name, falling back to the country context.
 export async function generateMetadata(): Promise<Metadata> {
   const branch = await getPrimaryBranch();
   const place = branch?.address ?? branch?.name ?? "Kenya";
   const contact = branch?.phone ?? branch?.whatsapp;
   return {
-    title: "Nairobi's Tyre & Auto Parts Specialist",
+    title: "Tyre & Auto Parts Specialist",
     description:
-      `WELL LUPS AUTO TYRES LIMITED at ${place} — tyres, alloy wheels, ` +
-      `batteries, auto parts and garage services with quote-based pricing.` +
+      `WELL LUPS AUTO TYRES LIMITED at ${place} — tyres, ` +
+      `auto parts and garage services with quote-based pricing.` +
       (contact ? ` Call/WhatsApp ${contact}.` : ""),
   };
 }
@@ -95,9 +95,9 @@ export default async function Home() {
   const liveBranches: LandingBranch[] = branches.slice(0, 2).map((b, i) => ({
     num: `Branch 0${i + 1}`,
     name: b.name,
-    address: b.address ? [b.address, "Nairobi, Kenya"] : ["Nairobi, Kenya"],
+    address: b.address ? [b.address] : [],
     phone: b.phone ?? "",
-    phoneHref: b.phone ? `tel:${b.phone.replace(/\s+/g, "")}` : "#branches",
+    phoneHref: b.phone ? `tel:${b.phone.replace(/\s+/g, "")}` : "",
   }));
 
   const modelsByMake: Record<string, string[]> = {};
@@ -119,12 +119,17 @@ export default async function Home() {
   const featured = products.filter((p) => p.stock !== "out");
   const heroSource = featured[0] ?? products[0] ?? null;
 
+  const primaryWhatsapp =
+    branch?.whatsapp ?? branches.find((b) => b.whatsapp)?.whatsapp ?? null;
+
   const content: LandingContent = {
     products,
     services,
     branches: liveBranches,
     productCount: dbProducts.length,
     serviceCount: dbServices.length,
+    branchCount: branches.length,
+    whatsapp: primaryWhatsapp,
     makes: makeNames.length ? makeNames : Object.keys(STATIC_VEHICLE_MODELS),
     modelsByMake: makeNames.length ? modelsByMake : STATIC_VEHICLE_MODELS,
     years: yearList.length ? yearList : STATIC_YEARS,

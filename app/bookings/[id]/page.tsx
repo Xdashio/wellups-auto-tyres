@@ -2,9 +2,12 @@
 
 import React, { useState, useEffect, use } from "react";
 import { useSearchParams } from "next/navigation";
-import { getGuestBooking, BookingCustomer, BookingStatus } from "@/lib/supabase/bookings";
+import { getGuestBooking, BookingCustomer } from "@/lib/supabase/bookings";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { PageHeader } from "@/components/ui/page-header";
+import { BookingStatusBadge } from "@/components/ui/status-badge";
+import { LoadingState } from "@/components/ui/loading-state";
+import { EmptyState } from "@/components/ui/empty-state";
 
 interface GuestBookingPageProps {
   params: Promise<{ id: string }>;
@@ -33,74 +36,56 @@ export default function GuestBookingPage({ params }: GuestBookingPageProps) {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-16 text-center">
-        <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-        <p className="text-sm text-text-secondary mt-2">Loading booking details...</p>
+      <div className="container mx-auto px-4 py-8 max-w-2xl">
+        <LoadingState text="Loading booking details..." />
       </div>
     );
   }
 
   if (!booking) {
     return (
-      <div className="container mx-auto px-4 py-16 text-center max-w-md" data-testid="booking-not-found">
-        <h1 className="text-2xl font-bold text-destructive">Booking Not Found</h1>
-        <p className="text-sm text-text-secondary mt-2">
-          The requested booking reference or security token is invalid. Please check your link or contact the workshop.
-        </p>
+      <div className="container mx-auto px-4 py-8 max-w-2xl" data-testid="booking-not-found">
+        <EmptyState
+          heading="Booking Not Found"
+          body="The requested booking reference or security token is invalid. Please check your link or contact the workshop."
+        />
       </div>
     );
   }
 
-  const getStatusBadge = (status: BookingStatus) => {
-    switch (status) {
-      case "new":
-        return <Badge tone="warning">STATUS: NEW</Badge>;
-      case "under_review":
-        return <Badge tone="info">STATUS: UNDER REVIEW</Badge>;
-      case "scheduled":
-        return <Badge tone="success">STATUS: SCHEDULED</Badge>;
-      case "completed":
-        return <Badge tone="success">STATUS: COMPLETED</Badge>;
-      case "declined":
-        return <Badge tone="neutral">STATUS: DECLINED</Badge>;
-      case "cancelled":
-        return <Badge tone="neutral">STATUS: CANCELLED</Badge>;
-      default:
-        return <Badge tone="neutral">STATUS: {(status as string).toUpperCase()}</Badge>;
-    }
-  };
-
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl space-y-6" data-testid="booking-detail-view">
-      <div className="border-b pb-4 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-extrabold">Booking Details</h1>
-          <p className="font-mono text-sm font-semibold text-primary" data-testid="booking-number-display">
+      <PageHeader
+        size="compact"
+        title="Booking Details"
+        description={
+          <span className="font-mono text-sm font-semibold text-primary" data-testid="booking-number-display">
             {booking.booking_number}
-          </p>
-        </div>
-        <div data-testid="booking-status-badge">{getStatusBadge(booking.status)}</div>
-      </div>
+          </span>
+        }
+        actions={
+          <span data-testid="booking-status-badge">
+            <BookingStatusBadge status={booking.status} />
+          </span>
+        }
+      />
 
       {/* Confirmed Appointment Banner (Only when scheduled or completed) */}
       {(booking.status === "scheduled" || booking.status === "completed") && booking.scheduled_at && (
         <div
-          className="p-5 bg-success/10 border border-success/20 rounded-lg space-y-1"
+          className="p-4 bg-success/10 border border-success/20 rounded-none space-y-1"
           data-testid="confirmed-appointment-banner"
         >
-          <div className="flex items-center gap-2">
-            <span className="text-lg">🗓️</span>
-            <span className="text-xs uppercase font-bold text-success tracking-wider">
-              Confirmed Workshop Appointment
-            </span>
-          </div>
+          <p className="text-xs uppercase font-bold text-success tracking-wider">
+            Confirmed Workshop Appointment
+          </p>
           <p className="text-lg font-bold text-navy" data-testid="confirmed-datetime-display">
             {new Date(booking.scheduled_at).toLocaleString("en-KE", {
               dateStyle: "full",
               timeStyle: "short",
             })}
           </p>
-          <p className="text-xs text-text-secondary">
+          <p className="text-xs text-muted-foreground">
             Our technicians will be prepared for your vehicle at this confirmed time.
           </p>
         </div>
@@ -108,9 +93,9 @@ export default function GuestBookingPage({ params }: GuestBookingPageProps) {
 
       {/* Under Review Notice */}
       {booking.status === "under_review" && (
-        <div className="p-4 bg-blue-muted/20 border border-blue-muted/40 rounded-lg text-sm text-navy space-y-1">
+        <div className="p-4 bg-blue-muted/20 border border-blue-muted/40 rounded-none text-sm text-navy space-y-1">
           <p className="font-semibold">Review in Progress</p>
-          <p className="text-xs text-text-secondary">
+          <p className="text-xs text-muted-foreground">
             Our workshop team is reviewing capacity and scheduling your service appointment. You will see your confirmed appointment time here once scheduled.
           </p>
         </div>
@@ -118,7 +103,7 @@ export default function GuestBookingPage({ params }: GuestBookingPageProps) {
 
       {/* New Request Notice */}
       {booking.status === "new" && (
-        <div className="p-4 bg-warning/10 border border-warning/20 rounded-lg text-sm text-warning space-y-1">
+        <div className="p-4 bg-warning/10 border border-warning/20 rounded-none text-sm text-warning space-y-1">
           <p className="font-semibold">Request Submitted</p>
           <p className="text-xs text-warning">
             Submitting this request sends your preferred date and time to our workshop team. Your appointment is not confirmed until our team reviews the request and schedules it.
@@ -128,7 +113,7 @@ export default function GuestBookingPage({ params }: GuestBookingPageProps) {
 
       {/* Declined / Cancelled Notice */}
       {booking.status === "declined" && (
-        <div className="p-4 bg-muted border border-border rounded-lg text-sm text-muted-foreground space-y-1">
+        <div className="p-4 bg-muted border border-border rounded-none text-sm text-muted-foreground space-y-1">
           <p className="font-semibold">Booking Request Declined</p>
           <p className="text-xs text-muted-foreground">
             Our workshop is unable to accommodate this booking request at the requested time. Please submit a new request with an alternate date or contact us.
@@ -137,7 +122,7 @@ export default function GuestBookingPage({ params }: GuestBookingPageProps) {
       )}
 
       {booking.status === "cancelled" && (
-        <div className="p-4 bg-muted border border-border rounded-lg text-sm text-muted-foreground space-y-1">
+        <div className="p-4 bg-muted border border-border rounded-none text-sm text-muted-foreground space-y-1">
           <p className="font-semibold">Appointment Cancelled</p>
           <p className="text-xs text-muted-foreground">
             This scheduled appointment has been cancelled by our workshop.
@@ -146,9 +131,9 @@ export default function GuestBookingPage({ params }: GuestBookingPageProps) {
       )}
 
       {/* Booking Details Card */}
-      <Card className="space-y-4">
+      <Card className="space-y-4 p-5">
         <div>
-          <h3 className="text-xs font-semibold uppercase text-text-secondary tracking-wider mb-1">
+          <h3 className="text-xs font-semibold uppercase text-muted-foreground tracking-wider mb-1">
             Service Requested
           </h3>
           <p className="text-base font-bold text-navy" data-testid="booking-service-name">
@@ -158,29 +143,29 @@ export default function GuestBookingPage({ params }: GuestBookingPageProps) {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t pt-4">
           <div>
-            <h3 className="text-xs font-semibold uppercase text-text-secondary tracking-wider mb-1">
+            <h3 className="text-xs font-semibold uppercase text-muted-foreground tracking-wider mb-1">
               Customer Preferred Date
             </h3>
             <p className="text-sm font-medium text-navy" data-testid="booking-requested-date">
               {booking.requested_date}
             </p>
-            <span className="text-[11px] text-text-secondary">(Requested preference)</span>
+            <span className="text-xs text-muted-foreground">(Requested preference)</span>
           </div>
 
           <div>
-            <h3 className="text-xs font-semibold uppercase text-text-secondary tracking-wider mb-1">
+            <h3 className="text-xs font-semibold uppercase text-muted-foreground tracking-wider mb-1">
               Customer Preferred Time
             </h3>
             <p className="text-sm font-medium text-navy" data-testid="booking-requested-time">
               {booking.requested_time}
             </p>
-            <span className="text-[11px] text-text-secondary">(24-hour local time preference)</span>
+            <span className="text-xs text-muted-foreground">(24-hour local time preference)</span>
           </div>
         </div>
 
         {booking.vehicle_summary && (
           <div className="border-t pt-4">
-            <h3 className="text-xs font-semibold uppercase text-text-secondary tracking-wider mb-1">
+            <h3 className="text-xs font-semibold uppercase text-muted-foreground tracking-wider mb-1">
               Vehicle Information
             </h3>
             <p className="text-sm text-navy" data-testid="booking-vehicle-summary">
@@ -191,7 +176,7 @@ export default function GuestBookingPage({ params }: GuestBookingPageProps) {
 
         {booking.customer_notes && (
           <div className="border-t pt-4">
-            <h3 className="text-xs font-semibold uppercase text-text-secondary tracking-wider mb-1">
+            <h3 className="text-xs font-semibold uppercase text-muted-foreground tracking-wider mb-1">
               Service Notes
             </h3>
             <p className="text-sm text-navy whitespace-pre-line" data-testid="booking-customer-notes">
@@ -200,7 +185,7 @@ export default function GuestBookingPage({ params }: GuestBookingPageProps) {
           </div>
         )}
 
-        <div className="border-t pt-4 flex justify-between text-xs text-text-secondary">
+        <div className="border-t pt-4 flex justify-between text-xs text-muted-foreground">
           <span>Requested on: {new Date(booking.created_at).toLocaleDateString()}</span>
           <span>Reference: {booking.booking_number}</span>
         </div>

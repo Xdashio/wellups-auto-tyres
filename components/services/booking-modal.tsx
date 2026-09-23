@@ -127,7 +127,7 @@ export function BookingModal({
             className="space-y-4 py-4"
             data-testid="booking-success-view"
           >
-            <div className="border border-success/20 bg-success/10 rounded-lg p-4 text-center space-y-3">
+            <div className="border border-success/20 bg-success/10 rounded-none p-4 text-center space-y-3">
               <CheckCircle2
                 className="mx-auto h-6 w-6 text-success"
                 aria-hidden="true"
@@ -176,7 +176,7 @@ export function BookingModal({
           >
             {errorMessage && (
               <div
-                className="border border-destructive/20 bg-destructive/10 rounded p-3 text-xs font-medium text-destructive"
+                className="border border-destructive/20 bg-destructive/10 rounded-none p-3 text-xs font-medium text-destructive"
                 data-testid="booking-error-message"
               >
                 {errorMessage}
@@ -292,7 +292,7 @@ export function BookingModal({
               />
             </div>
 
-            <div className="rounded-md border border-border bg-muted/40 p-3 text-xs text-muted-foreground">
+            <div className="rounded-none border border-border bg-muted/40 p-3 text-xs text-muted-foreground">
               <p className="font-semibold text-foreground mb-0.5">
                 Please Note:
               </p>

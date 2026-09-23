@@ -27,9 +27,18 @@ export interface LandingBranch {
   phoneHref: string;
 }
 
-export const WHATSAPP_NUMBER = "254748088741";
-
-export function whatsappInquiryUrl(itemName = "", itemSpec = "", itemCategory = "") {
+// WhatsApp inquiry links are built ONLY from the configured branch
+// number (branches_public.whatsapp via LandingContent.whatsapp). There is
+// no fallback number: a null/empty input returns null and the caller must
+// hide the WhatsApp action. Never hardcode a number here.
+export function buildWhatsappInquiryUrl(
+  whatsappNumber: string | null | undefined,
+  itemName = "",
+  itemSpec = "",
+  itemCategory = "",
+): string | null {
+  const clean = (whatsappNumber ?? "").replace(/[^0-9]/g, "");
+  if (!clean) return null;
   let message = "Hello Well Lups!";
   if (itemName) {
     message += ` I would like to inquire about ${itemName}`;
@@ -37,9 +46,9 @@ export function whatsappInquiryUrl(itemName = "", itemSpec = "", itemCategory = 
     if (itemCategory) message += ` under ${itemCategory}`;
     message += ".";
   } else {
-    message += " I would like to inquire about your tyres, products, and garage services.";
+    message += " I would like to inquire about your products and garage services.";
   }
-  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+  return `https://wa.me/${clean}?text=${encodeURIComponent(message)}`;
 }
 
 // Generic vehicle reference data for the fit finder. This is not store

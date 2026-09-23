@@ -1,6 +1,12 @@
 import Link from "next/link";
+import { buildWhatsappInquiryUrl } from "./landing-data";
 
-export function SiteFooter() {
+// Footer columns link only to real destinations. Shop and Services list
+// the catalogue roots (never invented category names); Contact renders
+// the WhatsApp action only when a branch number is configured.
+export function SiteFooter({ whatsapp = null }: { whatsapp?: string | null }) {
+  const waUrl = buildWhatsappInquiryUrl(whatsapp);
+  const year = new Date().getFullYear();
   return (
     <footer className="footer">
       <div className="footer-inner">
@@ -17,50 +23,42 @@ export function SiteFooter() {
             <span className="footer-brand-name">WELL LUPS AUTO TYRES</span>
           </div>
           <p className="footer-brand-tagline">
-            Tyres, parts, and garage care for the road ahead. Two branches in Nairobi.
+            Tyres, parts, and garage care for the road ahead.
           </p>
         </div>
         <div>
           <div className="footer-col-heading">Shop</div>
           <ul className="footer-links">
-            <li><Link href="/products">Tyres</Link></li>
-            <li><Link href="/products">Engine Oil</Link></li>
-            <li><Link href="/products">Batteries</Link></li>
-            <li><Link href="/products">Brake Parts</Link></li>
             <li><Link href="/products">All products</Link></li>
           </ul>
         </div>
         <div>
           <div className="footer-col-heading">Services</div>
           <ul className="footer-links">
-            <li><Link href="/services">Wheel Balancing</Link></li>
-            <li><Link href="/services">Wheel Alignment</Link></li>
-            <li><Link href="/services">Tyre Fitting</Link></li>
-            <li><Link href="/services">Tyre Repair</Link></li>
-            <li><Link href="/services">Book a service</Link></li>
+            <li><Link href="/services">All services</Link></li>
           </ul>
         </div>
         <div>
           <div className="footer-col-heading">Company</div>
           <ul className="footer-links">
             <li><a href="#branches">Our Branches</a></li>
-            <li><a href="#booking">About Well Lups</a></li>
             <li><Link href="/warranty">Warranty &amp; Returns</Link></li>
-            <li>
-              <a
-                href="https://wa.me/254748088741?text=Hello%20Well%20Lups!%20I%20would%20like%20to%20inquire%20about%20your%20tyres%2C%20products%2C%20and%20garage%20services."
-                target="_blank"
-                rel="noopener"
-              >
-                Contact Us
-              </a>
-            </li>
+            {waUrl ? (
+              <li>
+                <a
+                  href={waUrl}
+                  target="_blank"
+                  rel="noopener"
+                >
+                  Contact Us
+                </a>
+              </li>
+            ) : null}
           </ul>
         </div>
       </div>
       <div className="footer-bottom">
-        <span className="footer-copy">© 2025 Well Lups Auto Tyres Limited. All rights reserved.</span>
-        <span className="footer-copy">Nairobi, Kenya</span>
+        <span className="footer-copy">© {year} Well Lups Auto Tyres Limited. All rights reserved.</span>
       </div>
     </footer>
   );

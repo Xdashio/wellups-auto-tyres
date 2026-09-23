@@ -60,13 +60,13 @@ export function VehicleFilterBar({ fitments }: VehicleFilterBarProps) {
   };
 
   return (
-    <div className="bg-blue-muted/10 p-4 rounded-lg border border-blue-muted/20 space-y-3">
+    <div className="bg-blue-muted/10 p-4 rounded-none border border-blue-muted/20 space-y-3">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold uppercase tracking-wider text-navy">
           Filter by Vehicle (Kenya Catalogue)
         </h3>
         {searchParams.get("sizeSpec") && (
-          <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded font-mono font-medium">
+          <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-sm font-mono font-medium">
             Active Size: {searchParams.get("sizeSpec")}
           </span>
         )}
@@ -77,7 +77,7 @@ export function VehicleFilterBar({ fitments }: VehicleFilterBarProps) {
           setSelectedModel("");
           setSelectedTrim("");
         }}>
-          <SelectTrigger>
+          <SelectTrigger aria-label="Vehicle make">
             <SelectValue placeholder="Select Make" />
           </SelectTrigger>
           <SelectContent>
@@ -97,7 +97,7 @@ export function VehicleFilterBar({ fitments }: VehicleFilterBarProps) {
             setSelectedTrim("");
           }}
         >
-          <SelectTrigger>
+          <SelectTrigger aria-label="Vehicle model">
             <SelectValue placeholder={selectedMake ? "Select Model" : "Select Make First"} />
           </SelectTrigger>
           <SelectContent>
@@ -114,7 +114,7 @@ export function VehicleFilterBar({ fitments }: VehicleFilterBarProps) {
           value={selectedTrim}
           onValueChange={(val) => setSelectedTrim(val)}
         >
-          <SelectTrigger>
+          <SelectTrigger aria-label="Vehicle trim and tyre size">
             <SelectValue placeholder={selectedModel ? "Select Trim / Size" : "Select Model First"} />
           </SelectTrigger>
           <SelectContent>

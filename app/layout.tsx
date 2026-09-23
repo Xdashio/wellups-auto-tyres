@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
+import "../components/landing/landing.css";
 import { SiteHeader } from "@/components/landing/site-header";
 import { SiteFooter } from "@/components/landing/site-footer";
 import { Toaster } from "@/components/landing/toaster";
-import { getPublicCounts } from "@/lib/supabase/catalog";
+import { getPublicBranches, getPublicCounts, getPrimaryBranch } from "@/lib/supabase/catalog";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -27,7 +28,11 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const counts = await getPublicCounts();
+  const [counts, branches, primary] = await Promise.all([
+    getPublicCounts(),
+    getPublicBranches(),
+    getPrimaryBranch(),
+  ]);
   return (
     <html lang="en" className={plusJakartaSans.variable}>
       <body className="min-h-[100dvh] bg-background text-foreground font-sans flex flex-col">
@@ -35,9 +40,15 @@ export default async function RootLayout({
           productCount={counts.products}
           serviceCount={counts.services}
           branchCount={counts.branches}
+          whatsapp={primary?.whatsapp ?? null}
+          branches={branches.slice(0, 4).map((b) => ({
+            name: b.name,
+            address: b.address,
+            phone: b.phone ?? b.whatsapp,
+          }))}
         />
         <div className="flex-1">{children}</div>
-        <SiteFooter />
+        <SiteFooter whatsapp={primary?.whatsapp ?? null} />
         <Toaster />
       </body>
     </html>

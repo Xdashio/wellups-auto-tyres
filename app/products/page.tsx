@@ -12,13 +12,16 @@ import { CatalogEmptyState } from "@/components/catalog/catalog-empty-state";
 import { VehicleFilterBar } from "@/components/catalog/vehicle-filter-bar";
 import { SearchBar } from "@/components/catalog/search-bar";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
+import { PageHeader } from "@/components/ui/page-header";
 
 export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: "Product Catalogue",
   description:
-    "Browse tyres, alloy wheels, batteries, brake parts, filters and engine fluids. Quote-based pricing — request a quote on anything you need.",
+    "Browse our product catalogue. Quote-based pricing — request a quote on anything you need.",
 };
 
 interface ProductsPageProps {
@@ -39,19 +42,17 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-text-secondary/15 pb-6">
-        <div>
-          <h1 className="text-3xl font-extrabold tracking-tight">Product Catalogue</h1>
-          <p className="text-text-secondary mt-1">
-            Browse tyres, wheels, batteries, filters, and brake parts. Quote-based pricing.
-          </p>
-        </div>
-        <Suspense fallback={<div className="h-10 w-64 bg-blue-muted/15 animate-pulse rounded" />}>
-          <SearchBar />
-        </Suspense>
-      </div>
+      <PageHeader
+        title="Product Catalogue"
+        description="Browse our product catalogue. Quote-based pricing."
+        actions={
+          <Suspense fallback={<div className="h-10 w-64 bg-blue-muted/15 animate-pulse rounded-none" />}>
+            <SearchBar />
+          </Suspense>
+        }
+      />
 
-      <Suspense fallback={<div className="h-24 bg-blue-muted/15 animate-pulse rounded-lg" />}>
+      <Suspense fallback={<div className="h-24 bg-blue-muted/15 animate-pulse rounded-none" />}>
         <VehicleFilterBar fitments={fitments} />
       </Suspense>
 
@@ -81,18 +82,15 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
 
       {products.length === 0 ? (
         resolvedParams.categoryId || resolvedParams.brand || resolvedParams.sizeSpec || resolvedParams.search ? (
-          <div className="text-center py-16 border rounded-lg bg-blue-muted/10">
-            <p className="text-lg font-semibold text-text-secondary">No products found</p>
-            <p className="text-sm text-text-secondary mt-1">
-              Try resetting search or vehicle fitment filters.
-            </p>
-            <Link
-              href="/products"
-              className="inline-block mt-4 text-sm font-medium text-primary hover:underline"
-            >
-              Reset Filters
-            </Link>
-          </div>
+          <EmptyState
+            heading="No products found"
+            body="Try resetting search or vehicle fitment filters."
+            action={
+              <Button asChild variant="secondary">
+                <Link href="/products">Reset Filters</Link>
+              </Button>
+            }
+          />
         ) : (
           <CatalogEmptyState kind="products" whatsappNumber={branch?.whatsapp} />
         )

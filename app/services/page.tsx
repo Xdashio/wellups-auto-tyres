@@ -1,16 +1,16 @@
 import React from "react";
-import Link from "next/link";
 import type { Metadata } from "next";
 import { getPublicServices, getPrimaryBranch } from "@/lib/supabase/catalog";
 import { ServiceCard } from "@/components/catalog/service-card";
 import { CatalogEmptyState } from "@/components/catalog/catalog-empty-state";
+import { PageHeader } from "@/components/ui/page-header";
 
 export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: "Garage Services",
   description:
-    "Garage services — tyre fitting, wheel alignment, balancing, brake servicing and battery checks. Priced by quote after inspection.",
+    "Garage services with quote-based pricing — request a quote after inspection.",
 };
 
 export default async function ServicesPage() {
@@ -20,12 +20,14 @@ export default async function ServicesPage() {
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
       {/* Header */}
-      <div className="border-b pb-6">
-        <h1 className="text-3xl font-extrabold tracking-tight">Garage Services</h1>
-        <p className="text-muted-foreground mt-1">
-          Professional auto services{branch?.address ? ` performed at our ${branch.address} branch` : ""}. Equal weight to retail products.
-        </p>
-      </div>
+      <PageHeader
+        title="Garage Services"
+        description={
+          branch?.address
+            ? `Professional auto services performed at our ${branch.address} branch.`
+            : "Professional auto services with quote-based pricing."
+        }
+      />
 
       {/* Services Grid */}
       {services.length === 0 ? (

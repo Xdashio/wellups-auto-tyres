@@ -39,7 +39,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl space-y-8">
-      <nav className="text-sm text-text-secondary space-x-2">
+      <nav className="text-sm text-muted-foreground space-x-2">
         <Link href="/products" className="hover:underline">
           Products
         </Link>
@@ -48,12 +48,12 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
       </nav>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-        <div className="bg-blue-muted/15 aspect-square rounded-lg border border-text-secondary/25 flex items-center justify-center p-8 text-center">
+        <div className="bg-blue-muted/15 aspect-square rounded-none border border-border flex items-center justify-center p-8 text-center">
           <div>
             <div className="text-4xl font-extrabold text-navy/40 mb-2">
               {product.brand}
             </div>
-            <p className="text-sm font-mono text-text-secondary">{product.size_spec || "Standard Spec"}</p>
+            <p className="text-sm font-mono text-muted-foreground">{product.size_spec || "Standard Spec"}</p>
           </div>
         </div>
 
@@ -65,28 +65,28 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
               </Badge>
               <Badge tone={stockStatus.tone}>{stockStatus.label}</Badge>
             </div>
-            <h1 className="text-2xl font-bold tracking-tight">{product.name}</h1>
-            <p className="text-sm text-text-secondary font-mono mt-1">SKU: {product.sku}</p>
+            <h1 className="text-3xl font-extrabold tracking-tight">{product.name}</h1>
+            <p className="text-sm text-muted-foreground font-mono mt-1">SKU: {product.sku}</p>
           </div>
 
-          <Card className="space-y-3">
-            <div className="flex justify-between text-sm py-1 border-b border-text-secondary/15">
-              <span className="text-text-secondary">Pricing Model</span>
+          <Card className="space-y-3 p-5">
+            <div className="flex justify-between text-sm py-1 border-b border-border">
+              <span className="text-muted-foreground">Pricing Model</span>
               <span className="font-semibold text-primary">Quote on Inspection / Request</span>
             </div>
-            <div className="flex justify-between text-sm py-1 border-b border-text-secondary/15">
-              <span className="text-text-secondary">Specification / Size</span>
+            <div className="flex justify-between text-sm py-1 border-b border-border">
+              <span className="text-muted-foreground">Specification / Size</span>
               <span className="font-mono font-medium">{product.size_spec || "Standard"}</span>
             </div>
             <div className="flex justify-between text-sm py-1">
-              <span className="text-text-secondary">Availability</span>
+              <span className="text-muted-foreground">Availability</span>
               <span className="font-medium">{stockStatus.label}</span>
             </div>
           </Card>
 
-          <div className="p-4 rounded-lg bg-blue-muted/15 border border-blue-muted/30 space-y-3">
+          <div className="p-4 rounded-none bg-blue-muted/15 border border-blue-muted/30 space-y-3">
             <h3 className="font-semibold text-sm">Need pricing or installation details?</h3>
-            <p className="text-xs text-text-secondary">
+            <p className="text-xs text-muted-foreground">
               Request an instant quote directly with our team{branch?.address ? ` at our ${branch.address} branch` : ""} via WhatsApp.
             </p>
             <QuoteButton

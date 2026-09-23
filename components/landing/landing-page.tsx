@@ -13,7 +13,7 @@ import {
 import {
   STATIC_VEHICLE_MODELS,
   STATIC_YEARS,
-  whatsappInquiryUrl,
+  buildWhatsappInquiryUrl,
   type LandingBranch,
   type LandingProduct,
   type LandingService,
@@ -26,11 +26,59 @@ export interface LandingContent {
   branches: LandingBranch[];
   productCount: number;
   serviceCount: number;
+  branchCount: number;
+  whatsapp: string | null;
   makes: string[];
   modelsByMake: Record<string, string[]>;
   years: string[];
   featured: LandingProduct[];
   heroProduct: { name: string; spec: string } | null;
+}
+
+// Quote CTA that never fabricates a channel: with a configured branch
+// number it deep-links WhatsApp; without one it routes into the on-site
+// quote flow (/products or /services) where the request is logged and a
+// WhatsApp handoff appears only when configured.
+function QuoteLink({
+  whatsapp,
+  name,
+  spec,
+  category,
+  fallbackHref,
+  children,
+}: {
+  whatsapp: string | null;
+  name: string;
+  spec: string;
+  category: string;
+  fallbackHref: string;
+  children: React.ReactNode;
+}) {
+  const url = buildWhatsappInquiryUrl(whatsapp, name, spec, category);
+  if (url) {
+    return (
+      <a
+        className="product-price quote-btn"
+        href={url}
+        target="_blank"
+        rel="noopener"
+        style={{ background: "none", border: "none", padding: 0 }}
+        aria-label={`Get a quote for ${name} on WhatsApp`}
+      >
+        {children}
+      </a>
+    );
+  }
+  return (
+    <Link
+      className="product-price quote-btn"
+      href={fallbackHref}
+      style={{ background: "none", border: "none", padding: 0, textDecoration: "none" }}
+      aria-label={`Get a quote for ${name} (quote form)`}
+    >
+      {children}
+    </Link>
+  );
 }
 
 const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
@@ -153,41 +201,13 @@ function GenericServiceSvg() {
   );
 }
 
-function WishButton({ name }: { name: string }) {
-  const [active, setActive] = useState(false);
-  return (
-    <button
-      className={`wishlist-btn${active ? " active" : ""}`}
-      aria-label="Toggle wishlist"
-      onClick={(e) => {
-        e.stopPropagation();
-        setActive((a) => {
-          toast(a ? `${name} removed from wishlist` : `${name} added to wishlist`);
-          return !a;
-        });
-      }}
-    >
-      <svg
-        width="14"
-        height="14"
-        viewBox="0 0 24 24"
-        fill={active ? "#ef4444" : "none"}
-        stroke={active ? "#ef4444" : "#777"}
-        strokeWidth="2"
-      >
-        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-      </svg>
-    </button>
-  );
-}
-
 const STOCK_META = {
   in: { label: "In Stock", cls: "stock-in" },
   low: { label: "Low Stock", cls: "stock-low" },
   out: { label: "Out of Stock", cls: "stock-out" },
 } as const;
 
-function ProductCard({ product }: { product: LandingProduct }) {
+function ProductCard({ product, whatsapp }: { product: LandingProduct; whatsapp: string | null }) {
   const meta = STOCK_META[product.stock];
   const out = product.stock === "out";
   return (
@@ -208,43 +228,28 @@ function ProductCard({ product }: { product: LandingProduct }) {
         ) : (
           <GenericTyreSvg />
         )}
-        <WishButton name={product.name} />
       </div>
       <div className="product-card-body">
         <div className="product-cat">{product.category}</div>
         <div className="product-name">{product.name}</div>
         <div className="product-spec">{product.spec}</div>
         <div className="product-footer">
-          <a
-            className="product-price quote-btn"
-            href={whatsappInquiryUrl(product.name, product.spec, product.category)}
-            target="_blank"
-            rel="noopener"
-            style={{ background: "none", border: "none", padding: 0, ...(out ? { color: "var(--text-secondary)" } : {}) }}
-            aria-label={`Get a quote for ${product.name} on WhatsApp`}
+          <QuoteLink
+            whatsapp={whatsapp}
+            name={product.name}
+            spec={product.spec}
+            category={product.category}
+            fallbackHref="/products"
           >
             Get a quote
-          </a>
-          <button
-            className="add-to-cart-btn"
-            aria-label={out ? "Out of stock" : "Add to cart"}
-            disabled={out}
-            style={out ? { background: "#ccc", cursor: "not-allowed" } : undefined}
-            onClick={() => toast(`${product.brand} ${product.category === "Tyre" ? product.name.replace(/^(Bridgestone|Michelin|Continental|Pirelli|Goodyear)\s+/, "") : product.name} added to cart`.slice(0, 80))}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
-              <line x1="3" y1="6" x2="21" y2="6" />
-              <path d="M16 10a4 4 0 0 1-8 0" />
-            </svg>
-          </button>
+          </QuoteLink>
         </div>
       </div>
     </div>
   );
 }
 
-function ServiceCard({ service }: { service: LandingService }) {
+function ServiceCard({ service, whatsapp }: { service: LandingService; whatsapp: string | null }) {
   return (
     <div className="product-card">
       <div className="product-card-image" style={{ background: "#EEF3FA" }}>
@@ -259,21 +264,20 @@ function ServiceCard({ service }: { service: LandingService }) {
         <div className="product-name">{service.name}</div>
         <div className="product-spec">{service.spec}</div>
         <div className="product-footer">
-          <a
-            className="product-price quote-btn"
-            href={whatsappInquiryUrl(service.name, service.spec, service.category)}
-            target="_blank"
-            rel="noopener"
-            style={{ background: "none", border: "none", padding: 0 }}
-            aria-label={`Get a quote for ${service.name} on WhatsApp`}
+          <QuoteLink
+            whatsapp={whatsapp}
+            name={service.name}
+            spec={service.spec}
+            category={service.category}
+            fallbackHref="/services"
           >
             {service.cta}
-          </a>
-          <button
+          </QuoteLink>
+          <Link
             className="add-to-cart-btn"
-            style={{ background: "var(--navy)" }}
-            aria-label="Book service"
-            onClick={() => toast(`${service.name} booking started`)}
+            style={{ background: "var(--navy)", textDecoration: "none" }}
+            aria-label={`Book ${service.name} (booking form)`}
+            href="/services"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
@@ -281,7 +285,7 @@ function ServiceCard({ service }: { service: LandingService }) {
               <line x1="8" y1="2" x2="8" y2="6" />
               <line x1="3" y1="10" x2="21" y2="10" />
             </svg>
-          </button>
+          </Link>
         </div>
       </div>
     </div>
@@ -289,7 +293,13 @@ function ServiceCard({ service }: { service: LandingService }) {
 }
 
 /* ─── Hero (roll-in & settle, ported) ────────────────────── */
-function Hero({ heroProduct }: { heroProduct: { name: string; spec: string } | null }) {
+function Hero({
+  heroProduct,
+  whatsapp,
+}: {
+  heroProduct: { name: string; spec: string } | null;
+  whatsapp: string | null;
+}) {
   const stageRef = useRef<HTMLDivElement>(null);
   const rigRef = useRef<HTMLDivElement>(null);
   const wheelRef = useRef<HTMLDivElement>(null);
@@ -400,11 +410,11 @@ function Hero({ heroProduct }: { heroProduct: { name: string; spec: string } | n
     <section className="hero">
       <div className="hero-content">
         <h1 className="hero-headline">
-          Nairobi&apos;s tyres.<br />
+          Tyres &amp; parts.<br />
           Fitted right.
         </h1>
         <p className="hero-body">
-          Two branches, genuine brands, qualified technicians. Parts and garage care for every road ahead.
+          Quality parts and garage care for every road ahead.
         </p>
         <div className="hero-ctas">
           <a href="#catalog" className="btn-primary" onClick={scrollTo("catalog")}>
@@ -419,21 +429,21 @@ function Hero({ heroProduct }: { heroProduct: { name: string; spec: string } | n
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <polyline points="20 6 9 17 4 12" />
             </svg>
-            <span>Genuine brands stocked</span>
+            <span>Get a quote online</span>
           </span>
           <span className="hero-trust-dot" aria-hidden="true">·</span>
           <span className="hero-trust-item">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <polyline points="20 6 9 17 4 12" />
             </svg>
-            <span>Two Nairobi branches</span>
+            <span>Book a service</span>
           </span>
           <span className="hero-trust-dot" aria-hidden="true">·</span>
           <span className="hero-trust-item">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <polyline points="20 6 9 17 4 12" />
             </svg>
-            <span>Fitting included</span>
+            <span>Track your request</span>
           </span>
         </div>
       </div>
@@ -477,23 +487,15 @@ function Hero({ heroProduct }: { heroProduct: { name: string; spec: string } | n
               <div className="product-spec">{heroProduct.spec}</div>
             </div>
             <div className="hc-row hc-foot" style={{ "--i": 3 } as CSSProperties}>
-              <a
-                className="product-price quote-btn"
-                href={whatsappInquiryUrl(heroProduct.name, heroProduct.spec, "Tyres")}
-                target="_blank"
-                rel="noopener"
-                style={{ background: "none", border: "none", padding: 0 }}
-                aria-label={`Inquire about ${heroProduct.name} on WhatsApp`}
+              <QuoteLink
+                whatsapp={whatsapp}
+                name={heroProduct.name}
+                spec={heroProduct.spec}
+                category="Tyres"
+                fallbackHref="/products"
               >
                 Get a quote
-              </a>
-              <button className="add-to-cart-btn" onClick={() => toast(`${heroProduct.name} added to cart`)} aria-label="Add to cart">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
-                  <line x1="3" y1="6" x2="21" y2="6" />
-                  <path d="M16 10a4 4 0 0 1-8 0" />
-                </svg>
-              </button>
+              </QuoteLink>
             </div>
           </div>
         ) : null}
@@ -587,9 +589,9 @@ function FitFinder({
               }
               const label = model ? `${make} ${model}` : make;
               if (resultCount > 0) {
-                toast(`Found ${resultCount} matching genuine ${resultCount === 1 ? "tyre" : "tyres"} for ${label}`);
+                toast(`${label} noted — ${resultCount} item${resultCount === 1 ? "" : "s"} in the catalogue below; request a quote and we will confirm fitment`);
               } else {
-                toast(`No matching stock yet for ${label} — chat to us on WhatsApp`);
+                toast(`${label} noted — no stock listed yet; send a quote request and we will confirm fitment`);
               }
               document.getElementById("catalog")?.scrollIntoView({ behavior: "smooth" });
             }}
@@ -606,7 +608,7 @@ function FitFinder({
 }
 
 /* ─── Featured wheel carousel (ported) ───────────────────── */
-function Featured({ items }: { items: LandingProduct[] }) {
+function Featured({ items, whatsapp }: { items: LandingProduct[]; whatsapp: string | null }) {
   const trackRef = useRef<HTMLDivElement>(null);
   const pivotRef = useRef<HTMLDivElement>(null);
   const ticksRef = useRef<HTMLDivElement>(null);
@@ -858,38 +860,21 @@ function Featured({ items }: { items: LandingProduct[] }) {
                         }}
                       />
                     )}
-                    <WishButton name={p.name} />
                   </div>
                   <div className="product-card-body">
                     <div className="product-cat">{p.category}</div>
                     <div className="product-name">{p.name}</div>
                     <div className="product-spec">{p.spec}</div>
                     <div className="product-footer">
-                      <a
-                        className="product-price quote-btn"
-                        href={whatsappInquiryUrl(p.name, p.spec, p.category)}
-                        target="_blank"
-                        rel="noopener"
-                        style={{ background: "none", border: "none", padding: 0 }}
-                        aria-label={`Get a quote for ${p.name} on WhatsApp`}
-                        onClick={(e) => e.stopPropagation()}
+                      <QuoteLink
+                        whatsapp={whatsapp}
+                        name={p.name}
+                        spec={p.spec}
+                        category={p.category}
+                        fallbackHref="/products"
                       >
                         Get a quote
-                      </a>
-                      <button
-                        className="add-to-cart-btn"
-                        aria-label="Add to cart"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toast(`${p.name} added to cart`);
-                        }}
-                      >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
-                          <line x1="3" y1="6" x2="21" y2="6" />
-                          <path d="M16 10a4 4 0 0 1-8 0" />
-                        </svg>
-                      </button>
+                      </QuoteLink>
                     </div>
                   </div>
                 </div>
@@ -925,11 +910,13 @@ function Catalog({
   services,
   productCount,
   serviceCount,
+  whatsapp,
 }: {
   products: LandingProduct[];
   services: LandingService[];
   productCount: number;
   serviceCount: number;
+  whatsapp: string | null;
 }) {
   const [tab, setTab] = useState<"products" | "services">("products");
 
@@ -959,12 +946,12 @@ function Catalog({
 
         <div className="product-grid active" id="tab-products" style={{ display: tab === "products" ? "grid" : "none" }}>
           {products.length ? (
-            products.map((p) => <ProductCard key={p.id} product={p} />)
+            products.map((p) => <ProductCard key={p.id} product={p} whatsapp={whatsapp} />)
           ) : (
             <div style={{ gridColumn: "1 / -1", padding: "48px 24px", textAlign: "center" }}>
               <div className="product-name">Fresh stock landing soon.</div>
               <div className="product-spec" style={{ marginTop: 8 }}>
-                Chat to us on WhatsApp and we&apos;ll confirm availability for your vehicle.
+                Tell us what you need and we&apos;ll confirm availability for your vehicle.
               </div>
             </div>
           )}
@@ -972,12 +959,12 @@ function Catalog({
 
         <div className="product-grid" id="tab-services" style={{ display: tab === "services" ? "grid" : "none" }}>
           {services.length ? (
-            services.map((s) => <ServiceCard key={s.id} service={s} />)
+            services.map((s) => <ServiceCard key={s.id} service={s} whatsapp={whatsapp} />)
           ) : (
             <div style={{ gridColumn: "1 / -1", padding: "48px 24px", textAlign: "center" }}>
               <div className="product-name">Service menu coming together.</div>
               <div className="product-spec" style={{ marginTop: 8 }}>
-                Call or WhatsApp either branch to book fitting, balancing, and alignment.
+                Tell us what your vehicle needs and we&apos;ll confirm scope and pricing.
               </div>
             </div>
           )}
@@ -1166,8 +1153,8 @@ function RoadScene() {
   );
 }
 
-/* ─── WhatsApp FAB ───────────────────────────────────────── */
-function WhatsAppFab() {
+/* ─── WhatsApp FAB (rendered only when a branch number is configured) ─ */
+function WhatsAppFab({ whatsapp }: { whatsapp: string | null }) {
   const [visible, setVisible] = useState(false);
   useEffect(() => {
     const onScroll = () => setVisible(window.scrollY > 400);
@@ -1175,9 +1162,11 @@ function WhatsAppFab() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+  const url = buildWhatsappInquiryUrl(whatsapp);
+  if (!url) return null;
   return (
     <a
-      href={whatsappInquiryUrl()}
+      href={url}
       className={`whatsapp-fab${visible ? " visible" : ""}`}
       id="whatsappFab"
       target="_blank"
@@ -1206,7 +1195,7 @@ export function LandingPage({ content }: { content: LandingContent }) {
 
   return (
     <main>
-      <Hero heroProduct={content.heroProduct} />
+      <Hero heroProduct={content.heroProduct} whatsapp={content.whatsapp} />
 
       <FitFinder
         makes={content.makes}
@@ -1215,13 +1204,16 @@ export function LandingPage({ content }: { content: LandingContent }) {
         resultCount={content.productCount}
       />
 
-      {content.featured.length ? <Featured items={content.featured} /> : null}
+      {content.featured.length ? (
+        <Featured items={content.featured} whatsapp={content.whatsapp} />
+      ) : null}
 
       <Catalog
         products={content.products}
         services={content.services}
         productCount={content.productCount}
         serviceCount={content.serviceCount}
+        whatsapp={content.whatsapp}
       />
 
       <section className="dark-band" id="booking">
@@ -1229,7 +1221,7 @@ export function LandingPage({ content }: { content: LandingContent }) {
           <div>
             <h2 className="dark-band-heading">Good parts need expert hands.</h2>
             <p className="dark-band-body">
-              Our technicians handle fitting, balancing, alignment, and repairs. Book ahead or drop in at either branch.
+              Our technicians handle fitting, balancing, alignment, and repairs. Book ahead or visit a branch.
             </p>
             <Link href="/services" className="btn-ghost">
               Book a service
@@ -1237,16 +1229,16 @@ export function LandingPage({ content }: { content: LandingContent }) {
           </div>
           <div className="dark-band-stats">
             <div className="stat-item">
-              <div className="stat-number">15+</div>
-              <div className="stat-label">years on<br />the road</div>
+              <div className="stat-number">{content.productCount}</div>
+              <div className="stat-label">products in<br />the catalogue</div>
             </div>
             <div className="stat-item">
-              <div className="stat-number">2</div>
-              <div className="stat-label">branches in<br />Nairobi</div>
+              <div className="stat-number">{content.serviceCount}</div>
+              <div className="stat-label">garage<br />services</div>
             </div>
             <div className="stat-item">
-              <div className="stat-number">4.8</div>
-              <div className="stat-label">average<br />customer rating</div>
+              <div className="stat-number">{content.branchCount}</div>
+              <div className="stat-label">branch<br />locations</div>
             </div>
           </div>
         </div>
@@ -1265,13 +1257,13 @@ export function LandingPage({ content }: { content: LandingContent }) {
             <div className="why-item">
               <div className="why-item-heading">Technicians who show up</div>
               <p className="why-item-body">
-                Qualified team across both branches. No waiting for a specialist who isn&apos;t there.
+                Qualified technicians. No waiting for a specialist who isn&apos;t there.
               </p>
             </div>
             <div className="why-item">
               <div className="why-item-heading">Honest about what you need</div>
               <p className="why-item-body">
-                Clear pricing, genuine warranties, no surprises at the counter. We tell you what&apos;s needed and what can
+                Clear, quote-based pricing with no surprises at the counter. We tell you what&apos;s needed and what can
                 wait.
               </p>
             </div>
@@ -1282,47 +1274,54 @@ export function LandingPage({ content }: { content: LandingContent }) {
       <section className="branches" id="branches">
         <div className="wl-container">
           <h2 className="branches-heading reveal-heading">
-            Two branches.<br />
+            Our branches.<br />
             One standard.
           </h2>
           <div className="branches-grid">
             {content.branches.length ? (
-              content.branches.map((b) => (
-              <div className="branch-card" key={b.name}>
-                <div className="branch-num">{b.num}</div>
-                <div className="branch-name">{b.name}</div>
-                <div className="branch-address">
-                  {b.address[0]}
-                  {b.address[1] ? <br /> : null}
-                  {b.address[1]}
-                </div>
-                <div>
-                  <a href={b.phoneHref} className="branch-phone">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.42 2 2 0 0 1 3.58 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.96a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
+              content.branches.map((b) => {
+                const mapQuery = [b.name, b.address[0]].filter(Boolean).join(" ").trim();
+                return (
+                <div className="branch-card" key={b.name}>
+                  <div className="branch-num">{b.num}</div>
+                  <div className="branch-name">{b.name}</div>
+                  {b.address.length ? (
+                    <div className="branch-address">
+                      {b.address[0]}
+                      {b.address[1] ? <br /> : null}
+                      {b.address[1]}
+                    </div>
+                  ) : null}
+                  {b.phone ? (
+                    <div>
+                      <a href={b.phoneHref} className="branch-phone">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.42 2 2 0 0 1 3.58 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.96a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
+                        </svg>
+                        {b.phone}
+                      </a>
+                    </div>
+                  ) : null}
+                  <a
+                    className="branch-map-link"
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`Well Lups Auto Tyres ${mapQuery}`)}`}
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                      <circle cx="12" cy="10" r="3" />
                     </svg>
-                    {b.phone}
+                    Get directions
                   </a>
                 </div>
-                <a
-                  className="branch-map-link"
-                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`Well Lups Auto Tyres ${b.name} Nairobi`)}`}
-                  target="_blank"
-                  rel="noopener"
-                >
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                    <circle cx="12" cy="10" r="3" />
-                  </svg>
-                  Get directions
-                </a>
-              </div>
-            ))
+                );
+              })
             ) : (
               <div className="branch-card">
                 <div className="branch-name">Branch details coming soon.</div>
                 <div className="branch-address">
-                  Chat to us on WhatsApp for directions to your nearest branch.
+                  Contact us for directions to your nearest branch.
                 </div>
               </div>
             )}
@@ -1332,7 +1331,7 @@ export function LandingPage({ content }: { content: LandingContent }) {
 
       <RoadScene />
 
-      <WhatsAppFab />
+      <WhatsAppFab whatsapp={content.whatsapp} />
 
       <noscript>
         <style>{`.hero-rig{opacity:1}.hero-shadow{opacity:1}.hero-card,.hc-row{opacity:1;transform:none}`}</style>

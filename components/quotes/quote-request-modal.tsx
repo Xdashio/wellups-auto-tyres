@@ -117,7 +117,7 @@ export function QuoteRequestModal({
 
         {submittedQuote ? (
           <div className="space-y-4 py-4">
-            <div className="p-4 bg-success/10 border border-success/20 rounded-lg text-center space-y-3">
+            <div className="p-4 bg-success/10 border border-success/20 rounded-none text-center space-y-3">
               <CheckCircle2 className="mx-auto h-6 w-6 text-success" aria-hidden="true" />
               <span className="inline-block text-2xl font-extrabold text-success">
                 Quote Submitted
@@ -158,7 +158,7 @@ export function QuoteRequestModal({
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4 py-2">
             {errorMessage && (
-              <div className="p-3 text-xs font-medium text-destructive bg-destructive/10 border border-destructive/20 rounded">
+              <div role="alert" className="p-3 text-xs font-medium text-destructive bg-destructive/10 border border-destructive/20 rounded-none">
                 {errorMessage}
               </div>
             )}

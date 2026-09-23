@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { getPrimaryBranch } from "@/lib/supabase/catalog";
+import { PageHeader } from "@/components/ui/page-header";
 
-// DRAFT — NOT PUBLISHED. This page is intentionally NOT linked from the
-// Header, Footer, or any nav (verified: no Link to /warranty exists in
-// components/layout or app navigation). It is reachable by direct URL only
-// so Simon can review the wording. Do not link it until the client signs
-// off, and resolve every [CONFIRM] placeholder below first.
+// DRAFT — NOT YET IN EFFECT. Reachable by direct URL and linked from
+// the footer for review visibility; NOT linked from the header or main
+// nav. Do not treat it as published policy until the client signs off,
+// and resolve every [CONFIRM] placeholder below first.
 //
 // Copy rules followed: plain, defensible tyre/auto-parts-retail language;
 // manufacturer-warranty pass-through only; no Well Lups-specific policy
@@ -25,17 +25,14 @@ export default async function WarrantyPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-3xl space-y-8">
-      <div className="border-b pb-6">
-        <h1 className="text-3xl font-extrabold tracking-tight">Warranty &amp; Returns</h1>
-        <p className="text-sm text-text-secondary mt-2">
-          Draft for review — pending client approval. The terms below take
-          effect only once confirmed and published.
-        </p>
-      </div>
+      <PageHeader
+        title="Warranty & Returns"
+        description="Draft for review — pending client approval. The terms below take effect only once confirmed and published."
+      />
 
       <section className="space-y-3">
         <h2 className="text-xl font-bold">Manufacturer warranties</h2>
-        <p className="text-sm leading-relaxed text-text-secondary">
+        <p className="text-sm leading-relaxed text-muted-foreground">
           Tyres, batteries, and branded auto parts carry whatever warranty
           the manufacturer offers on that item — we pass it through to you
           unchanged and help you raise the claim. Keep your receipt: every
@@ -53,7 +50,7 @@ export default async function WarrantyPage() {
 
       <section className="space-y-3">
         <h2 className="text-xl font-bold">Returns &amp; exchanges</h2>
-        <ul className="list-disc list-inside space-y-2 text-sm leading-relaxed text-text-secondary">
+        <ul className="list-disc list-inside space-y-2 text-sm leading-relaxed text-muted-foreground">
           <li>
             Unused items in resalable condition — unmounted tyres, unopened
             parts in original packaging — may be returned or exchanged within{" "}
@@ -86,7 +83,7 @@ export default async function WarrantyPage() {
 
       <section className="space-y-3">
         <h2 className="text-xl font-bold">Faulty items</h2>
-        <p className="text-sm leading-relaxed text-text-secondary">
+        <p className="text-sm leading-relaxed text-muted-foreground">
           If something we supplied fails early, bring it back with the
           receipt and we will inspect it with you. Genuine defects are
           repaired, replaced, or refunded{" "}
@@ -102,7 +99,7 @@ export default async function WarrantyPage() {
 
       <section className="space-y-3">
         <h2 className="text-xl font-bold">How to start a return</h2>
-        <p className="text-sm leading-relaxed text-text-secondary">
+        <p className="text-sm leading-relaxed text-muted-foreground">
           {branch?.address ? (
             <>Visit us at {branch.address} with the item and receipt. </>
           ) : (

@@ -26,6 +26,7 @@ export function SearchBar() {
     <form onSubmit={handleSearch} className="flex gap-2 w-full max-w-lg">
       <Input
         type="search"
+        aria-label="Search products"
         placeholder="Search tyres, parts, brands, or sizes (e.g. 265/65R17)..."
         value={query}
         onChange={(e) => setQuery(e.target.value)}

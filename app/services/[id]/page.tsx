@@ -39,7 +39,7 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-3xl space-y-8">
-      <nav className="text-sm text-text-secondary space-x-2">
+      <nav className="text-sm text-muted-foreground space-x-2">
         <Link href="/services" className="hover:underline">
           Services
         </Link>
@@ -53,12 +53,12 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
             <Badge tone="info">Garage Service</Badge>
             <Badge tone="neutral">Quote on Inspection</Badge>
           </div>
-          <h1 className="text-3xl font-bold tracking-tight">{service.name}</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight">{service.name}</h1>
         </div>
 
-        <Card className="space-y-4">
+        <Card className="space-y-4 p-5">
           <div>
-            <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-1">
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-1">
               Description
             </h3>
             <p className="text-base text-navy leading-relaxed">
@@ -68,7 +68,7 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
 
           {service.vehicle_types && service.vehicle_types.length > 0 && (
             <div>
-              <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-2">
+              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-2">
                 Supported Vehicle Types
               </h3>
               <div className="flex flex-wrap gap-2">
@@ -82,9 +82,9 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
           )}
         </Card>
 
-        <div className="p-6 rounded-lg bg-blue-muted/15 border border-blue-muted/30 space-y-4">
+        <div className="p-6 rounded-none bg-blue-muted/15 border border-blue-muted/30 space-y-4">
           <h3 className="font-semibold text-lg">Book Service or Get a Quote</h3>
-          <p className="text-sm text-text-secondary">
+          <p className="text-sm text-muted-foreground">
             Service scope and pricing depend on vehicle inspection. Submit a booking request to schedule your vehicle, or request formal pricing from our team.
           </p>
           <div className="flex flex-wrap gap-3">
