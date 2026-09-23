@@ -13,6 +13,7 @@ import {
 } from "@/lib/supabase/scoped-client";
 import { ServicesAdminPanel } from "@/components/admin/services-admin-panel";
 import { StaffAuthGate } from "@/components/admin/staff-auth-gate";
+import { PageHeader } from "@/components/ui/page-header";
 
 export const revalidate = 0;
 
@@ -60,13 +61,10 @@ export default async function AdminServicesPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
-      <div className="border-b pb-4">
-        <h1 className="text-3xl font-extrabold tracking-tight">Garage Services</h1>
-        <p className="text-sm text-text-secondary mt-1">
-          Services have no listed price — every one is quoted after an inspection or
-          request. Toggle availability instead of deleting when a service is paused.
-        </p>
-      </div>
+      <PageHeader
+        title="Garage Services"
+        description="Services have no listed price — every one is quoted after an inspection or request. Toggle availability instead of deleting when a service is paused."
+      />
 
       <StaffAuthGate context="Sign in as an Admin to manage garage services. Catalog writes are admin-only." />
 

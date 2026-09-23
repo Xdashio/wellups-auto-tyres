@@ -106,14 +106,14 @@ export function QuoteResponseForm({ quote, userRole, onSuccess, onCancel }: Quot
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-6 bg-card border border-border p-6 rounded-lg"
+      className="space-y-6 bg-card border border-border p-6 rounded-none"
     >
       <div className="flex items-center justify-between border-b border-border pb-4">
         <div>
           <h2 className="text-xl font-bold">
             Quote Response: {quote.quote_number}
           </h2>
-          <p className="text-xs text-text-secondary mt-0.5">
+          <p className="text-xs text-muted-foreground mt-0.5">
             Submitted {new Date(quote.created_at).toLocaleString()}
           </p>
         </div>
@@ -138,7 +138,7 @@ export function QuoteResponseForm({ quote, userRole, onSuccess, onCancel }: Quot
       {isCashier && (
         <div
           data-testid="cashier-readonly-notice"
-          className="p-3 text-xs font-semibold text-warning bg-warning/10 border border-warning/20 rounded"
+          className="p-3 text-xs font-semibold text-warning bg-warning/10 border border-warning/20 rounded-none"
         >
           Cashier Access: Read-only. Pricing controls and status transitions are disabled for Cashier role.
         </div>
@@ -147,7 +147,7 @@ export function QuoteResponseForm({ quote, userRole, onSuccess, onCancel }: Quot
       {isAlreadyQuoted && (
         <div
           data-testid="quoted-locked-notice"
-          className="p-3 text-xs font-semibold text-info bg-info/10 border border-info/20 rounded"
+          className="p-3 text-xs font-semibold text-info bg-info/10 border border-info/20 rounded-none"
         >
           This quote has been QUOTED and is awaiting customer response. Staff cannot directly modify the pricing or status.
         </div>
@@ -156,48 +156,48 @@ export function QuoteResponseForm({ quote, userRole, onSuccess, onCancel }: Quot
       {isTerminal && (
         <div
           data-testid="terminal-locked-notice"
-          className="p-3 text-xs font-semibold text-muted-foreground bg-muted border border-border rounded"
+          className="p-3 text-xs font-semibold text-muted-foreground bg-muted border border-border rounded-none"
         >
           This quote is in a terminal state ({quote.status.toUpperCase()}). Further modifications are prohibited.
         </div>
       )}
 
       {quote.status === "new" && !isCashier && (
-        <div className="p-3 text-xs font-medium text-navy bg-blue-muted/10 border border-blue-muted/20 rounded">
+        <div className="p-3 text-xs font-medium text-navy bg-blue-muted/10 border border-blue-muted/20 rounded-none">
           Step 1: Move quote to <strong>Under Review</strong> to triage request before pricing.
         </div>
       )}
 
       {quote.status === "under_review" && !isCashier && (
-        <div className="p-3 text-xs font-medium text-navy bg-blue-muted/10 border border-blue-muted/20 rounded">
+        <div className="p-3 text-xs font-medium text-navy bg-blue-muted/10 border border-blue-muted/20 rounded-none">
           Step 2: Enter offered price and validity date, then move status to <strong>Quoted</strong>.
         </div>
       )}
 
       {errorMessage && (
-        <div className="p-3 text-xs font-medium text-destructive bg-destructive/10 border border-destructive/20 rounded">
+        <div role="alert" className="p-3 text-xs font-medium text-destructive bg-destructive/10 border border-destructive/20 rounded-none">
           {errorMessage}
         </div>
       )}
 
       {/* Customer & Item Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm bg-blue-muted/10 p-4 rounded-md border border-blue-muted/20">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm bg-blue-muted/10 p-4 rounded-none border border-blue-muted/20">
         <div>
-          <span className="text-xs uppercase font-semibold text-text-secondary block">Customer Details</span>
+          <span className="text-xs uppercase font-semibold text-muted-foreground block">Customer Details</span>
           <p className="font-bold text-navy">{quote.customer_name}</p>
           <p className="font-mono text-xs">{quote.customer_phone}</p>
-          {quote.customer_email && <p className="text-xs text-text-secondary">{quote.customer_email}</p>}
+          {quote.customer_email && <p className="text-xs text-muted-foreground">{quote.customer_email}</p>}
         </div>
 
         <div>
-          <span className="text-xs uppercase font-semibold text-text-secondary block">Requested Item</span>
+          <span className="text-xs uppercase font-semibold text-muted-foreground block">Requested Item</span>
           <p className="font-bold text-navy">{quote.product_name || quote.service_name || "Custom Inquiry"}</p>
-          <p className="text-xs text-text-secondary">Quantity: {quote.quantity}</p>
+          <p className="text-xs text-muted-foreground">Quantity: {quote.quantity}</p>
           {quote.vehicle_summary && (
-            <p className="text-xs text-text-secondary">Vehicle: {quote.vehicle_summary}</p>
+            <p className="text-xs text-muted-foreground">Vehicle: {quote.vehicle_summary}</p>
           )}
           {quote.customer_notes && (
-            <p className="text-xs italic text-text-secondary mt-1">"{quote.customer_notes}"</p>
+            <p className="text-xs italic text-muted-foreground mt-1">"{quote.customer_notes}"</p>
           )}
         </div>
       </div>

@@ -17,6 +17,8 @@ import type { BulkUpsertResult } from "@/lib/supabase/catalog-import";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 
 type ImportKind = "products" | "services";
 
@@ -38,6 +40,7 @@ export function CsvImporter<T extends ProductInput | ServiceInput>({ kind, branc
   const [importing, setImporting] = useState(false);
   const [result, setResult] = useState<BulkUpsertResult | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const isProducts = kind === "products";
   const validRows = (rows ?? []).filter((r) => r.status === "valid");
@@ -78,20 +81,9 @@ export function CsvImporter<T extends ProductInput | ServiceInput>({ kind, branc
     setRows(validated.rows as ValidatedRow<T>[]);
   };
 
-  const handleImport = async () => {
+  const runImport = async () => {
     const valid = validRows.filter((r) => r.data).map((r) => r.data!);
     if (valid.length === 0) return;
-    if (
-      !confirm(
-        `Import ${valid.length} valid ${isProducts ? "product" : "service"} row${valid.length === 1 ? "" : "s"}? ` +
-          (isProducts
-            ? "Existing SKUs will be UPDATED in place; new SKUs will be created."
-            : "Existing names will be UPDATED in place; new names will be created.") +
-          (invalidRows.length > 0 ? ` ${invalidRows.length} invalid row${invalidRows.length === 1 ? " will be" : "s will be"} left out.` : "")
-      )
-    ) {
-      return;
-    }
     setImporting(true);
     setImportError(null);
     try {
@@ -105,6 +97,7 @@ export function CsvImporter<T extends ProductInput | ServiceInput>({ kind, branc
       setResult(res);
     } finally {
       setImporting(false);
+      setConfirmOpen(false);
     }
   };
 
@@ -112,7 +105,7 @@ export function CsvImporter<T extends ProductInput | ServiceInput>({ kind, branc
     <div className="space-y-6">
       <Card className="p-5 space-y-3">
         <h2 className="font-bold">1. Get the template</h2>
-        <p className="text-sm text-text-secondary">
+        <p className="text-sm text-muted-foreground">
           {isProducts ? (
             <>
               Columns: <span className="font-mono text-xs">name, sku, category, brand, size_spec, cost_price, sell_price, stock_quantity, status</span>.
@@ -140,20 +133,22 @@ export function CsvImporter<T extends ProductInput | ServiceInput>({ kind, branc
 
       <Card className="p-5 space-y-3">
         <h2 className="font-bold">2. Upload + dry-run preview</h2>
+        <Label htmlFor="csv-file-input">CSV file</Label>
         <input
+          id="csv-file-input"
           data-testid="csv-file-input"
           type="file"
           accept=".csv,text/csv"
           onChange={(e) => handleFile(e.target.files?.[0])}
-          className="block w-full text-sm file:mr-3 file:px-4 file:py-2 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary-hover file:cursor-pointer"
+          className="block w-full text-sm file:mr-3 file:px-4 file:py-2 file:rounded-none file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary-hover file:cursor-pointer"
         />
         {fileName && (
-          <p className="text-xs text-text-secondary">
+          <p className="text-xs text-muted-foreground">
             File: <span className="font-mono">{fileName}</span>
           </p>
         )}
         {fileError && (
-          <div className="p-3 rounded-md bg-destructive/10 border border-destructive/20 text-destructive text-sm">
+          <div role="alert" className="p-3 rounded-none bg-destructive/10 border border-destructive/20 text-destructive text-sm">
             {fileError}
           </div>
         )}
@@ -162,18 +157,18 @@ export function CsvImporter<T extends ProductInput | ServiceInput>({ kind, branc
             <div className="flex flex-wrap items-center gap-2 text-sm">
               <Badge tone="success">{validRows.length} valid</Badge>
               <Badge tone={invalidRows.length > 0 ? "error" : "neutral"}>{invalidRows.length} invalid</Badge>
-              <span className="text-xs text-text-secondary">
+              <span className="text-xs text-muted-foreground">
                 Nothing has been written — review below, then confirm.
               </span>
             </div>
-            <div className="overflow-x-auto border border-border rounded-md">
+            <div className="overflow-x-auto border border-border rounded-sm">
               <table className="w-full text-sm">
                 <thead className="bg-muted text-left">
                   <tr>
-                    <th className="px-3 py-2">Line</th>
-                    <th className="px-3 py-2">{isProducts ? "SKU" : "Name"}</th>
-                    <th className="px-3 py-2">Status</th>
-                    <th className="px-3 py-2">Detail</th>
+                    <th scope="col" className="px-3 py-2">Line</th>
+                    <th scope="col" className="px-3 py-2">{isProducts ? "SKU" : "Name"}</th>
+                    <th scope="col" className="px-3 py-2">Status</th>
+                    <th scope="col" className="px-3 py-2">Detail</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -189,7 +184,7 @@ export function CsvImporter<T extends ProductInput | ServiceInput>({ kind, branc
                       </td>
                       <td className="px-3 py-2 text-xs">
                         {r.status === "valid" ? (
-                          <span className="text-text-secondary">Ready to import</span>
+                          <span className="text-muted-foreground">Ready to import</span>
                         ) : (
                           <ul className="list-disc list-inside space-y-0.5 text-destructive">
                             {r.errors.map((e, j) => (
@@ -211,18 +206,36 @@ export function CsvImporter<T extends ProductInput | ServiceInput>({ kind, branc
         <Card className="p-5 space-y-3">
           <h2 className="font-bold">3. Confirm import</h2>
           {importError && (
-            <div className="p-3 rounded-md bg-destructive/10 border border-destructive/20 text-destructive text-sm">
+            <div role="alert" className="p-3 rounded-none bg-destructive/10 border border-destructive/20 text-destructive text-sm">
               {importError}
             </div>
           )}
           <Button
-            onClick={handleImport}
+            onClick={() => setConfirmOpen(true)}
             disabled={importing}
             variant="primary"
             data-testid="csv-import-confirm"
           >
             {importing ? "Importing…" : `Import ${validRows.length} valid row${validRows.length === 1 ? "" : "s"}`}
           </Button>
+          <ConfirmationDialog
+            open={confirmOpen}
+            onOpenChange={setConfirmOpen}
+            title={`Import ${validRows.length} valid row${validRows.length === 1 ? "" : "s"}?`}
+            description={
+              (isProducts
+                ? "Existing SKUs will be UPDATED in place; new SKUs will be created."
+                : "Existing names will be UPDATED in place; new names will be created.") +
+              (invalidRows.length > 0
+                ? ` ${invalidRows.length} invalid row${invalidRows.length === 1 ? " will be" : "s will be"} left out.`
+                : "")
+            }
+            confirmLabel={importing ? "Importing…" : "Import now"}
+            loading={importing}
+            error={importError}
+            onConfirm={runImport}
+            testId="csv-import-dialog"
+          />
           {result && (
             <div className="text-sm space-y-1">
               <p>

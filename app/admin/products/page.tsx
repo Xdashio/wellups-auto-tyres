@@ -16,6 +16,7 @@ import {
 } from "@/lib/supabase/scoped-client";
 import { ProductsAdminPanel } from "@/components/admin/products-admin-panel";
 import { StaffAuthGate } from "@/components/admin/staff-auth-gate";
+import { PageHeader } from "@/components/ui/page-header";
 
 export const revalidate = 0;
 
@@ -75,14 +76,10 @@ export default async function AdminProductsPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
-      <div className="border-b pb-4">
-        <h1 className="text-3xl font-extrabold tracking-tight">Product Catalogue</h1>
-        <p className="text-sm text-text-secondary mt-1">
-          Add, edit, or retire products. Nothing here is displayed with a price to
-          customers — pricing is used internally for margin tracking and to
-          populate accepted quotes.
-        </p>
-      </div>
+      <PageHeader
+        title="Product Catalogue"
+        description="Add, edit, or retire products. Nothing here is displayed with a price to customers — pricing is used internally for margin tracking and to populate accepted quotes."
+      />
 
       <StaffAuthGate context="Sign in as an Admin to manage the product catalogue. Catalog writes are admin-only." />
 

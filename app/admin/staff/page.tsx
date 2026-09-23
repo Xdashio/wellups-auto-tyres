@@ -14,6 +14,7 @@ import {
 } from "@/lib/supabase/scoped-client";
 import { StaffAdminPanel } from "@/components/admin/staff-admin-panel";
 import { StaffAuthGate } from "@/components/admin/staff-auth-gate";
+import { PageHeader } from "@/components/ui/page-header";
 
 export const revalidate = 0;
 
@@ -72,14 +73,10 @@ export default async function AdminStaffPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
-      <div className="border-b pb-4">
-        <h1 className="text-3xl font-extrabold tracking-tight">Staff Access</h1>
-        <p className="text-sm text-text-secondary mt-1">
-          Admin-only. Grant roles, change roles, or deactivate staff. Every
-          action is enforced server-side — including the rails that protect
-          the last admin and your own record.
-        </p>
-      </div>
+      <PageHeader
+        title="Staff Access"
+        description="Admin-only. Grant roles, change roles, or deactivate staff. Every action is enforced server-side — including the rails that protect the last admin and your own record."
+      />
 
       <StaffAuthGate context="Sign in as an Admin to manage staff access. This page is admin-only." />
 

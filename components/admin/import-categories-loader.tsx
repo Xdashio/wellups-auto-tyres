@@ -2,6 +2,8 @@
 
 import { CsvImporter } from "@/components/admin/csv-importer";
 import { useProtectedRead } from "@/components/admin/use-protected-read";
+import { LoadingState } from "@/components/ui/loading-state";
+import { ErrorState } from "@/components/ui/error-state";
 import type {
   AdminCategory,
   ProductInput,
@@ -31,35 +33,26 @@ export function ImportCategoriesLoader({
   const read = useProtectedRead(onLoadCategories);
 
   if (read.status === "loading") {
-    return (
-      <div className="p-8 text-center" data-testid="import-categories-loading">
-        <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-        <p className="text-sm text-text-secondary mt-3">Loading categories…</p>
-      </div>
-    );
+    return <LoadingState text="Loading categories…" testId="import-categories-loading" />;
   }
 
   if (read.status === "unauthorized") {
     return (
-      <div
-        className="p-4 bg-blue-muted/10 border border-blue-muted/30 rounded-lg"
-        data-testid="import-categories-unauthorized"
-      >
-        <p className="text-sm font-semibold">Could not read categories — access denied.</p>
-        <p className="text-xs text-text-secondary mt-1">{read.message}</p>
-      </div>
+      <ErrorState
+        title="Could not read categories — access denied."
+        message={read.message}
+        testId="import-categories-unauthorized"
+      />
     );
   }
 
   if (read.status === "error") {
     return (
-      <div
-        className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg"
-        data-testid="import-categories-error"
-      >
-        <p className="text-sm font-semibold text-destructive">Could not read categories.</p>
-        <p className="text-xs text-text-secondary mt-1">{read.message}</p>
-      </div>
+      <ErrorState
+        title="Could not read categories."
+        message={read.message}
+        testId="import-categories-error"
+      />
     );
   }
 

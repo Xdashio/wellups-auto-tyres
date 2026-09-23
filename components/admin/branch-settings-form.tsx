@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { ErrorState } from "@/components/ui/error-state";
 
 interface BranchSettingsFormProps {
   initialBranch: BranchData;
@@ -101,21 +102,19 @@ export function BranchSettingsForm({ initialBranch, onSave }: BranchSettingsForm
     <Card className="max-w-2xl mx-auto p-6 space-y-6">
       <div>
         <h2 className="text-xl font-bold tracking-tight">Public Business Settings</h2>
-        <p className="text-sm text-text-secondary mt-1">
+        <p className="text-sm text-muted-foreground mt-1">
           Manage your official branch contact details and public website configuration.
         </p>
       </div>
 
       {successMessage && (
-        <div className="p-4 rounded-md bg-success/10 border border-success/20 text-success text-sm font-medium">
+        <div role="status" className="p-4 rounded-none bg-success/10 border border-success/20 text-success text-sm font-medium">
           {successMessage}
         </div>
       )}
 
       {errorMessage && (
-        <div className="p-4 rounded-md bg-destructive/10 border border-destructive/20 text-destructive text-sm font-medium">
-          {errorMessage}
-        </div>
+        <ErrorState title="Could not save settings" message={errorMessage} />
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -130,7 +129,7 @@ export function BranchSettingsForm({ initialBranch, onSave }: BranchSettingsForm
             required
             value={formData.name}
             onChange={handleChange}
-            placeholder="WELL LUPS AUTO TYRES — Industrial Area"
+            placeholder="e.g. WELL LUPS AUTO TYRES — Main Branch"
           />
         </div>
 
@@ -147,7 +146,7 @@ export function BranchSettingsForm({ initialBranch, onSave }: BranchSettingsForm
             className="font-mono"
             placeholder="e.g. 254712345678"
           />
-          <p className="text-xs text-text-secondary">
+          <p className="text-xs text-muted-foreground">
             Used to generate "Get a Quote" WhatsApp deep links across product and service pages.
           </p>
         </div>
@@ -162,7 +161,7 @@ export function BranchSettingsForm({ initialBranch, onSave }: BranchSettingsForm
             type="text"
             value={formData.phone || ""}
             onChange={handleChange}
-            placeholder="+254 700 000000"
+            placeholder="+254 700 000000 (example format)"
           />
         </div>
 
@@ -176,7 +175,7 @@ export function BranchSettingsForm({ initialBranch, onSave }: BranchSettingsForm
             rows={2}
             value={formData.address || ""}
             onChange={handleChange}
-            placeholder="Industrial Area, Nairobi, Kenya"
+            placeholder="e.g. Street address, city"
           />
         </div>
 
@@ -190,14 +189,14 @@ export function BranchSettingsForm({ initialBranch, onSave }: BranchSettingsForm
             type="text"
             value={formData.opening_hours || ""}
             onChange={handleChange}
-            placeholder="Mon - Sat: 8:00 AM - 6:00 PM"
+            placeholder="e.g. Mon - Sat: 8:00 AM - 6:00 PM"
           />
         </div>
 
-        <div className="pt-4 border-t space-y-4">
+        <div className="pt-4 border-t border-border space-y-4">
           <div>
             <h3 className="text-lg font-bold tracking-tight">M-Pesa Payment Channel</h3>
-            <p className="text-xs text-text-secondary mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               Only one channel is ever live at a time. Toggle which one is active — the
               inactive number stays saved here but is never shown to customers.
             </p>
@@ -266,9 +265,9 @@ export function BranchSettingsForm({ initialBranch, onSave }: BranchSettingsForm
           </div>
         </div>
 
-        <div className="pt-4 border-t flex justify-end">
-          <Button type="submit" disabled={loading} variant="primary">
-            {loading ? "Saving Settings..." : "Save Settings"}
+        <div className="pt-4 border-t border-border flex justify-end">
+          <Button type="submit" loading={loading} disabled={loading} variant="primary">
+            Save Settings
           </Button>
         </div>
       </form>

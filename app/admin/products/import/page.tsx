@@ -6,6 +6,7 @@ import { scopedClientOrError, type ProtectedReadResult } from "@/lib/supabase/sc
 import type { AdminCategory } from "@/lib/supabase/catalog-admin";
 import { ImportCategoriesLoader } from "@/components/admin/import-categories-loader";
 import { StaffAuthGate } from "@/components/admin/staff-auth-gate";
+import { PageHeader } from "@/components/ui/page-header";
 
 export const revalidate = 0;
 
@@ -38,15 +39,10 @@ export default async function AdminProductImportPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
-      <div className="border-b pb-4">
-        <h1 className="text-3xl font-extrabold tracking-tight">Import Products (CSV)</h1>
-        <p className="text-sm text-text-secondary mt-1">
-          Bulk upsert by SKU: new SKUs are created, existing SKUs are updated in
-          place — re-running the same file changes nothing. Every row is
-          validated before anything is written, and nothing is written until
-          you confirm.
-        </p>
-      </div>
+      <PageHeader
+        title="Import Products (CSV)"
+        description="Bulk upsert by SKU: new SKUs are created, existing SKUs are updated in place — re-running the same file changes nothing. Every row is validated before anything is written, and nothing is written until you confirm."
+      />
 
       <StaffAuthGate context="Sign in as an Admin to bulk-import products. Catalog writes are admin-only." />
 

@@ -109,42 +109,42 @@ export function BookingActionModal({
         </div>
 
         {errorMessage && (
-          <div className="p-3 text-xs font-medium text-destructive bg-destructive/10 border border-destructive/20 rounded" data-testid="modal-error-message">
+          <div role="alert" className="p-3 text-xs font-medium text-destructive bg-destructive/10 border border-destructive/20 rounded-none" data-testid="modal-error-message">
             {errorMessage}
           </div>
         )}
 
         {/* Customer & Request Summary */}
-        <div className="p-3 bg-navy/5 rounded text-xs space-y-1.5">
+        <div className="p-3 bg-navy/5 rounded-none text-xs space-y-1.5">
           <div className="flex justify-between">
-            <span className="font-semibold text-text-secondary">Customer:</span>
+            <span className="font-semibold text-muted-foreground">Customer:</span>
             <span className="text-navy font-medium">{booking.customer_name} ({booking.customer_phone})</span>
           </div>
           <div className="flex justify-between">
-            <span className="font-semibold text-text-secondary">Customer Requested Slot:</span>
+            <span className="font-semibold text-muted-foreground">Customer Requested Slot:</span>
             <span className="text-navy font-medium">{booking.requested_date} at {booking.requested_time}</span>
           </div>
           {booking.vehicle_summary && (
             <div className="flex justify-between">
-              <span className="font-semibold text-text-secondary">Vehicle:</span>
+              <span className="font-semibold text-muted-foreground">Vehicle:</span>
               <span className="text-navy font-medium">{booking.vehicle_summary}</span>
             </div>
           )}
           {booking.customer_notes && (
             <div className="pt-1 border-t border-navy/10">
-              <span className="font-semibold text-text-secondary">Customer Notes:</span>
+              <span className="font-semibold text-muted-foreground">Customer Notes:</span>
               <p className="text-navy mt-0.5">{booking.customer_notes}</p>
             </div>
           )}
           <div className="flex justify-between pt-1 border-t border-navy/10">
-            <span className="font-semibold text-text-secondary">Current Status:</span>
+            <span className="font-semibold text-muted-foreground">Current Status:</span>
             <span className="font-bold text-navy uppercase">{booking.status}</span>
           </div>
         </div>
 
         {/* Role Notice for Cashier */}
         {isCashier && !isTerminal && booking.status !== "scheduled" && (
-          <div className="p-3 bg-warning/10 border border-warning/20 text-warning rounded text-xs" data-testid="cashier-readonly-notice">
+          <div className="p-3 bg-warning/10 border border-warning/20 text-warning rounded-none text-xs" data-testid="cashier-readonly-notice">
             <p className="font-semibold">Cashier Operational View</p>
             <p>Cashiers are restricted from scheduling, declining, or modifying notes. Cashiers may only mark bookings as completed once work is finished in the workshop.</p>
           </div>
@@ -152,7 +152,7 @@ export function BookingActionModal({
 
         {/* Terminal State Notice */}
         {isTerminal && (
-          <div className="p-4 bg-muted border border-border text-muted-foreground rounded text-center text-xs space-y-1" data-testid="terminal-status-notice">
+          <div className="p-4 bg-muted border border-border text-muted-foreground rounded-none text-center text-xs space-y-1" data-testid="terminal-status-notice">
             <p className="font-bold uppercase">Terminal State: {booking.status}</p>
             <p>This booking has reached a final state and cannot be modified.</p>
           </div>
@@ -166,7 +166,7 @@ export function BookingActionModal({
               <>
                 {isAdminOrManager ? (
                   <div className="space-y-3">
-                    <p className="text-xs text-text-secondary">
+                    <p className="text-xs text-muted-foreground">
                       Triage this booking request. Moving to <strong>Under Review</strong> allows scheduling workshop bays.
                     </p>
                     <div className="flex gap-2">
@@ -192,7 +192,7 @@ export function BookingActionModal({
                     </div>
                   </div>
                 ) : (
-                  <div className="text-center py-2 text-xs text-text-secondary">
+                  <div className="text-center py-2 text-xs text-muted-foreground">
                     Waiting for Admin or Manager triage.
                   </div>
                 )}
@@ -216,7 +216,7 @@ export function BookingActionModal({
                         value={scheduledAt}
                         onChange={(e) => setScheduledAt(e.target.value)}
                       />
-                      <p className="text-[11px] text-text-secondary mt-0.5">
+                      <p className="text-xs text-muted-foreground mt-0.5">
                         Sets the authoritative appointment timestamp for the customer and workshop.
                       </p>
                     </div>
@@ -235,7 +235,7 @@ export function BookingActionModal({
                       />
                     </div>
 
-                    <div className="flex gap-2 pt-2 border-t">
+                    <div className="flex gap-2 pt-2 border-t border-border">
                       <Button
                         type="button"
                         onClick={() => handleAction("scheduled")}
@@ -258,7 +258,7 @@ export function BookingActionModal({
                     </div>
                   </div>
                 ) : (
-                  <div className="text-center py-2 text-xs text-text-secondary">
+                  <div className="text-center py-2 text-xs text-muted-foreground">
                     Waiting for Admin or Manager to schedule.
                   </div>
                 )}
@@ -268,7 +268,7 @@ export function BookingActionModal({
             {/* Status = SCHEDULED */}
             {booking.status === "scheduled" && (
               <div className="space-y-3">
-                <div className="p-3 bg-success/10 border border-success/20 rounded text-xs text-success">
+                <div className="p-3 bg-success/10 border border-success/20 rounded-none text-xs text-success">
                   <p className="font-semibold">Scheduled Appointment:</p>
                   <p className="font-bold text-sm">
                     {booking.scheduled_at
@@ -278,10 +278,10 @@ export function BookingActionModal({
                         })
                       : "Pending"}
                   </p>
-                  {booking.staff_notes && <p className="mt-1 text-text-secondary">Notes: {booking.staff_notes}</p>}
+                  {booking.staff_notes && <p className="mt-1 text-muted-foreground">Notes: {booking.staff_notes}</p>}
                 </div>
 
-                <div className="flex gap-2 pt-2 border-t">
+                <div className="flex gap-2 pt-2 border-t border-border">
                   <Button
                     type="button"
                     onClick={() => handleAction("completed")}
@@ -311,7 +311,7 @@ export function BookingActionModal({
           </div>
         )}
 
-        <div className="flex justify-end pt-2 border-t">
+        <div className="flex justify-end pt-2 border-t border-border">
           <Button variant="secondary" onClick={onClose} disabled={isSubmitting}>
             Close
           </Button>

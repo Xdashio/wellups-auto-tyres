@@ -5,6 +5,9 @@ import type { BranchData, BranchSettingsInput } from "@/lib/supabase/branch";
 import type { ProtectedReadResult } from "@/lib/supabase/scoped-client";
 import { useProtectedRead } from "@/components/admin/use-protected-read";
 import { BranchSettingsForm } from "@/components/admin/branch-settings-form";
+import { ErrorState } from "@/components/ui/error-state";
+import { LoadingState } from "@/components/ui/loading-state";
+import { EmptyState } from "@/components/ui/empty-state";
 
 // Load-state wrapper around the branch settings form (GATE 023, defect
 // S1). The form itself is unchanged; this component owns the four read
@@ -27,38 +30,29 @@ export function BranchSettingsPanel({ onLoad, onSave }: BranchSettingsPanelProps
   const read = useProtectedRead(onLoad);
 
   if (read.status === "loading") {
-    return (
-      <div data-testid="settings-loading" className="text-center py-16">
-        <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-        <p className="text-sm text-text-secondary mt-2">Loading branch settings...</p>
-      </div>
-    );
+    return <LoadingState text="Loading branch settings..." testId="settings-loading" />;
   }
 
   if (read.status === "unauthorized") {
     return (
-      <div
-        data-testid="settings-unauthorized"
-        className="max-w-2xl mx-auto text-center py-12 border rounded-lg bg-destructive/5 border-destructive/20 space-y-2"
-      >
-        <p className="text-lg font-semibold text-destructive">
-          Could not read branch settings — access denied.
-        </p>
-        <p className="text-sm text-text-secondary">{read.message}</p>
+      <div className="max-w-2xl mx-auto">
+        <ErrorState
+          title="Could not read branch settings — access denied."
+          message={read.message}
+          testId="settings-unauthorized"
+        />
       </div>
     );
   }
 
   if (read.status === "error") {
     return (
-      <div
-        data-testid="settings-error"
-        className="max-w-2xl mx-auto text-center py-12 border rounded-lg bg-destructive/5 border-destructive/20 space-y-2"
-      >
-        <p className="text-lg font-semibold text-destructive">
-          Could not read branch settings — unexpected database error.
-        </p>
-        <p className="text-sm text-text-secondary">{read.message}</p>
+      <div className="max-w-2xl mx-auto">
+        <ErrorState
+          title="Could not read branch settings — unexpected database error."
+          message={read.message}
+          testId="settings-error"
+        />
       </div>
     );
   }
@@ -67,15 +61,12 @@ export function BranchSettingsPanel({ onLoad, onSave }: BranchSettingsPanelProps
     // Only reachable by a signed-in Admin whose read of branches_admin
     // genuinely returned zero rows — an honest empty state, not a denial.
     return (
-      <div
-        data-testid="settings-missing"
-        className="max-w-2xl mx-auto text-center py-12 border rounded-lg bg-blue-muted/10 space-y-2"
-      >
-        <p className="text-lg font-semibold text-destructive">Branch Configuration Not Found</p>
-        <p className="text-sm text-text-secondary">
-          Your Admin account read branches_admin successfully, but it returned zero rows —
-          no branch has been configured yet.
-        </p>
+      <div className="max-w-2xl mx-auto">
+        <EmptyState
+          heading="Branch Configuration Not Found"
+          body="Your Admin account read branches_admin successfully, but it returned zero rows — no branch has been configured yet."
+          testId="settings-missing"
+        />
       </div>
     );
   }

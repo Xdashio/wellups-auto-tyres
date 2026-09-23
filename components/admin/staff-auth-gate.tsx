@@ -80,10 +80,10 @@ export function StaffAuthGate({ context }: { context: string }) {
     return (
       <div
         data-testid="staff-session-bar"
-        className="flex flex-wrap items-center justify-between gap-4 p-4 bg-navy/5 border border-navy/15 rounded-lg"
+        className="flex flex-wrap items-center justify-between gap-4 p-4 bg-navy/5 border border-navy/15 rounded-none"
       >
         <div className="flex items-center gap-3">
-          <span className="text-xs uppercase font-bold text-text-secondary tracking-wider">
+          <span className="text-xs uppercase font-bold text-muted-foreground tracking-wider">
             Staff Session:
           </span>
           <span data-testid="staff-email" className="font-mono text-sm font-semibold text-navy">
@@ -116,12 +116,12 @@ export function StaffAuthGate({ context }: { context: string }) {
   return (
     <div
       data-testid="staff-auth-panel"
-      className="p-4 bg-blue-muted/10 border border-blue-muted/30 rounded-lg space-y-3"
+      className="p-4 bg-blue-muted/10 border border-blue-muted/30 rounded-none space-y-3"
     >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div>
           <h2 className="text-sm font-bold text-navy">Staff Authentication Required</h2>
-          <p className="text-xs text-text-secondary">{context}</p>
+          <p className="text-xs text-muted-foreground">{context}</p>
         </div>
         {process.env.NODE_ENV === "development" && (
           <div className="flex flex-wrap gap-2">
@@ -130,7 +130,7 @@ export function StaffAuthGate({ context }: { context: string }) {
               data-testid="login-admin-quick"
               onClick={() => handleSignIn("admin@test.local", "TestPassword123!")}
               disabled={authLoading}
-              className="px-2.5 py-1 text-xs font-semibold bg-navy text-white rounded hover:bg-navy/90 transition-colors"
+              className="px-2.5 py-1 text-xs font-semibold bg-navy text-white rounded-none hover:bg-navy/90 transition-colors"
             >
               Sign In as Admin
             </button>
@@ -139,30 +139,47 @@ export function StaffAuthGate({ context }: { context: string }) {
               data-testid="login-manager-quick"
               onClick={() => handleSignIn("mgr@test.local", "TestPassword123!")}
               disabled={authLoading}
-              className="px-2.5 py-1 text-xs font-semibold bg-primary text-primary-foreground rounded hover:bg-primary/90 transition-colors"
+              className="px-2.5 py-1 text-xs font-semibold bg-primary text-primary-foreground rounded-none hover:bg-primary/90 transition-colors"
             >
               Sign In as Manager
+            </button>
+            <button
+              type="button"
+              data-testid="login-cashier-quick"
+              onClick={() => handleSignIn("cashier@test.local", "TestPassword123!")}
+              disabled={authLoading}
+              className="px-2.5 py-1 text-xs font-semibold bg-muted text-foreground rounded-none hover:bg-muted/80 transition-colors"
+            >
+              Sign In as Cashier
             </button>
           </div>
         )}
       </div>
 
       {loginError && (
-        <div className="p-2 text-xs font-medium text-destructive bg-destructive/10 border border-destructive/20 rounded">
+        <div className="p-2 text-xs font-medium text-destructive bg-destructive/10 border border-destructive/20 rounded-none">
           {loginError}
         </div>
       )}
 
-      <div className="flex flex-wrap items-center gap-2 pt-2 border-t">
+      <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-border">
+        <label className="sr-only" htmlFor="staff-login-email">
+          Staff email
+        </label>
         <input
+          id="staff-login-email"
           data-testid="staff-login-email"
           type="email"
           placeholder="Staff Email"
           value={loginEmail}
           onChange={(e) => setLoginEmail(e.target.value)}
-          className="px-3 py-1.5 text-xs border rounded-md focus:outline-none focus:ring-1 focus:ring-primary w-48"
+          className="px-3 py-1.5 text-xs border border-border rounded-none focus:outline-none focus:ring-1 focus:ring-primary w-48"
         />
+        <label className="sr-only" htmlFor="staff-login-password">
+          Password
+        </label>
         <input
+          id="staff-login-password"
           data-testid="staff-login-password"
           type="password"
           placeholder="Password"
@@ -171,7 +188,7 @@ export function StaffAuthGate({ context }: { context: string }) {
           onKeyDown={(e) => {
             if (e.key === "Enter") handleSignIn();
           }}
-          className="px-3 py-1.5 text-xs border rounded-md focus:outline-none focus:ring-1 focus:ring-primary w-48"
+          className="px-3 py-1.5 text-xs border border-border rounded-none focus:outline-none focus:ring-1 focus:ring-primary w-48"
         />
         <Button
           data-testid="staff-login-btn"

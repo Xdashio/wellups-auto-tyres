@@ -13,6 +13,10 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
+import { ErrorState } from "@/components/ui/error-state";
+import { LoadingState } from "@/components/ui/loading-state";
+import { FormField } from "@/components/ui/form-field";
 import {
   Select,
   SelectTrigger,
@@ -54,6 +58,13 @@ export function StaffAdminPanel({
   const [formError, setFormError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [pendingAction, setPendingAction] = useState<
+    | { kind: "revoke"; entry: StaffRosterEntry }
+    | { kind: "role"; entry: StaffRosterEntry; next: StaffRole }
+    | { kind: "remove"; entry: StaffRosterEntry }
+    | null
+  >(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const getAccessToken = async (): Promise<string | null> => {
     const { data } = await supabase.auth.getSession();
@@ -110,53 +121,82 @@ export function StaffAdminPanel({
     }
   };
 
-  const handleRevoke = async (entry: StaffRosterEntry) => {
-    if (!entry.invite_id) return;
-    if (!confirm(`Withdraw the pending invite for ${entry.email}?`)) return;
+  const runPendingAction = async () => {
+    if (!pendingAction) return;
+    const { entry } = pendingAction;
     const accessToken = await getAccessToken();
     if (!accessToken) {
-      setFormError("Sign in as an Admin first.");
+      const msg = "Sign in as an Admin first.";
+      setFormError(msg);
+      setActionError(msg);
       return;
     }
-    const res = await onRevokeInvite(accessToken, entry.invite_id);
-    if (!refreshNote("Revoke", res)) return;
-    setRoster((prev) => prev.filter((r) => r.invite_id !== entry.invite_id));
-    setNotice(`Pending invite for ${entry.email} withdrawn.`);
+    const fail = (action: string, res: ActionResult) => {
+      const msg = res.error || `${action} failed.`;
+      setNotice(null);
+      setFormError(msg);
+      setActionError(msg);
+    };
+    if (pendingAction.kind === "revoke") {
+      if (!entry.invite_id) return;
+      const res = await onRevokeInvite(accessToken, entry.invite_id);
+      if (!res.success) {
+        fail("Revoke", res);
+        return;
+      }
+      setFormError(null);
+      setRoster((prev) => prev.filter((r) => r.invite_id !== entry.invite_id));
+      setNotice(`Pending invite for ${entry.email} withdrawn.`);
+    } else if (pendingAction.kind === "role") {
+      if (!entry.staff_id) return;
+      const res = await onSetRole(accessToken, entry.staff_id, pendingAction.next);
+      if (!res.success) {
+        fail("Role change", res);
+        return;
+      }
+      setFormError(null);
+      setRoster((prev) =>
+        prev.map((r) => (r.staff_id === entry.staff_id ? { ...r, role: pendingAction.next } : r)),
+      );
+      setNotice(
+        `Role for ${entry.email} is now ${pendingAction.next}. It applies on their next sign-in (token refresh).`,
+      );
+    } else {
+      if (!entry.staff_id) return;
+      const res = await onRemove(accessToken, entry.staff_id);
+      if (!res.success) {
+        fail("Deactivation", res);
+        return;
+      }
+      setFormError(null);
+      setRoster((prev) => prev.filter((r) => r.staff_id !== entry.staff_id));
+      setNotice(
+        `${entry.email} deactivated. Remember: ban via Dashboard → Authentication for immediate session revocation if needed.`,
+      );
+    }
+    setPendingAction(null);
+    setActionError(null);
   };
 
-  const handleSetRole = async (entry: StaffRosterEntry, next: StaffRole) => {
-    if (!entry.staff_id || entry.role === next) return;
-    if (!confirm(`Change ${entry.email} from ${entry.role} to ${next}?`)) return;
-    const accessToken = await getAccessToken();
-    if (!accessToken) {
-      setFormError("Sign in as an Admin first.");
-      return;
-    }
-    const res = await onSetRole(accessToken, entry.staff_id, next);
-    if (!refreshNote("Role change", res)) return;
-    setRoster((prev) => prev.map((r) => (r.staff_id === entry.staff_id ? { ...r, role: next } : r)));
-    setNotice(`Role for ${entry.email} is now ${next}. It applies on their next sign-in (token refresh).`);
-  };
-
-  const handleRemove = async (entry: StaffRosterEntry) => {
-    if (!entry.staff_id) return;
-    if (
-      !confirm(
-        `Deactivate ${entry.email}? Their role mapping is deleted immediately; the claim drops out on their next sign-in. Their current session is NOT revoked here — ban them via the Supabase Dashboard for urgent cases.`
-      )
-    ) {
-      return;
-    }
-    const accessToken = await getAccessToken();
-    if (!accessToken) {
-      setFormError("Sign in as an Admin first.");
-      return;
-    }
-    const res = await onRemove(accessToken, entry.staff_id);
-    if (!refreshNote("Deactivation", res)) return;
-    setRoster((prev) => prev.filter((r) => r.staff_id !== entry.staff_id));
-    setNotice(`${entry.email} deactivated. Remember: ban via Dashboard → Authentication for immediate session revocation if needed.`);
-  };
+  const pendingCopy = pendingAction
+    ? pendingAction.kind === "revoke"
+      ? {
+          title: "Withdraw invite",
+          description: `Withdraw the pending invite for ${pendingAction.entry.email}?`,
+          confirmLabel: "Withdraw invite",
+        }
+      : pendingAction.kind === "role"
+        ? {
+            title: "Change role",
+            description: `Change ${pendingAction.entry.email} from ${pendingAction.entry.role} to ${pendingAction.next}? It applies on their next sign-in.`,
+            confirmLabel: "Change role",
+          }
+        : {
+            title: "Deactivate staff",
+            description: `Deactivate ${pendingAction.entry.email}? Their role mapping is deleted immediately; the claim drops out on their next sign-in. Their current session is NOT revoked here — ban them via the Supabase Dashboard for urgent cases.`,
+            confirmLabel: "Deactivate",
+          }
+    : null;
 
   // Distinct read outcomes (GATE 023 S1): the grant form and roster table
   // render only for a signed-in Admin whose admin_list_staff read
@@ -164,37 +204,24 @@ export function StaffAdminPanel({
   // Admin-only administration is preserved, and an empty roster now always
   // means zero staff records, never a swallowed RPC failure.
   if (read.status === "loading") {
-    return (
-      <div data-testid="staff-loading" className="text-center py-16">
-        <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-        <p className="text-sm text-text-secondary mt-2">Loading staff roster...</p>
-      </div>
-    );
+    return <LoadingState text="Loading staff roster..." testId="staff-loading" />;
   }
   if (read.status === "unauthorized") {
     return (
-      <div
-        data-testid="staff-unauthorized"
-        className="text-center py-12 border rounded-lg bg-destructive/5 border-destructive/20 space-y-2"
-      >
-        <p className="text-lg font-semibold text-destructive">
-          Could not read staff roster — access denied.
-        </p>
-        <p className="text-sm text-text-secondary">{read.message}</p>
-      </div>
+      <ErrorState
+        title="Could not read staff roster — access denied."
+        message={read.message}
+        testId="staff-unauthorized"
+      />
     );
   }
   if (read.status === "error") {
     return (
-      <div
-        data-testid="staff-error"
-        className="text-center py-12 border rounded-lg bg-destructive/5 border-destructive/20 space-y-2"
-      >
-        <p className="text-lg font-semibold text-destructive">
-          Could not read staff roster — unexpected database error.
-        </p>
-        <p className="text-sm text-text-secondary">{read.message}</p>
-      </div>
+      <ErrorState
+        title="Could not read staff roster — unexpected database error."
+        message={read.message}
+        testId="staff-error"
+      />
     );
   }
 
@@ -202,7 +229,7 @@ export function StaffAdminPanel({
     <div className="space-y-6">
       <Card className="p-5 space-y-2 text-sm">
         <h2 className="font-bold">How staff access works here</h2>
-        <ul className="list-disc list-inside space-y-1 text-text-secondary">
+        <ul className="list-disc list-inside space-y-1 text-muted-foreground">
           <li>
             Accounts themselves are created manually in the Supabase Dashboard
             (Authentication → Add user) — this screen cannot send invites yet.
@@ -223,12 +250,10 @@ export function StaffAdminPanel({
       </Card>
 
       {formError && (
-        <div className="p-3 rounded-md bg-destructive/10 border border-destructive/20 text-destructive text-sm">
-          {formError}
-        </div>
+        <ErrorState title="Staff action failed" message={formError} />
       )}
       {notice && (
-        <div className="p-3 rounded-md bg-success/10 border border-success/20 text-sm">
+        <div role="status" className="p-3 rounded-none bg-success/10 border border-success/20 text-sm">
           {notice}
         </div>
       )}
@@ -237,19 +262,23 @@ export function StaffAdminPanel({
         <h2 className="font-bold">Grant a role (pending invite)</h2>
         <form onSubmit={handleInvite} className="flex flex-wrap items-end gap-2">
           <div className="min-w-52 flex-1">
-            <label className="text-xs text-text-secondary">Email</label>
-            <Input
-              type="email"
-              placeholder="staff@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
+            <FormField label="Email" htmlFor="staff-invite-email">
+              <Input
+                id="staff-invite-email"
+                type="email"
+                placeholder="staff@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </FormField>
           </div>
           <div>
-            <label className="text-xs text-text-secondary">Role</label>
+            <span id="staff-invite-role-label" className="block text-sm font-medium text-foreground mb-1.5">
+              Role
+            </span>
             <Select value={role} onValueChange={(v) => setRole(v as StaffRole)}>
-              <SelectTrigger>
+              <SelectTrigger aria-labelledby="staff-invite-role-label">
                 <SelectValue placeholder="Role" />
               </SelectTrigger>
               <SelectContent>
@@ -262,28 +291,30 @@ export function StaffAdminPanel({
             </Select>
           </div>
           <div className="min-w-40 flex-1">
-            <label className="text-xs text-text-secondary">Display name (optional)</label>
-            <Input
-              placeholder="e.g. Jane Wanjiru"
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-            />
+            <FormField label="Display name (optional)" htmlFor="staff-invite-name">
+              <Input
+                id="staff-invite-name"
+                placeholder="e.g. Jane Wanjiru"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+              />
+            </FormField>
           </div>
-          <Button type="submit" variant="primary" disabled={busy}>
-            {busy ? "Saving…" : "Add Grant"}
+          <Button type="submit" variant="primary" loading={busy} disabled={busy}>
+            Add Grant
           </Button>
         </form>
       </Card>
 
-      <Card className="overflow-x-auto">
+      <Card className="overflow-x-auto rounded-sm">
         <table className="w-full text-sm">
           <thead className="bg-muted text-left">
             <tr>
-              <th className="px-4 py-3">Email</th>
-              <th className="px-4 py-3">Role</th>
-              <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3">Since</th>
-              <th className="px-4 py-3" />
+              <th scope="col" className="px-4 py-3">Email</th>
+              <th scope="col" className="px-4 py-3">Role</th>
+              <th scope="col" className="px-4 py-3">Status</th>
+              <th scope="col" className="px-4 py-3">Since</th>
+              <th scope="col" className="px-4 py-3" />
             </tr>
           </thead>
           <tbody>
@@ -292,7 +323,7 @@ export function StaffAdminPanel({
                 <td
                   colSpan={5}
                   data-testid="staff-empty"
-                  className="px-4 py-8 text-center text-text-secondary"
+                  className="px-4 py-8 text-center text-muted-foreground"
                 >
                   No staff yet — add the first grant above.
                 </td>
@@ -303,8 +334,16 @@ export function StaffAdminPanel({
                 <td className="px-4 py-3 font-mono text-xs">{r.email}</td>
                 <td className="px-4 py-3">
                   {r.status === "active" && r.staff_id ? (
-                    <Select value={r.role} onValueChange={(v) => handleSetRole(r, v as StaffRole)}>
-                      <SelectTrigger className="w-36">
+                    <Select
+                      value={r.role}
+                      onValueChange={(v) => {
+                        if (v !== r.role) {
+                          setPendingAction({ kind: "role", entry: r, next: v as StaffRole });
+                          setActionError(null);
+                        }
+                      }}
+                    >
+                      <SelectTrigger className="w-36" aria-label={`Change role for ${r.email}`}>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -322,16 +361,28 @@ export function StaffAdminPanel({
                 <td className="px-4 py-3">
                   <Badge tone={r.status === "active" ? "success" : "warning"}>{r.status}</Badge>
                 </td>
-                <td className="px-4 py-3 text-xs text-text-secondary">
+                <td className="px-4 py-3 text-xs text-muted-foreground">
                   {new Date(r.created_at).toLocaleDateString()}
                 </td>
                 <td className="px-4 py-3 text-right whitespace-nowrap">
                   {r.status === "invited" ? (
-                    <Button variant="secondary" onClick={() => handleRevoke(r)}>
+                    <Button
+                      variant="secondary"
+                      onClick={() => {
+                        setPendingAction({ kind: "revoke", entry: r });
+                        setActionError(null);
+                      }}
+                    >
                       Withdraw
                     </Button>
                   ) : (
-                    <Button variant="destructive" onClick={() => handleRemove(r)}>
+                    <Button
+                      variant="destructive"
+                      onClick={() => {
+                        setPendingAction({ kind: "remove", entry: r });
+                        setActionError(null);
+                      }}
+                    >
                       Deactivate
                     </Button>
                   )}
@@ -341,6 +392,23 @@ export function StaffAdminPanel({
           </tbody>
         </table>
       </Card>
+
+      <ConfirmationDialog
+        open={pendingAction !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setPendingAction(null);
+            setActionError(null);
+          }
+        }}
+        title={pendingCopy?.title ?? "Confirm"}
+        description={pendingCopy?.description ?? ""}
+        confirmLabel={pendingCopy?.confirmLabel ?? "Confirm"}
+        destructive={pendingAction?.kind !== "role"}
+        error={actionError}
+        onConfirm={runPendingAction}
+        testId="confirm-staff-action"
+      />
     </div>
   );
 }

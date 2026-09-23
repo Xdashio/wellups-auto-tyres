@@ -11,6 +11,7 @@ import {
 } from "@/lib/supabase/scoped-client";
 import { BranchSettingsPanel } from "@/components/admin/branch-settings-panel";
 import { StaffAuthGate } from "@/components/admin/staff-auth-gate";
+import { PageHeader } from "@/components/ui/page-header";
 
 export const revalidate = 0;
 
@@ -60,12 +61,10 @@ export default async function AdminSettingsPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
-      <div className="border-b pb-4">
-        <h1 className="text-3xl font-extrabold tracking-tight">Admin Settings</h1>
-        <p className="text-sm text-text-secondary mt-1">
-          Configure business details and public contact settings for Well Lups Auto Tyres.
-        </p>
-      </div>
+      <PageHeader
+        title="Admin Settings"
+        description="Configure business details and public contact settings for Well Lups Auto Tyres."
+      />
 
       <StaffAuthGate context="Sign in as an Admin to change branch and M-Pesa settings. Settings writes are admin-only." />
 

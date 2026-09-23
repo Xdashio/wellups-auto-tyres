@@ -15,6 +15,11 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
+import { EmptyState } from "@/components/ui/empty-state";
+import { ErrorState } from "@/components/ui/error-state";
+import { LoadingState } from "@/components/ui/loading-state";
+import { FormField } from "@/components/ui/form-field";
 import {
   Select,
   SelectTrigger,
@@ -71,6 +76,8 @@ export function ProductsAdminPanel({
   const [form, setForm] = useState<ProductInput>(EMPTY_FORM(branchId));
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<AdminProduct | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   // The browser holds the staff session; its access token is passed to the
   // server action so the write runs as the signed-in actor (RLS-enforced).
@@ -141,18 +148,20 @@ export function ProductsAdminPanel({
     setOpen(false);
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Remove this product from the catalogue?")) return;
+  const confirmDelete = async () => {
+    if (!pendingDelete) return;
     const accessToken = await getAccessToken();
     if (!accessToken) {
-      alert("Sign in as a staff member before deleting.");
+      setDeleteError("Sign in as a staff member before deleting.");
       return;
     }
-    const res = await onDelete(accessToken, id);
+    const res = await onDelete(accessToken, pendingDelete.id);
     if (res.success) {
-      setProducts((prev) => prev.filter((p) => p.id !== id));
+      setProducts((prev) => prev.filter((p) => p.id !== pendingDelete.id));
+      setPendingDelete(null);
+      setDeleteError(null);
     } else {
-      alert(res.error || "Failed to delete product.");
+      setDeleteError(res.error || "Failed to delete product.");
     }
   };
 
@@ -160,37 +169,24 @@ export function ProductsAdminPanel({
   // successful read reaches the table below, where an empty list honestly
   // means "no products configured" — never an authorization failure.
   if (read.status === "loading") {
-    return (
-      <div data-testid="products-loading" className="text-center py-16">
-        <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-        <p className="text-sm text-text-secondary mt-2">Loading products...</p>
-      </div>
-    );
+    return <LoadingState text="Loading products..." testId="products-loading" />;
   }
   if (read.status === "unauthorized") {
     return (
-      <div
-        data-testid="products-unauthorized"
-        className="text-center py-12 border rounded-lg bg-destructive/5 border-destructive/20 space-y-2"
-      >
-        <p className="text-lg font-semibold text-destructive">
-          Could not read products — access denied.
-        </p>
-        <p className="text-sm text-text-secondary">{read.message}</p>
-      </div>
+      <ErrorState
+        title="Could not read products — access denied."
+        message={read.message}
+        testId="products-unauthorized"
+      />
     );
   }
   if (read.status === "error") {
     return (
-      <div
-        data-testid="products-error"
-        className="text-center py-12 border rounded-lg bg-destructive/5 border-destructive/20 space-y-2"
-      >
-        <p className="text-lg font-semibold text-destructive">
-          Could not read products — unexpected database error.
-        </p>
-        <p className="text-sm text-text-secondary">{read.message}</p>
-      </div>
+      <ErrorState
+        title="Could not read products — unexpected database error."
+        message={read.message}
+        testId="products-error"
+      />
     );
   }
 
@@ -204,18 +200,18 @@ export function ProductsAdminPanel({
         </Button>
       </div>
 
-      <Card className="overflow-x-auto">
+      <Card className="overflow-x-auto rounded-sm">
         <table className="w-full text-sm">
           <thead className="bg-muted text-left">
             <tr>
-              <th className="px-4 py-3">Name</th>
-              <th className="px-4 py-3">SKU</th>
-              <th className="px-4 py-3">Brand / Size</th>
-              <th className="px-4 py-3">Cost / Sell</th>
-              <th className="px-4 py-3">Margin</th>
-              <th className="px-4 py-3">Stock</th>
-              <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3" />
+              <th scope="col" className="px-4 py-3">Name</th>
+              <th scope="col" className="px-4 py-3">SKU</th>
+              <th scope="col" className="px-4 py-3">Brand / Size</th>
+              <th scope="col" className="px-4 py-3">Cost / Sell</th>
+              <th scope="col" className="px-4 py-3">Margin</th>
+              <th scope="col" className="px-4 py-3">Stock</th>
+              <th scope="col" className="px-4 py-3">Status</th>
+              <th scope="col" className="px-4 py-3" />
             </tr>
           </thead>
           <tbody>
@@ -224,7 +220,7 @@ export function ProductsAdminPanel({
                 <td
                   colSpan={8}
                   data-testid="products-empty"
-                  className="px-4 py-8 text-center text-text-secondary"
+                  className="px-4 py-8 text-center text-muted-foreground"
                 >
                   No products configured yet — add the first one above.
                 </td>
@@ -234,7 +230,7 @@ export function ProductsAdminPanel({
               <tr key={p.id} className="border-t border-border">
                 <td className="px-4 py-3 font-medium">{p.name}</td>
                 <td className="px-4 py-3 font-mono text-xs">{p.sku}</td>
-                <td className="px-4 py-3 text-text-secondary">
+                <td className="px-4 py-3 text-muted-foreground">
                   {p.brand} {p.size_spec ? `· ${p.size_spec}` : ""}
                 </td>
                 <td className="px-4 py-3">
@@ -251,7 +247,7 @@ export function ProductsAdminPanel({
                   <Button variant="secondary" onClick={() => openEdit(p)} className="mr-2">
                     Edit
                   </Button>
-                  <Button variant="destructive" onClick={() => handleDelete(p.id)}>
+                  <Button variant="destructive" onClick={() => { setPendingDelete(p); setDeleteError(null); }}>
                     Delete
                   </Button>
                 </td>
@@ -268,36 +264,44 @@ export function ProductsAdminPanel({
           </DialogTitle>
 
           {error && (
-            <div className="p-3 rounded-md bg-destructive/10 border border-destructive/20 text-destructive text-sm">
+            <div role="alert" className="p-3 rounded-none bg-destructive/10 border border-destructive/20 text-destructive text-sm">
               {error}
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-3">
-            <Input
-              placeholder="Product name"
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              required
-            />
-            <Input
-              placeholder="SKU"
-              value={form.sku}
-              onChange={(e) => setForm({ ...form, sku: e.target.value })}
-              className="font-mono"
-              required
-            />
+            <FormField label="Product name" htmlFor="product-name">
+              <Input
+                id="product-name"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                required
+              />
+            </FormField>
+            <FormField label="SKU" htmlFor="product-sku">
+              <Input
+                id="product-sku"
+                value={form.sku}
+                onChange={(e) => setForm({ ...form, sku: e.target.value })}
+                className="font-mono"
+                required
+              />
+            </FormField>
             <div className="grid grid-cols-2 gap-3">
-              <Input
-                placeholder="Brand"
-                value={form.brand || ""}
-                onChange={(e) => setForm({ ...form, brand: e.target.value })}
-              />
-              <Input
-                placeholder="Size / Spec"
-                value={form.size_spec || ""}
-                onChange={(e) => setForm({ ...form, size_spec: e.target.value })}
-              />
+              <FormField label="Brand" htmlFor="product-brand">
+                <Input
+                  id="product-brand"
+                  value={form.brand || ""}
+                  onChange={(e) => setForm({ ...form, brand: e.target.value })}
+                />
+              </FormField>
+              <FormField label="Size / Spec" htmlFor="product-size">
+                <Input
+                  id="product-size"
+                  value={form.size_spec || ""}
+                  onChange={(e) => setForm({ ...form, size_spec: e.target.value })}
+                />
+              </FormField>
             </div>
 
             <Select
@@ -318,8 +322,9 @@ export function ProductsAdminPanel({
 
             <div className="grid grid-cols-3 gap-3">
               <div>
-                <label className="text-xs text-text-secondary">Cost price (KES)</label>
+                <label className="text-xs text-muted-foreground" htmlFor="product-cost">Cost price (KES)</label>
                 <Input
+                  id="product-cost"
                   type="number"
                   min={0}
                   step="0.01"
@@ -328,8 +333,9 @@ export function ProductsAdminPanel({
                 />
               </div>
               <div>
-                <label className="text-xs text-text-secondary">Sell price (KES)</label>
+                <label className="text-xs text-muted-foreground" htmlFor="product-sell">Sell price (KES)</label>
                 <Input
+                  id="product-sell"
                   type="number"
                   min={0}
                   step="0.01"
@@ -338,8 +344,9 @@ export function ProductsAdminPanel({
                 />
               </div>
               <div>
-                <label className="text-xs text-text-secondary">Stock qty</label>
+                <label className="text-xs text-muted-foreground" htmlFor="product-stock">Stock qty</label>
                 <Input
+                  id="product-stock"
                   type="number"
                   min={0}
                   value={form.stock_quantity}
@@ -365,13 +372,34 @@ export function ProductsAdminPanel({
               <Button type="button" variant="secondary" onClick={() => setOpen(false)}>
                 Cancel
               </Button>
-              <Button type="submit" variant="primary" disabled={saving}>
-                {saving ? "Saving..." : "Save Product"}
+              <Button type="submit" variant="primary" loading={saving} disabled={saving}>
+                Save Product
               </Button>
             </div>
           </form>
         </DialogContent>
       </Dialog>
+
+      <ConfirmationDialog
+        open={pendingDelete !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setPendingDelete(null);
+            setDeleteError(null);
+          }
+        }}
+        title="Remove product"
+        description={
+          pendingDelete
+            ? `Remove "${pendingDelete.name}" (${pendingDelete.sku}) from the catalogue? This cannot be undone.`
+            : "Remove this product from the catalogue?"
+        }
+        confirmLabel="Remove product"
+        destructive
+        error={deleteError}
+        onConfirm={confirmDelete}
+        testId="confirm-delete-product"
+      />
     </div>
   );
 }

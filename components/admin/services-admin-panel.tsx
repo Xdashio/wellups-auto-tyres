@@ -12,6 +12,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
+import { EmptyState } from "@/components/ui/empty-state";
+import { ErrorState } from "@/components/ui/error-state";
+import { LoadingState } from "@/components/ui/loading-state";
+import { FormField } from "@/components/ui/form-field";
 
 type SaveResult = { success: boolean; error?: string };
 
@@ -48,6 +53,9 @@ export function ServicesAdminPanel({
   const [vehicleTypesText, setVehicleTypesText] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<AdminService | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [rowError, setRowError] = useState<string | null>(null);
 
   // The browser holds the staff session; its access token is passed to the
   // server action so the write runs as the signed-in actor (RLS-enforced).
@@ -118,18 +126,20 @@ export function ServicesAdminPanel({
     setOpen(false);
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Remove this service permanently? Consider toggling availability off instead.")) return;
+  const confirmDelete = async () => {
+    if (!pendingDelete) return;
     const accessToken = await getAccessToken();
     if (!accessToken) {
-      alert("Sign in as a staff member before deleting.");
+      setDeleteError("Sign in as a staff member before deleting.");
       return;
     }
-    const res = await onDelete(accessToken, id);
+    const res = await onDelete(accessToken, pendingDelete.id);
     if (res.success) {
-      setServices((prev) => prev.filter((s) => s.id !== id));
+      setServices((prev) => prev.filter((s) => s.id !== pendingDelete.id));
+      setPendingDelete(null);
+      setDeleteError(null);
     } else {
-      alert(res.error || "Failed to delete service.");
+      setDeleteError(res.error || "Failed to delete service.");
     }
   };
 
@@ -137,14 +147,15 @@ export function ServicesAdminPanel({
     const updated = { name: s.name, description: s.description, vehicle_types: s.vehicle_types, is_available: !s.is_available };
     const accessToken = await getAccessToken();
     if (!accessToken) {
-      alert("Sign in as a staff member before changing availability.");
+      setRowError("Sign in as a staff member before changing availability.");
       return;
     }
     const res = await onUpdate(accessToken, s.id, updated);
     if (res.success) {
+      setRowError(null);
       setServices((prev) => prev.map((x) => (x.id === s.id ? { ...x, is_available: updated.is_available } : x)));
     } else {
-      alert(res.error || "Failed to update availability.");
+      setRowError(res.error || "Failed to update availability.");
     }
   };
 
@@ -152,37 +163,24 @@ export function ServicesAdminPanel({
   // successful read reaches the cards, where empty honestly means "no
   // services configured" — not "could not read services".
   if (read.status === "loading") {
-    return (
-      <div data-testid="services-loading" className="text-center py-16">
-        <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-        <p className="text-sm text-text-secondary mt-2">Loading services...</p>
-      </div>
-    );
+    return <LoadingState text="Loading services..." testId="services-loading" />;
   }
   if (read.status === "unauthorized") {
     return (
-      <div
-        data-testid="services-unauthorized"
-        className="text-center py-12 border rounded-lg bg-destructive/5 border-destructive/20 space-y-2"
-      >
-        <p className="text-lg font-semibold text-destructive">
-          Could not read services — access denied.
-        </p>
-        <p className="text-sm text-text-secondary">{read.message}</p>
-      </div>
+      <ErrorState
+        title="Could not read services — access denied."
+        message={read.message}
+        testId="services-unauthorized"
+      />
     );
   }
   if (read.status === "error") {
     return (
-      <div
-        data-testid="services-error"
-        className="text-center py-12 border rounded-lg bg-destructive/5 border-destructive/20 space-y-2"
-      >
-        <p className="text-lg font-semibold text-destructive">
-          Could not read services — unexpected database error.
-        </p>
-        <p className="text-sm text-text-secondary">{read.message}</p>
-      </div>
+      <ErrorState
+        title="Could not read services — unexpected database error."
+        message={read.message}
+        testId="services-error"
+      />
     );
   }
 
@@ -194,11 +192,18 @@ export function ServicesAdminPanel({
         </Button>
       </div>
 
+      {rowError && (
+        <ErrorState title="Could not update service" message={rowError} />
+      )}
+
       <div className="grid gap-4 sm:grid-cols-2">
         {services.length === 0 && (
-          <p data-testid="services-empty" className="text-text-secondary col-span-full text-center py-8">
-            No services configured yet — add the first one above.
-          </p>
+          <div className="col-span-full" data-testid="services-empty">
+            <EmptyState
+              heading="No services configured yet"
+              body="Add the first garage service above."
+            />
+          </div>
         )}
         {services.map((s) => (
           <Card key={s.id} className="p-5 space-y-3">
@@ -208,9 +213,9 @@ export function ServicesAdminPanel({
                 {s.is_available ? "Available" : "Paused"}
               </Badge>
             </div>
-            {s.description && <p className="text-sm text-text-secondary">{s.description}</p>}
+            {s.description && <p className="text-sm text-muted-foreground">{s.description}</p>}
             {s.vehicle_types.length > 0 && (
-              <p className="text-xs text-text-secondary">Vehicle types: {s.vehicle_types.join(", ")}</p>
+              <p className="text-xs text-muted-foreground">Vehicle types: {s.vehicle_types.join(", ")}</p>
             )}
             <div className="flex items-center justify-between pt-2">
               <label className="flex items-center gap-2 text-sm">
@@ -221,7 +226,7 @@ export function ServicesAdminPanel({
                 <Button variant="secondary" onClick={() => openEdit(s)}>
                   Edit
                 </Button>
-                <Button variant="destructive" onClick={() => handleDelete(s.id)}>
+                <Button variant="destructive" onClick={() => { setPendingDelete(s); setDeleteError(null); }}>
                   Delete
                 </Button>
               </div>
@@ -237,29 +242,39 @@ export function ServicesAdminPanel({
           </DialogTitle>
 
           {error && (
-            <div className="p-3 rounded-md bg-destructive/10 border border-destructive/20 text-destructive text-sm">
+            <div role="alert" className="p-3 rounded-none bg-destructive/10 border border-destructive/20 text-destructive text-sm">
               {error}
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-3">
-            <Input
-              placeholder="Service name"
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              required
-            />
-            <Textarea
-              placeholder="Description"
-              rows={3}
-              value={form.description || ""}
-              onChange={(e) => setForm({ ...form, description: e.target.value })}
-            />
-            <Input
-              placeholder="Vehicle types, comma separated (e.g. sedan, SUV, truck)"
-              value={vehicleTypesText}
-              onChange={(e) => setVehicleTypesText(e.target.value)}
-            />
+            <FormField label="Service name" htmlFor="service-name">
+              <Input
+                id="service-name"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                required
+              />
+            </FormField>
+            <FormField label="Description" htmlFor="service-description">
+              <Textarea
+                id="service-description"
+                rows={3}
+                value={form.description || ""}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
+              />
+            </FormField>
+            <FormField
+              label="Vehicle types"
+              htmlFor="service-vehicles"
+              hint="Comma separated (e.g. sedan, SUV, truck)"
+            >
+              <Input
+                id="service-vehicles"
+                value={vehicleTypesText}
+                onChange={(e) => setVehicleTypesText(e.target.value)}
+              />
+            </FormField>
             <label className="flex items-center gap-2 text-sm">
               <Switch
                 checked={form.is_available}
@@ -272,13 +287,34 @@ export function ServicesAdminPanel({
               <Button type="button" variant="secondary" onClick={() => setOpen(false)}>
                 Cancel
               </Button>
-              <Button type="submit" variant="primary" disabled={saving}>
-                {saving ? "Saving..." : "Save Service"}
+              <Button type="submit" variant="primary" loading={saving} disabled={saving}>
+                Save Service
               </Button>
             </div>
           </form>
         </DialogContent>
       </Dialog>
+
+      <ConfirmationDialog
+        open={pendingDelete !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setPendingDelete(null);
+            setDeleteError(null);
+          }
+        }}
+        title="Remove service"
+        description={
+          pendingDelete
+            ? `Remove "${pendingDelete.name}" permanently? Consider toggling availability off instead — removal cannot be undone.`
+            : "Remove this service permanently?"
+        }
+        confirmLabel="Remove service"
+        destructive
+        error={deleteError}
+        onConfirm={confirmDelete}
+        testId="confirm-delete-service"
+      />
     </div>
   );
 }
