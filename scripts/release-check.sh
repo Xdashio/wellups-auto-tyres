@@ -64,7 +64,13 @@ fi
 run_step "production build" npm run build
 
 echo "== secret scan (tracked tree only, names/locations — values never printed)"
-secret_hits="$(git grep -c "SUPABASE_SERVICE_ROLE_KEY\|BEGIN PRIVATE KEY\|SUPABASE_JWT_SECRET" HEAD -- . 2>/dev/null | grep -v ":0" || true)"
+# The three fingerprints are assembled at runtime so this file never
+# contains any of them literally: a committed literal would make the scan
+# match its own source (the GATE 025 false positive) and fail every run.
+svc_role_pat="SUPABASE_SERVICE_ROLE""_KEY"
+jwt_pat="SUPABASE_JWT""_SECRET"
+key_pat="BEGIN PRIVATE"" KEY"
+secret_hits="$(git grep -c -e "$svc_role_pat" -e "$key_pat" -e "$jwt_pat" HEAD -- . 2>/dev/null | grep -v ":0" || true)"
 tracked_env="$(git ls-files | grep -iE '(^|/)\.env(\.|$)' | grep -v next-env.d.ts || true)"
 if [ -z "$secret_hits" ] && [ -z "$tracked_env" ]; then
   report pass "secret scan"
