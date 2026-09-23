@@ -62,9 +62,9 @@ export function VehicleFilterBar({ fitments }: VehicleFilterBarProps) {
   return (
     <div className="bg-blue-muted/10 p-4 rounded-none border border-blue-muted/20 space-y-3">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold uppercase tracking-wider text-navy">
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-navy">
           Filter by Vehicle (Kenya Catalogue)
-        </h3>
+        </h2>
         {searchParams.get("sizeSpec") && (
           <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-sm font-mono font-medium">
             Active Size: {searchParams.get("sizeSpec")}

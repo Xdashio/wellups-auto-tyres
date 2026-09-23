@@ -47,7 +47,7 @@ export default async function RootLayout({
             phone: b.phone ?? b.whatsapp,
           }))}
         />
-        <div className="flex-1">{children}</div>
+        <main className="flex-1">{children}</main>
         <SiteFooter whatsapp={primary?.whatsapp ?? null} />
         <Toaster />
       </body>

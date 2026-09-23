@@ -133,9 +133,9 @@ export default function GuestBookingPage({ params }: GuestBookingPageProps) {
       {/* Booking Details Card */}
       <Card className="space-y-4 p-5">
         <div>
-          <h3 className="text-xs font-semibold uppercase text-muted-foreground tracking-wider mb-1">
+          <h2 className="text-xs font-semibold uppercase text-muted-foreground tracking-wider mb-1">
             Service Requested
-          </h3>
+          </h2>
           <p className="text-base font-bold text-navy" data-testid="booking-service-name">
             {booking.service_name || "General Service"}
           </p>
@@ -143,9 +143,9 @@ export default function GuestBookingPage({ params }: GuestBookingPageProps) {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t pt-4">
           <div>
-            <h3 className="text-xs font-semibold uppercase text-muted-foreground tracking-wider mb-1">
+            <h2 className="text-xs font-semibold uppercase text-muted-foreground tracking-wider mb-1">
               Customer Preferred Date
-            </h3>
+            </h2>
             <p className="text-sm font-medium text-navy" data-testid="booking-requested-date">
               {booking.requested_date}
             </p>
@@ -153,9 +153,9 @@ export default function GuestBookingPage({ params }: GuestBookingPageProps) {
           </div>
 
           <div>
-            <h3 className="text-xs font-semibold uppercase text-muted-foreground tracking-wider mb-1">
+            <h2 className="text-xs font-semibold uppercase text-muted-foreground tracking-wider mb-1">
               Customer Preferred Time
-            </h3>
+            </h2>
             <p className="text-sm font-medium text-navy" data-testid="booking-requested-time">
               {booking.requested_time}
             </p>
@@ -165,9 +165,9 @@ export default function GuestBookingPage({ params }: GuestBookingPageProps) {
 
         {booking.vehicle_summary && (
           <div className="border-t pt-4">
-            <h3 className="text-xs font-semibold uppercase text-muted-foreground tracking-wider mb-1">
+            <h2 className="text-xs font-semibold uppercase text-muted-foreground tracking-wider mb-1">
               Vehicle Information
-            </h3>
+            </h2>
             <p className="text-sm text-navy" data-testid="booking-vehicle-summary">
               {booking.vehicle_summary}
             </p>
@@ -176,9 +176,9 @@ export default function GuestBookingPage({ params }: GuestBookingPageProps) {
 
         {booking.customer_notes && (
           <div className="border-t pt-4">
-            <h3 className="text-xs font-semibold uppercase text-muted-foreground tracking-wider mb-1">
+            <h2 className="text-xs font-semibold uppercase text-muted-foreground tracking-wider mb-1">
               Service Notes
-            </h3>
+            </h2>
             <p className="text-sm text-navy whitespace-pre-line" data-testid="booking-customer-notes">
               {booking.customer_notes}
             </p>

@@ -389,9 +389,18 @@ function Hero({
     else start();
     const fallback = window.setTimeout(start, 1500);
     const onResize = () => {
+      if (stop) {
+        stop();
+        stop = null;
+      }
       measure();
-      if (started) draw(0, 0);
-      else draw(x0, 0);
+      if (started) {
+        draw(0, 0);
+        blur.style.opacity = "0";
+        card?.classList.add("on");
+      } else {
+        draw(x0, 0);
+      }
     };
     window.addEventListener("resize", onResize);
     return () => {
@@ -950,7 +959,7 @@ function Catalog({
           ) : (
             <div style={{ gridColumn: "1 / -1", padding: "48px 24px", textAlign: "center" }}>
               <div className="product-name">Fresh stock landing soon.</div>
-              <div className="product-spec" style={{ marginTop: 8 }}>
+              <div className="catalog-empty-note" style={{ marginTop: 8 }}>
                 Tell us what you need and we&apos;ll confirm availability for your vehicle.
               </div>
             </div>
@@ -963,7 +972,7 @@ function Catalog({
           ) : (
             <div style={{ gridColumn: "1 / -1", padding: "48px 24px", textAlign: "center" }}>
               <div className="product-name">Service menu coming together.</div>
-              <div className="product-spec" style={{ marginTop: 8 }}>
+              <div className="catalog-empty-note" style={{ marginTop: 8 }}>
                 Tell us what your vehicle needs and we&apos;ll confirm scope and pricing.
               </div>
             </div>
@@ -1194,7 +1203,7 @@ export function LandingPage({ content }: { content: LandingContent }) {
   );
 
   return (
-    <main>
+    <div>
       <Hero heroProduct={content.heroProduct} whatsapp={content.whatsapp} />
 
       <FitFinder
@@ -1340,6 +1349,6 @@ export function LandingPage({ content }: { content: LandingContent }) {
       <span hidden>
         <a href="#catalog" onClick={scrollTo("catalog")}>catalog</a>
       </span>
-    </main>
+    </div>
   );
 }

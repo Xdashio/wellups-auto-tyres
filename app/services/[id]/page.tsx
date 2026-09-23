@@ -58,9 +58,9 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
 
         <Card className="space-y-4 p-5">
           <div>
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-1">
               Description
-            </h3>
+            </h2>
             <p className="text-base text-navy leading-relaxed">
               {service.description || "Professional vehicle inspection and installation service."}
             </p>
@@ -68,9 +68,9 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
 
           {service.vehicle_types && service.vehicle_types.length > 0 && (
             <div>
-              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+              <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-2">
                 Supported Vehicle Types
-              </h3>
+              </h2>
               <div className="flex flex-wrap gap-2">
                 {service.vehicle_types.map((v, i) => (
                   <Badge key={i} tone="neutral" className="px-3 py-1">
@@ -83,7 +83,7 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
         </Card>
 
         <div className="p-6 rounded-none bg-blue-muted/15 border border-blue-muted/30 space-y-4">
-          <h3 className="font-semibold text-lg">Book Service or Get a Quote</h3>
+          <h2 className="font-semibold text-lg">Book Service or Get a Quote</h2>
           <p className="text-sm text-muted-foreground">
             Service scope and pricing depend on vehicle inspection. Submit a booking request to schedule your vehicle, or request formal pricing from our team.
           </p>

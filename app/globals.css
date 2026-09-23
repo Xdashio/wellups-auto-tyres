@@ -24,7 +24,8 @@
   --color-card: #ffffff;           /* resolves transparent bg-card */
   --color-card-foreground: #1a1b1b;
   --color-muted: #e8e9ec;          /* subtle surface tint */
-  --color-muted-foreground: #777878; /* secondary text */
+  --color-muted-foreground: #666666; /* secondary text — measured ≥4.5:1
+    on card, background, and muted surfaces (GATE 026B axe audit) */
 
   --color-border: #e0dfdd;          /* canonical prototype border */
   --color-input: #ffffff;
@@ -35,6 +36,10 @@
   /* ─── WhatsApp actions only ────────────────────────────────── */
   --color-whatsapp: #25d366;
   --color-whatsapp-dark: #1eb954;
+
+  /* ─── Deep blue for small text/icons on light surfaces (measured
+       ≥4.5:1 on card; fills keep the brand blue-muted) ─────────── */
+  --color-blue-muted-deep: #4a6fa5;
 
   /* ─── Stock-out solid (prototype #9CA3AF; in/low reuse
        success/warning per the design contract) ───────────────── */

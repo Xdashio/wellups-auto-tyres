@@ -56,6 +56,7 @@ export function SiteHeader({
 
   return (
     <>
+      <header>
       <div className="announcement-bar">
         Quality parts. Expert fitting.
         <a href="#branches" onClick={(e) => { e.preventDefault(); goSection("branches"); }}>
@@ -124,6 +125,7 @@ export function SiteHeader({
           </div>
         </div>
       </nav>
+      </header>
 
       <DialogPrimitive.Root open={menuOpen} onOpenChange={setMenuOpen}>
         <DialogPrimitive.Overlay className="mobile-menu-overlay open" />
