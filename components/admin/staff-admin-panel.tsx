@@ -1,12 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase/client";
 import {
   StaffInviteSchema,
   type StaffRosterEntry,
   type StaffRole,
 } from "@/lib/supabase/staff-admin";
+import type { ProtectedReadResult } from "@/lib/supabase/scoped-client";
+import { useProtectedRead } from "@/components/admin/use-protected-read";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -22,7 +24,10 @@ import {
 type ActionResult = { success: boolean; error?: string };
 
 interface StaffAdminPanelProps {
-  initialRoster: StaffRosterEntry[];
+  // GATE 023 (S1): the roster arrives through this token-scoped action
+  // instead of an anon server-render prop, so a non-admin caller gets an
+  // explicit denied state rather than a false "No staff yet" table.
+  onLoad: (accessToken: string) => Promise<ProtectedReadResult<StaffRosterEntry[]>>;
   onInvite: (accessToken: string, email: string, role: StaffRole, displayName?: string) => Promise<ActionResult>;
   onRevokeInvite: (accessToken: string, inviteId: string) => Promise<ActionResult>;
   onSetRole: (accessToken: string, staffId: string, role: StaffRole) => Promise<ActionResult>;
@@ -32,13 +37,17 @@ interface StaffAdminPanelProps {
 const ROLE_OPTIONS: StaffRole[] = ["admin", "manager", "cashier"];
 
 export function StaffAdminPanel({
-  initialRoster,
+  onLoad,
   onInvite,
   onRevokeInvite,
   onSetRole,
   onRemove,
 }: StaffAdminPanelProps) {
-  const [roster, setRoster] = useState(initialRoster);
+  const read = useProtectedRead(onLoad);
+  const [roster, setRoster] = useState<StaffRosterEntry[]>([]);
+  useEffect(() => {
+    if (read.status === "ready") setRoster(read.data);
+  }, [read]);
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<StaffRole>("cashier");
   const [displayName, setDisplayName] = useState("");
@@ -149,6 +158,46 @@ export function StaffAdminPanel({
     setNotice(`${entry.email} deactivated. Remember: ban via Dashboard → Authentication for immediate session revocation if needed.`);
   };
 
+  // Distinct read outcomes (GATE 023 S1): the grant form and roster table
+  // render only for a signed-in Admin whose admin_list_staff read
+  // succeeded. Manager/Cashier and anon get the explicit denied state —
+  // Admin-only administration is preserved, and an empty roster now always
+  // means zero staff records, never a swallowed RPC failure.
+  if (read.status === "loading") {
+    return (
+      <div data-testid="staff-loading" className="text-center py-16">
+        <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+        <p className="text-sm text-text-secondary mt-2">Loading staff roster...</p>
+      </div>
+    );
+  }
+  if (read.status === "unauthorized") {
+    return (
+      <div
+        data-testid="staff-unauthorized"
+        className="text-center py-12 border rounded-lg bg-destructive/5 border-destructive/20 space-y-2"
+      >
+        <p className="text-lg font-semibold text-destructive">
+          Could not read staff roster — access denied.
+        </p>
+        <p className="text-sm text-text-secondary">{read.message}</p>
+      </div>
+    );
+  }
+  if (read.status === "error") {
+    return (
+      <div
+        data-testid="staff-error"
+        className="text-center py-12 border rounded-lg bg-destructive/5 border-destructive/20 space-y-2"
+      >
+        <p className="text-lg font-semibold text-destructive">
+          Could not read staff roster — unexpected database error.
+        </p>
+        <p className="text-sm text-text-secondary">{read.message}</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <Card className="p-5 space-y-2 text-sm">
@@ -240,7 +289,11 @@ export function StaffAdminPanel({
           <tbody>
             {roster.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-text-secondary">
+                <td
+                  colSpan={5}
+                  data-testid="staff-empty"
+                  className="px-4 py-8 text-center text-text-secondary"
+                >
                   No staff yet — add the first grant above.
                 </td>
               </tr>

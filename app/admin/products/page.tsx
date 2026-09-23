@@ -7,10 +7,12 @@ import {
   updateProduct,
   deleteProduct,
   ProductInput,
+  AdminProduct,
+  AdminCategory,
 } from "@/lib/supabase/catalog-admin";
 import {
-  clientWithAccessToken,
-  verifiedStaffActor,
+  scopedClientOrError,
+  type ProtectedReadResult,
 } from "@/lib/supabase/scoped-client";
 import { ProductsAdminPanel } from "@/components/admin/products-admin-panel";
 import { StaffAuthGate } from "@/components/admin/staff-auth-gate";
@@ -21,21 +23,34 @@ export const revalidate = 0;
 // session access token, the action validates it with the Auth server, and
 // PostgREST/RLS enforces the real actor. No token (or a forged one) →
 // server-side denial before any mutation. RLS remains authoritative.
-async function scopedClientOrError(accessToken: string) {
-  const scoped = clientWithAccessToken(accessToken);
-  if (!scoped) return { error: "Not authenticated. Sign in as a staff member first." };
-  const actor = await verifiedStaffActor(scoped);
-  if ("error" in actor) return { error: actor.error };
-  return { scoped };
-}
+//
+// GATE 023 (defect S1): reads used to run with the ANON server client and
+// swallowed the 016 revocation into [] — every operator saw an empty
+// catalogue. The read below is now a token-scoped server action returning
+// a typed result that separates unauthorized / unexpected error / honest
+// empty (products_admin's predicate is request_role() = 'admin', so only
+// an Admin role reaches the data; Manager/Cashier get an explicit
+// unauthorized result, Anon never gets a token).
+const ADMIN_ONLY_READ = "Catalogue management is Admin-only. Sign in with an Admin account.";
 
 export default async function AdminProductsPage() {
-  const { publicSupabase } = await import("@/lib/supabase/catalog");
   const branch = await getPrimaryBranch();
-  const [products, categories] = await Promise.all([
-    listProductsForAdmin(publicSupabase),
-    listCategoriesForAdmin(publicSupabase),
-  ]);
+
+  async function handleLoadProducts(
+    accessToken: string
+  ): Promise<ProtectedReadResult<{ products: AdminProduct[]; categories: AdminCategory[] }>> {
+    "use server";
+    const gate = await scopedClientOrError(accessToken);
+    if ("error" in gate) return { ok: false, kind: "unauthorized", message: gate.error };
+    if (gate.role !== "admin") return { ok: false, kind: "unauthorized", message: ADMIN_ONLY_READ };
+    const [products, categories] = await Promise.all([
+      listProductsForAdmin(gate.scoped),
+      listCategoriesForAdmin(gate.scoped),
+    ]);
+    if (!products.ok) return products;
+    if (!categories.ok) return categories;
+    return { ok: true, data: { products: products.data, categories: categories.data } };
+  }
 
   async function handleCreate(accessToken: string, input: ProductInput) {
     "use server";
@@ -72,8 +87,7 @@ export default async function AdminProductsPage() {
       <StaffAuthGate context="Sign in as an Admin to manage the product catalogue. Catalog writes are admin-only." />
 
       <ProductsAdminPanel
-        initialProducts={products}
-        categories={categories}
+        onLoad={handleLoadProducts}
         branchId={branch?.id || ""}
         onCreate={handleCreate}
         onUpdate={handleUpdate}

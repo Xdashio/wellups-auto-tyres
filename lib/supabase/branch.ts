@@ -1,5 +1,6 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
+import { type ProtectedReadResult, readFailure } from "./scoped-client";
 
 // M-Pesa field hygiene (GATE 012 §8). No real business numbers are hardcoded;
 // these validators only constrain SHAPE: trim, reject control characters,
@@ -65,20 +66,26 @@ export interface BranchData {
   mpesa_account_number: string | null;
 }
 
-export async function getBranchForAdmin(client: SupabaseClient): Promise<BranchData | null> {
+// Admin branch read (GATE 023, defect S1). maybeSingle() instead of
+// single(): a non-admin authenticated caller is admitted by the SELECT
+// grant but filtered to zero rows by the branches_admin admin predicate —
+// that outcome is ok + data:null (valid request, zero visible rows), NOT
+// an error and NOT the same as the previous swallowed null. Anon's 42501
+// denial and unexpected failures come back as typed results so the settings
+// page can render "access denied" instead of a false "Not Found".
+export async function getBranchForAdmin(
+  client: SupabaseClient
+): Promise<ProtectedReadResult<BranchData | null>> {
   const { data, error } = await client
     .from("branches_admin")
     .select(
       "id, name, address, phone, whatsapp, opening_hours, mpesa_channel_type, mpesa_paybill_number, mpesa_till_number, mpesa_account_number"
     )
     .limit(1)
-    .single();
+    .maybeSingle();
 
-  if (error) {
-    console.error("Error fetching branch for admin:", error);
-    return null;
-  }
-  return data;
+  if (error) return readFailure(error);
+  return { ok: true, data };
 }
 
 export async function updateBranchSettings(

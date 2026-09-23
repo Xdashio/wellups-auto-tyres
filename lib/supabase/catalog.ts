@@ -100,6 +100,41 @@ export async function getPrimaryBranch(): Promise<PublicBranch | null> {
   return data;
 }
 
+export async function getPublicBranches(): Promise<PublicBranch[]> {
+  const { data, error } = await publicSupabase
+    .from("branches_public")
+    .select("*")
+    .order("name", { ascending: true });
+
+  if (error) {
+    console.error("Error fetching public branches:", error);
+    return [];
+  }
+  return data || [];
+}
+
+export interface PublicCounts {
+  products: number;
+  services: number;
+  branches: number;
+}
+
+export async function getPublicCounts(): Promise<PublicCounts> {
+  const [p, s, b] = await Promise.all([
+    publicSupabase.from("products_public").select("id", { count: "exact", head: true }),
+    publicSupabase.from("services_public").select("id", { count: "exact", head: true }),
+    publicSupabase.from("branches_public").select("id", { count: "exact", head: true }),
+  ]);
+  if (p.error) console.error("Error counting public products:", p.error);
+  if (s.error) console.error("Error counting public services:", s.error);
+  if (b.error) console.error("Error counting public branches:", b.error);
+  return {
+    products: p.count ?? 0,
+    services: s.count ?? 0,
+    branches: b.count ?? 0,
+  };
+}
+
 export async function getPublicProducts(params?: {
   categoryId?: string;
   brand?: string;

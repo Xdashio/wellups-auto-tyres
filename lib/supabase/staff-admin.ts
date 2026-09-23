@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
+import { type ProtectedReadResult, readFailure } from "./scoped-client";
 
 // Staff roster management (migration 017). No service_role key exists in
 // app code by design, so everything here goes through the admin-only
@@ -46,15 +47,16 @@ function rpcErrorMessage(error: { message: string }): string {
   return error.message;
 }
 
+// Roster read (GATE 023, defect S1): typed result instead of swallowing
+// the RPC's fail-closed 42501 into []. The RPC remains admin-only from the
+// caller's JWT; anon and non-admin callers now surface as
+// kind:"unauthorized" rather than an honest-looking empty roster.
 export async function listStaffForAdmin(
   client: SupabaseClient
-): Promise<StaffRosterEntry[]> {
+): Promise<ProtectedReadResult<StaffRosterEntry[]>> {
   const { data, error } = await client.rpc("admin_list_staff");
-  if (error) {
-    console.error("Error listing staff:", error);
-    return [];
-  }
-  return (data ?? []) as StaffRosterEntry[];
+  if (error) return readFailure(error);
+  return { ok: true, data: (data ?? []) as StaffRosterEntry[] };
 }
 
 export async function inviteStaff(

@@ -1,27 +1,33 @@
 import React from "react";
-import { getPrimaryBranch, publicSupabase } from "@/lib/supabase/catalog";
+import { getPrimaryBranch } from "@/lib/supabase/catalog";
 import { listCategoriesForAdmin, type ProductInput } from "@/lib/supabase/catalog-admin";
 import { upsertProductsBySku, type BulkUpsertResult } from "@/lib/supabase/catalog-import";
-import {
-  clientWithAccessToken,
-  verifiedStaffActor,
-} from "@/lib/supabase/scoped-client";
-import { CsvImporter } from "@/components/admin/csv-importer";
+import { scopedClientOrError, type ProtectedReadResult } from "@/lib/supabase/scoped-client";
+import type { AdminCategory } from "@/lib/supabase/catalog-admin";
+import { ImportCategoriesLoader } from "@/components/admin/import-categories-loader";
 import { StaffAuthGate } from "@/components/admin/staff-auth-gate";
 
 export const revalidate = 0;
 
-async function scopedClientOrError(accessToken: string) {
-  const scoped = clientWithAccessToken(accessToken);
-  if (!scoped) return { error: "Not authenticated. Sign in as a staff member first." };
-  const actor = await verifiedStaffActor(scoped);
-  if ("error" in actor) return { error: actor.error };
-  return { scoped };
-}
+// GATE 025: the category dropdown is an admin-only read (categories_admin
+// is revoked from anon by 016), so it goes through the same token-scoped
+// protected-read architecture as the other S1 surfaces. The browser passes
+// its session token; the action enforces the admin role; unauthorized /
+// error / honest-empty stay distinct instead of collapsing into "none yet".
+const ADMIN_ONLY_READ = "Catalogue management is Admin-only. Sign in with an Admin account.";
 
 export default async function AdminProductImportPage() {
   const branch = await getPrimaryBranch();
-  const categories = await listCategoriesForAdmin(publicSupabase);
+
+  async function handleLoadCategories(
+    accessToken: string
+  ): Promise<ProtectedReadResult<AdminCategory[]>> {
+    "use server";
+    const gate = await scopedClientOrError(accessToken);
+    if ("error" in gate) return { ok: false, kind: "unauthorized", message: gate.error };
+    if (gate.role !== "admin") return { ok: false, kind: "unauthorized", message: ADMIN_ONLY_READ };
+    return listCategoriesForAdmin(gate.scoped);
+  }
 
   async function handleImport(accessToken: string, rows: ProductInput[]): Promise<BulkUpsertResult> {
     "use server";
@@ -44,11 +50,10 @@ export default async function AdminProductImportPage() {
 
       <StaffAuthGate context="Sign in as an Admin to bulk-import products. Catalog writes are admin-only." />
 
-      <CsvImporter
-        kind="products"
+      <ImportCategoriesLoader
         branchId={branch?.id || ""}
-        categories={categories}
         templateHref="/import-templates/products.csv"
+        onLoadCategories={handleLoadCategories}
         onImport={handleImport}
       />
     </div>

@@ -1,5 +1,6 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
+import { type ProtectedReadResult, readFailure } from "./scoped-client";
 
 // ─── Products ────────────────────────────────────────────────────────────
 
@@ -24,17 +25,21 @@ export interface AdminProduct extends ProductInput {
   created_at: string;
 }
 
-export async function listProductsForAdmin(client: SupabaseClient): Promise<AdminProduct[]> {
+// Admin projection reads (GATE 023, defect S1): typed results, never a
+// swallowed failure. ok:true + [] means the signed-in caller genuinely
+// sees zero records; a 42501/anon denial or an unexpected DB error is
+// reported as such so the UI can distinguish "no products configured"
+// from "could not read products".
+export async function listProductsForAdmin(
+  client: SupabaseClient
+): Promise<ProtectedReadResult<AdminProduct[]>> {
   const { data, error } = await client
     .from("products_admin")
     .select("*")
     .order("name", { ascending: true });
 
-  if (error) {
-    console.error("Error listing products for admin:", error);
-    return [];
-  }
-  return data as AdminProduct[];
+  if (error) return readFailure(error);
+  return { ok: true, data: (data ?? []) as AdminProduct[] };
 }
 
 export async function createProduct(
@@ -89,7 +94,9 @@ export interface AdminService extends ServiceInput {
   created_at: string;
 }
 
-export async function listServicesForAdmin(client: SupabaseClient): Promise<AdminService[]> {
+export async function listServicesForAdmin(
+  client: SupabaseClient
+): Promise<ProtectedReadResult<AdminService[]>> {
   // services_public filters to is_available = true, which would hide
   // disabled services from admin and make them unreachable to re-enable —
   // use the unfiltered admin view instead.
@@ -98,11 +105,8 @@ export async function listServicesForAdmin(client: SupabaseClient): Promise<Admi
     .select("*")
     .order("name", { ascending: true });
 
-  if (error) {
-    console.error("Error listing services for admin:", error);
-    return [];
-  }
-  return data as AdminService[];
+  if (error) return readFailure(error);
+  return { ok: true, data: (data ?? []) as AdminService[] };
 }
 
 export async function createService(
@@ -149,7 +153,9 @@ export interface AdminCategory {
   description: string | null;
 }
 
-export async function listCategoriesForAdmin(client: SupabaseClient): Promise<AdminCategory[]> {
+export async function listCategoriesForAdmin(
+  client: SupabaseClient
+): Promise<ProtectedReadResult<AdminCategory[]>> {
   // Dedicated admin view (016): category writes must not ride the
   // anon-readable categories_public view.
   const { data, error } = await client
@@ -157,11 +163,8 @@ export async function listCategoriesForAdmin(client: SupabaseClient): Promise<Ad
     .select("*")
     .order("name", { ascending: true });
 
-  if (error) {
-    console.error("Error listing categories for admin:", error);
-    return [];
-  }
-  return data as AdminCategory[];
+  if (error) return readFailure(error);
+  return { ok: true, data: (data ?? []) as AdminCategory[] };
 }
 
 export async function createCategory(

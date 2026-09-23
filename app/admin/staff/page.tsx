@@ -6,10 +6,11 @@ import {
   setStaffRole,
   removeStaff,
   type StaffRole,
+  type StaffRosterEntry,
 } from "@/lib/supabase/staff-admin";
 import {
-  clientWithAccessToken,
-  verifiedStaffActor,
+  scopedClientOrError,
+  type ProtectedReadResult,
 } from "@/lib/supabase/scoped-client";
 import { StaffAdminPanel } from "@/components/admin/staff-admin-panel";
 import { StaffAuthGate } from "@/components/admin/staff-auth-gate";
@@ -20,46 +21,52 @@ export const revalidate = 0;
 // its session access token, the action validates it, and the 017 RPCs
 // enforce the Admin role from the JWT server-side (fail-closed 42501).
 // RLS remains authoritative; no service-role key is involved anywhere.
-async function scopedClientOrError(accessToken: string) {
-  const scoped = clientWithAccessToken(accessToken);
-  if (!scoped) return { error: "Not authenticated. Sign in as a staff member first." };
-  const actor = await verifiedStaffActor(scoped);
-  if ("error" in actor) return { error: actor.error };
-  return { scoped };
-}
+//
+// GATE 023 (defect S1): the roster used to be read during server render
+// with the ANON client, so admin_list_staff failed (execute revoked from
+// anon by 017) and the error was swallowed into [] — the page told every
+// operator "No staff yet". The read below is a token-scoped action with a
+// typed result: Admin gets the real roster (or an honest empty list),
+// Manager/Cashier and Anon get an explicit unauthorized result while every
+// mutation continues to be re-checked by the RPCs themselves.
+const ADMIN_ONLY_READ = "Staff administration is Admin-only. Sign in with an Admin account.";
 
 export default async function AdminStaffPage() {
-  const { publicSupabase } = await import("@/lib/supabase/catalog");
-  // The roster RPC itself is admin-gated: non-admin callers get an empty
-  // list here (the error is swallowed by design — the gate below explains
-  // sign-in, and every mutation re-checks server-side).
-  const roster = await listStaffForAdmin(publicSupabase);
+  async function handleLoadStaff(
+    accessToken: string
+  ): Promise<ProtectedReadResult<StaffRosterEntry[]>> {
+    "use server";
+    const gate = await scopedClientOrError(accessToken);
+    if ("error" in gate) return { ok: false, kind: "unauthorized", message: gate.error };
+    if (gate.role !== "admin") return { ok: false, kind: "unauthorized", message: ADMIN_ONLY_READ };
+    return listStaffForAdmin(gate.scoped);
+  }
 
   async function handleInvite(accessToken: string, email: string, role: StaffRole, displayName?: string) {
     "use server";
     const gate = await scopedClientOrError(accessToken);
-    if ("error" in gate) return { success: false, error: gate.error ?? "Not authenticated." };
+    if ("error" in gate) return { success: false, error: gate.error };
     return inviteStaff(gate.scoped, { email, role, displayName });
   }
 
   async function handleRevokeInvite(accessToken: string, inviteId: string) {
     "use server";
     const gate = await scopedClientOrError(accessToken);
-    if ("error" in gate) return { success: false, error: gate.error ?? "Not authenticated." };
+    if ("error" in gate) return { success: false, error: gate.error };
     return revokeStaffInvite(gate.scoped, inviteId);
   }
 
   async function handleSetRole(accessToken: string, staffId: string, role: StaffRole) {
     "use server";
     const gate = await scopedClientOrError(accessToken);
-    if ("error" in gate) return { success: false, error: gate.error ?? "Not authenticated." };
+    if ("error" in gate) return { success: false, error: gate.error };
     return setStaffRole(gate.scoped, staffId, role);
   }
 
   async function handleRemove(accessToken: string, staffId: string) {
     "use server";
     const gate = await scopedClientOrError(accessToken);
-    if ("error" in gate) return { success: false, error: gate.error ?? "Not authenticated." };
+    if ("error" in gate) return { success: false, error: gate.error };
     return removeStaff(gate.scoped, staffId);
   }
 
@@ -77,7 +84,7 @@ export default async function AdminStaffPage() {
       <StaffAuthGate context="Sign in as an Admin to manage staff access. This page is admin-only." />
 
       <StaffAdminPanel
-        initialRoster={roster}
+        onLoad={handleLoadStaff}
         onInvite={handleInvite}
         onRevokeInvite={handleRevokeInvite}
         onSetRole={handleSetRole}

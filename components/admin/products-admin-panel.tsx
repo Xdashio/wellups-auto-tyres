@@ -1,8 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
-import { AdminProduct, AdminCategory, ProductInput, ProductInputSchema } from "@/lib/supabase/catalog-admin";
+import React, { useState, useEffect } from "react";
+import {
+  AdminProduct,
+  AdminCategory,
+  ProductInput,
+  ProductInputSchema,
+} from "@/lib/supabase/catalog-admin";
+import type { ProtectedReadResult } from "@/lib/supabase/scoped-client";
 import { supabase } from "@/lib/supabase/client";
+import { useProtectedRead } from "@/components/admin/use-protected-read";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -19,8 +26,13 @@ import {
 type SaveResult = { success: boolean; error?: string };
 
 interface ProductsAdminPanelProps {
-  initialProducts: AdminProduct[];
-  categories: AdminCategory[];
+  // GATE 023 (S1): data no longer arrives as an anon server-render prop.
+  // The panel asks the session for its access token and calls this
+  // token-scoped server action, which separates unauthorized / error /
+  // honest-empty results for rendering.
+  onLoad: (
+    accessToken: string
+  ) => Promise<ProtectedReadResult<{ products: AdminProduct[]; categories: AdminCategory[] }>>;
   branchId: string;
   onCreate: (accessToken: string, input: ProductInput) => Promise<SaveResult>;
   onUpdate: (accessToken: string, id: string, input: ProductInput) => Promise<SaveResult>;
@@ -43,14 +55,17 @@ const EMPTY_FORM = (branchId: string): ProductInput => ({
 });
 
 export function ProductsAdminPanel({
-  initialProducts,
-  categories,
+  onLoad,
   branchId,
   onCreate,
   onUpdate,
   onDelete,
 }: ProductsAdminPanelProps) {
-  const [products, setProducts] = useState(initialProducts);
+  const read = useProtectedRead(onLoad);
+  const [products, setProducts] = useState<AdminProduct[]>([]);
+  useEffect(() => {
+    if (read.status === "ready") setProducts(read.data.products);
+  }, [read]);
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<ProductInput>(EMPTY_FORM(branchId));
@@ -141,6 +156,46 @@ export function ProductsAdminPanel({
     }
   };
 
+  // Distinct read outcomes (GATE 023 S1). Only a signed-in Admin with a
+  // successful read reaches the table below, where an empty list honestly
+  // means "no products configured" — never an authorization failure.
+  if (read.status === "loading") {
+    return (
+      <div data-testid="products-loading" className="text-center py-16">
+        <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+        <p className="text-sm text-text-secondary mt-2">Loading products...</p>
+      </div>
+    );
+  }
+  if (read.status === "unauthorized") {
+    return (
+      <div
+        data-testid="products-unauthorized"
+        className="text-center py-12 border rounded-lg bg-destructive/5 border-destructive/20 space-y-2"
+      >
+        <p className="text-lg font-semibold text-destructive">
+          Could not read products — access denied.
+        </p>
+        <p className="text-sm text-text-secondary">{read.message}</p>
+      </div>
+    );
+  }
+  if (read.status === "error") {
+    return (
+      <div
+        data-testid="products-error"
+        className="text-center py-12 border rounded-lg bg-destructive/5 border-destructive/20 space-y-2"
+      >
+        <p className="text-lg font-semibold text-destructive">
+          Could not read products — unexpected database error.
+        </p>
+        <p className="text-sm text-text-secondary">{read.message}</p>
+      </div>
+    );
+  }
+
+  const categories = read.data.categories;
+
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
@@ -166,8 +221,12 @@ export function ProductsAdminPanel({
           <tbody>
             {products.length === 0 && (
               <tr>
-                <td colSpan={8} className="px-4 py-8 text-center text-text-secondary">
-                  No products yet — add the first one above.
+                <td
+                  colSpan={8}
+                  data-testid="products-empty"
+                  className="px-4 py-8 text-center text-text-secondary"
+                >
+                  No products configured yet — add the first one above.
                 </td>
               </tr>
             )}

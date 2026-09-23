@@ -1,8 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { AdminService, ServiceInput, ServiceInputSchema } from "@/lib/supabase/catalog-admin";
+import type { ProtectedReadResult } from "@/lib/supabase/scoped-client";
 import { supabase } from "@/lib/supabase/client";
+import { useProtectedRead } from "@/components/admin/use-protected-read";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -14,7 +16,9 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 type SaveResult = { success: boolean; error?: string };
 
 interface ServicesAdminPanelProps {
-  initialServices: AdminService[];
+  // GATE 023 (S1): token-scoped read instead of an anon server-render prop,
+  // so unauthorized / error / honest-empty stay distinguishable.
+  onLoad: (accessToken: string) => Promise<ProtectedReadResult<AdminService[]>>;
   onCreate: (accessToken: string, input: ServiceInput) => Promise<SaveResult>;
   onUpdate: (accessToken: string, id: string, input: ServiceInput) => Promise<SaveResult>;
   onDelete: (accessToken: string, id: string) => Promise<SaveResult>;
@@ -28,12 +32,16 @@ const EMPTY_FORM: ServiceInput = {
 };
 
 export function ServicesAdminPanel({
-  initialServices,
+  onLoad,
   onCreate,
   onUpdate,
   onDelete,
 }: ServicesAdminPanelProps) {
-  const [services, setServices] = useState(initialServices);
+  const read = useProtectedRead(onLoad);
+  const [services, setServices] = useState<AdminService[]>([]);
+  useEffect(() => {
+    if (read.status === "ready") setServices(read.data);
+  }, [read]);
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<ServiceInput>(EMPTY_FORM);
@@ -140,6 +148,44 @@ export function ServicesAdminPanel({
     }
   };
 
+  // Distinct read outcomes (GATE 023 S1): only a signed-in Admin with a
+  // successful read reaches the cards, where empty honestly means "no
+  // services configured" — not "could not read services".
+  if (read.status === "loading") {
+    return (
+      <div data-testid="services-loading" className="text-center py-16">
+        <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+        <p className="text-sm text-text-secondary mt-2">Loading services...</p>
+      </div>
+    );
+  }
+  if (read.status === "unauthorized") {
+    return (
+      <div
+        data-testid="services-unauthorized"
+        className="text-center py-12 border rounded-lg bg-destructive/5 border-destructive/20 space-y-2"
+      >
+        <p className="text-lg font-semibold text-destructive">
+          Could not read services — access denied.
+        </p>
+        <p className="text-sm text-text-secondary">{read.message}</p>
+      </div>
+    );
+  }
+  if (read.status === "error") {
+    return (
+      <div
+        data-testid="services-error"
+        className="text-center py-12 border rounded-lg bg-destructive/5 border-destructive/20 space-y-2"
+      >
+        <p className="text-lg font-semibold text-destructive">
+          Could not read services — unexpected database error.
+        </p>
+        <p className="text-sm text-text-secondary">{read.message}</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
@@ -150,8 +196,8 @@ export function ServicesAdminPanel({
 
       <div className="grid gap-4 sm:grid-cols-2">
         {services.length === 0 && (
-          <p className="text-text-secondary col-span-full text-center py-8">
-            No services yet — add the first one above.
+          <p data-testid="services-empty" className="text-text-secondary col-span-full text-center py-8">
+            No services configured yet — add the first one above.
           </p>
         )}
         {services.map((s) => (

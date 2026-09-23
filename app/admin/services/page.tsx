@@ -5,27 +5,37 @@ import {
   updateService,
   deleteService,
   ServiceInput,
+  AdminService,
 } from "@/lib/supabase/catalog-admin";
 import {
-  clientWithAccessToken,
-  verifiedStaffActor,
+  scopedClientOrError,
+  type ProtectedReadResult,
 } from "@/lib/supabase/scoped-client";
 import { ServicesAdminPanel } from "@/components/admin/services-admin-panel";
 import { StaffAuthGate } from "@/components/admin/staff-auth-gate";
 
 export const revalidate = 0;
 
-async function scopedClientOrError(accessToken: string) {
-  const scoped = clientWithAccessToken(accessToken);
-  if (!scoped) return { error: "Not authenticated. Sign in as a staff member first." };
-  const actor = await verifiedStaffActor(scoped);
-  if ("error" in actor) return { error: actor.error };
-  return { scoped };
-}
+// GATE 023 (defect S1): this page used to fetch services_admin with the
+// ANON server client — post-016 that is a 42501 denial which the helper
+// swallowed into [] (every operator saw "No services yet"). The read is
+// now a token-scoped server action with a typed result; services_admin's
+// predicate is request_role() = 'admin' (015), so Admin reads the
+// projection, Manager/Cashier get an explicit unauthorized result, and
+// Anon never gets a token. Disabled services stay reachable here because
+// the admin view is unfiltered.
+const ADMIN_ONLY_READ = "Catalogue management is Admin-only. Sign in with an Admin account.";
 
 export default async function AdminServicesPage() {
-  const { publicSupabase } = await import("@/lib/supabase/catalog");
-  const services = await listServicesForAdmin(publicSupabase);
+  async function handleLoadServices(
+    accessToken: string
+  ): Promise<ProtectedReadResult<AdminService[]>> {
+    "use server";
+    const gate = await scopedClientOrError(accessToken);
+    if ("error" in gate) return { ok: false, kind: "unauthorized", message: gate.error };
+    if (gate.role !== "admin") return { ok: false, kind: "unauthorized", message: ADMIN_ONLY_READ };
+    return listServicesForAdmin(gate.scoped);
+  }
 
   async function handleCreate(accessToken: string, input: ServiceInput) {
     "use server";
@@ -61,7 +71,7 @@ export default async function AdminServicesPage() {
       <StaffAuthGate context="Sign in as an Admin to manage garage services. Catalog writes are admin-only." />
 
       <ServicesAdminPanel
-        initialServices={services}
+        onLoad={handleLoadServices}
         onCreate={handleCreate}
         onUpdate={handleUpdate}
         onDelete={handleDelete}

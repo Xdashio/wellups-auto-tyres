@@ -1,22 +1,11 @@
 import React from "react";
 import { type ServiceInput } from "@/lib/supabase/catalog-admin";
 import { upsertServicesByName, type BulkUpsertResult } from "@/lib/supabase/catalog-import";
-import {
-  clientWithAccessToken,
-  verifiedStaffActor,
-} from "@/lib/supabase/scoped-client";
+import { scopedClientOrError } from "@/lib/supabase/scoped-client";
 import { CsvImporter } from "@/components/admin/csv-importer";
 import { StaffAuthGate } from "@/components/admin/staff-auth-gate";
 
 export const revalidate = 0;
-
-async function scopedClientOrError(accessToken: string) {
-  const scoped = clientWithAccessToken(accessToken);
-  if (!scoped) return { error: "Not authenticated. Sign in as a staff member first." };
-  const actor = await verifiedStaffActor(scoped);
-  if ("error" in actor) return { error: actor.error };
-  return { scoped };
-}
 
 export default async function AdminServiceImportPage() {
   async function handleImport(accessToken: string, rows: ServiceInput[]): Promise<BulkUpsertResult> {
