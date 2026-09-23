@@ -82,7 +82,7 @@ export function StaffAuthGate({ context }: { context: string }) {
         data-testid="staff-session-bar"
         className="flex flex-wrap items-center justify-between gap-4 p-4 bg-navy/5 border border-navy/15 rounded-none"
       >
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <span className="text-xs uppercase font-bold text-muted-foreground tracking-wider">
             Staff Session:
           </span>
