@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { QuoteRequestStaff, updateStaffQuoteResponse, QuoteStatus } from "@/lib/supabase/quotes";
+import { QuoteRequestStaff, updateStaffQuoteResponse, QuoteStatus, getStaffWhatsAppQuoteUrl } from "@/lib/supabase/quotes";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -62,10 +62,42 @@ export function QuoteResponseForm({ quote, userRole, onSuccess, onCancel }: Quot
     const numericPrice = offeredPrice ? parseFloat(offeredPrice) : undefined;
     const isoValidUntil = validUntilDate ? new Date(validUntilDate).toISOString() : undefined;
 
-    if (status === "quoted" && (!numericPrice || numericPrice <= 0)) {
-      setErrorMessage("A valid offered price (> 0) is required to quote this request.");
-      setIsSubmitting(false);
-      return;
+    if (status === "quoted") {
+      if (!numericPrice || numericPrice <= 0) {
+        setErrorMessage("A valid offered price (> 0) is required to quote this request.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (!validUntilDate) {
+        setErrorMessage("Quote validity date is required.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      const selectedDate = new Date(validUntilDate);
+      const today = new Date();
+      const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+      const maxAllowed = todayStart + 7 * 24 * 60 * 60 * 1000;
+      const targetTime = selectedDate.getTime();
+
+      if (isNaN(targetTime)) {
+        setErrorMessage("Invalid validity date format.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (targetTime < todayStart) {
+        setErrorMessage("Quote validity date cannot be in the past.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (targetTime > maxAllowed) {
+        setErrorMessage("Quote validity cannot exceed 7 calendar days from quote issuance.");
+        setIsSubmitting(false);
+        return;
+      }
     }
 
     const res = await updateStaffQuoteResponse({
@@ -86,22 +118,17 @@ export function QuoteResponseForm({ quote, userRole, onSuccess, onCancel }: Quot
     onSuccess();
   };
 
-  const getWhatsAppMessageUrl = () => {
-    const cleanPhone = quote.customer_phone.replace(/[^0-9]/g, "");
-    if (!cleanPhone) return null;
-
-    const itemName = quote.product_name || quote.service_name || "your requested item";
-    const priceText = offeredPrice ? `KES ${parseFloat(offeredPrice).toLocaleString()}` : "[Price Pending]";
-    const text = encodeURIComponent(
-      `Hello ${quote.customer_name},\n\n` +
-      `Regarding your Quote Request ${quote.quote_number} for ${itemName} (${quote.quantity} unit/s):\n` +
-      `Our offered price is ${priceText}, valid until ${validUntilDate}.\n\n` +
-      `Thank you for choosing Well Lups Auto Tyres Limited.`
-    );
-    return `https://wa.me/${cleanPhone}?text=${text}`;
-  };
-
-  const waUrl = getWhatsAppMessageUrl();
+  const waUrl = getStaffWhatsAppQuoteUrl({
+    customerPhone: quote.customer_phone,
+    customerName: quote.customer_name,
+    quoteNumber: quote.quote_number,
+    quoteId: quote.id,
+    secretToken: quote.secret_token,
+    itemName: quote.product_name || quote.service_name || "your requested item",
+    quantity: quote.quantity,
+    offeredPrice,
+    validUntilDate,
+  });
 
   return (
     <form
@@ -270,6 +297,8 @@ export function QuoteResponseForm({ quote, userRole, onSuccess, onCancel }: Quot
               id="quote-valid-until-input"
               data-testid="quote-valid-until-input"
               type="date"
+              min={new Date().toISOString().slice(0, 10)}
+              max={new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)}
               value={validUntilDate}
               disabled={controlsDisabled || status === "under_review"}
               onChange={(e) => setValidUntilDate(e.target.value)}

@@ -36,6 +36,30 @@ export interface QuoteRequestCustomer {
   valid_until: string | null;
   created_at: string;
   updated_at: string;
+  accepted_at?: string | null;
+}
+
+export interface QuoteAcceptance {
+  id: string;
+  quote_id: string;
+  quote_number: string;
+  offered_price: number;
+  currency: string;
+  item_type: QuoteItemType;
+  item_name: string;
+  product_id?: string | null;
+  service_id?: string | null;
+  quantity: number;
+  vehicle_fitment_id?: string | null;
+  vehicle_summary: string | null;
+  customer_notes: string | null;
+  valid_until: string;
+  accepted_at: string;
+  acceptance_mechanism: "guest_token" | "authenticated_user";
+  customer_name: string;
+  customer_phone: string;
+  customer_email: string | null;
+  token_fingerprint: string;
 }
 
 export interface QuoteRequestStaff {
@@ -166,7 +190,8 @@ export async function getGuestQuote(quoteId: string, secretToken: string): Promi
     offered_price: row.offered_price ? Number(row.offered_price) : null,
     valid_until: row.valid_until,
     created_at: row.created_at,
-    updated_at: row.updated_at
+    updated_at: row.updated_at,
+    accepted_at: row.accepted_at || null
   };
 }
 
@@ -252,3 +277,83 @@ export function isQuoteExpired(validUntil: string | null | undefined): boolean {
   if (!validUntil) return false;
   return new Date(validUntil).getTime() < Date.now();
 }
+
+/**
+ * Fetches the immutable acceptance evidence record for a quote using the guest secret token.
+ */
+export async function getQuoteAcceptance(quoteId: string, secretToken: string): Promise<QuoteAcceptance | null> {
+  const { data, error } = await publicSupabase.rpc("get_quote_acceptance", {
+    p_quote_id: quoteId,
+    p_token: secretToken
+  });
+
+  if (error || !data || data.length === 0) {
+    if (error) console.error("Error fetching quote acceptance evidence:", error);
+    return null;
+  }
+
+  const row = data[0];
+  return {
+    id: row.id,
+    quote_id: row.quote_id,
+    quote_number: row.quote_number,
+    offered_price: Number(row.offered_price),
+    currency: row.currency || "KES",
+    item_type: row.item_type,
+    item_name: row.item_name,
+    product_id: null,
+    service_id: null,
+    quantity: row.quantity,
+    vehicle_fitment_id: null,
+    vehicle_summary: row.vehicle_summary,
+    customer_notes: row.customer_notes,
+    valid_until: row.valid_until,
+    accepted_at: row.accepted_at,
+    acceptance_mechanism: row.acceptance_mechanism,
+    customer_name: row.customer_name,
+    customer_phone: row.customer_phone,
+    customer_email: row.customer_email,
+    token_fingerprint: row.token_fingerprint
+  };
+}
+
+/**
+ * Generates the staff WhatsApp message URL containing the customer portal link.
+ * Strictly adheres to the rule that WhatsApp is a notification channel only,
+ * with the portal link acting as the gateway to the authoritative commercial system of record.
+ */
+export function getStaffWhatsAppQuoteUrl(params: {
+  customerPhone: string;
+  customerName: string;
+  quoteNumber: string;
+  quoteId: string;
+  secretToken: string;
+  itemName: string;
+  quantity: number;
+  offeredPrice?: number | string | null;
+  validUntilDate?: string | null;
+  origin?: string;
+}): string | null {
+  const cleanPhone = params.customerPhone.replace(/[^0-9]/g, "");
+  if (!cleanPhone) return null;
+
+  const priceText = params.offeredPrice
+    ? `KES ${parseFloat(params.offeredPrice.toString()).toLocaleString()}`
+    : "[Price Pending]";
+
+  const baseUrl = params.origin || (typeof window !== "undefined" ? window.location.origin : "");
+  const portalUrl = baseUrl
+    ? `${baseUrl}/quotes/${params.quoteId}?token=${params.secretToken}`
+    : `/quotes/${params.quoteId}?token=${params.secretToken}`;
+
+  const text = encodeURIComponent(
+    `Hello ${params.customerName},\n\n` +
+    `Regarding your Quote Request ${params.quoteNumber} for ${params.itemName} (${params.quantity} unit/s):\n` +
+    `Our offered price is ${priceText}${params.validUntilDate ? `, valid until ${params.validUntilDate}` : ""}.\n\n` +
+    `Review details and respond securely on our customer portal:\n${portalUrl}\n\n` +
+    `Thank you for choosing Well Lups Auto Tyres Limited.`
+  );
+
+  return `https://wa.me/${cleanPhone}?text=${text}`;
+}
+
