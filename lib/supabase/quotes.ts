@@ -357,3 +357,102 @@ export function getStaffWhatsAppQuoteUrl(params: {
   return `https://wa.me/${cleanPhone}?text=${text}`;
 }
 
+// ─── V0.6B: Quote Conversation & Audit Timeline ───────────────────────────
+
+export type QuoteMessageSenderType = "customer" | "staff" | "system";
+export type QuoteMessageEventType =
+  | "quote_created"
+  | "quote_reviewed"
+  | "quote_priced"
+  | "quote_accepted"
+  | "quote_declined"
+  | "customer_message"
+  | "staff_message";
+
+export interface QuoteMessage {
+  id: string;
+  quote_id: string;
+  sender_type: QuoteMessageSenderType;
+  staff_id?: string | null;
+  sender_display_name: string;
+  message_body: string | null;
+  event_type: QuoteMessageEventType | null;
+  event_metadata: Record<string, unknown> | null;
+  created_at: string;
+}
+
+/**
+ * Fetches quote conversation messages for a guest customer using token authorization.
+ */
+export async function getQuoteMessages(quoteId: string, secretToken: string): Promise<QuoteMessage[]> {
+  const { data, error } = await publicSupabase.rpc("get_quote_messages", {
+    p_quote_id: quoteId,
+    p_token: secretToken,
+  });
+
+  if (error) {
+    console.error("Error fetching quote messages:", error);
+    return [];
+  }
+
+  return (data || []) as QuoteMessage[];
+}
+
+/**
+ * Sends a customer message to a quote conversation using token authorization.
+ */
+export async function sendQuoteMessage(
+  quoteId: string,
+  secretToken: string,
+  message: string
+): Promise<{ success: boolean; messageId?: string; error?: string }> {
+  const { data, error } = await publicSupabase.rpc("send_quote_message", {
+    p_quote_id: quoteId,
+    p_token: secretToken,
+    p_message: message,
+  });
+
+  if (error) {
+    console.error("Error sending quote message:", error);
+    return { success: false, error: error.message };
+  }
+
+  return { success: true, messageId: data as string };
+}
+
+/**
+ * Fetches quote conversation messages for authenticated staff (no token needed).
+ */
+export async function staffGetQuoteMessages(quoteId: string): Promise<QuoteMessage[]> {
+  const { data, error } = await publicSupabase.rpc("staff_get_quote_messages", {
+    p_quote_id: quoteId,
+  });
+
+  if (error) {
+    console.error("Error fetching staff quote messages:", error);
+    return [];
+  }
+
+  return (data || []) as QuoteMessage[];
+}
+
+/**
+ * Sends a staff message to a quote conversation (authenticated, Admin/Manager only).
+ */
+export async function staffSendQuoteMessage(
+  quoteId: string,
+  message: string
+): Promise<{ success: boolean; messageId?: string; error?: string }> {
+  const { data, error } = await publicSupabase.rpc("staff_send_quote_message", {
+    p_quote_id: quoteId,
+    p_message: message,
+  });
+
+  if (error) {
+    console.error("Error sending staff quote message:", error);
+    return { success: false, error: error.message };
+  }
+
+  return { success: true, messageId: data as string };
+}
+

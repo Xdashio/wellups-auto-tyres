@@ -1,12 +1,23 @@
 "use client";
 
-import React, { useState } from "react";
-import { QuoteRequestStaff, updateStaffQuoteResponse, QuoteStatus, getStaffWhatsAppQuoteUrl } from "@/lib/supabase/quotes";
+import React, { useState, useEffect, useCallback } from "react";
+import {
+  QuoteRequestStaff,
+  updateStaffQuoteResponse,
+  QuoteStatus,
+  getStaffWhatsAppQuoteUrl,
+  staffGetQuoteMessages,
+  staffSendQuoteMessage,
+  QuoteMessage,
+} from "@/lib/supabase/quotes";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { QuoteConversationTimeline } from "@/components/quotes/quote-conversation-timeline";
+import { QuoteMessageComposer } from "@/components/quotes/quote-message-composer";
+import { MessageSquare } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -49,6 +60,30 @@ export function QuoteResponseForm({ quote, userRole, onSuccess, onCancel }: Quot
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+
+  // V0.6B: Conversation state
+  const [conversationMessages, setConversationMessages] = useState<QuoteMessage[]>([]);
+  const [conversationLoading, setConversationLoading] = useState(true);
+
+  const canStaffMessage = userRole === "admin" || userRole === "manager";
+
+  const loadConversation = useCallback(async () => {
+    const msgs = await staffGetQuoteMessages(quote.id);
+    setConversationMessages(msgs);
+    setConversationLoading(false);
+  }, [quote.id]);
+
+  useEffect(() => {
+    loadConversation();
+  }, [loadConversation]);
+
+  const handleStaffSendMessage = async (message: string) => {
+    const result = await staffSendQuoteMessage(quote.id, message);
+    if (result.success) {
+      await loadConversation();
+    }
+    return result;
+  };
 
   const controlsDisabled = isCashier || isTerminal || isAlreadyQuoted || isSubmitting;
 
@@ -320,6 +355,39 @@ export function QuoteResponseForm({ quote, userRole, onSuccess, onCancel }: Quot
             onChange={(e) => setStaffNotes(e.target.value)}
           />
         </div>
+      </div>
+
+      {/* V0.6B: Quote Conversation Timeline */}
+      <div className="border border-border rounded-none overflow-hidden">
+        <div className="p-3 border-b border-border bg-blue-muted/5 flex items-center gap-2">
+          <MessageSquare className="h-4 w-4 text-navy" />
+          <h3 className="text-sm font-bold text-navy">Quote Conversation</h3>
+          <span className="ml-auto text-[10px] text-muted-foreground font-medium">
+            {conversationMessages.length} {conversationMessages.length === 1 ? "entry" : "entries"}
+          </span>
+        </div>
+
+        {conversationLoading ? (
+          <div className="p-4 text-center text-xs text-muted-foreground">Loading conversation...</div>
+        ) : (
+          <QuoteConversationTimeline messages={conversationMessages} isStaffView={true} />
+        )}
+
+        {canStaffMessage && (
+          <div className="p-3 border-t border-border bg-card">
+            <QuoteMessageComposer
+              onSend={handleStaffSendMessage}
+              placeholder="Reply to customer..."
+              senderLabel="Staff Reply"
+            />
+          </div>
+        )}
+
+        {!canStaffMessage && (
+          <div className="p-3 text-center text-xs text-muted-foreground bg-muted/20 border-t">
+            {isCashier ? "Cashier role: read-only access to quote conversation." : "Sign in as Admin or Manager to reply."}
+          </div>
+        )}
       </div>
 
       <div className="flex flex-col sm:flex-row justify-between items-center gap-3 pt-4 border-t border-border">
