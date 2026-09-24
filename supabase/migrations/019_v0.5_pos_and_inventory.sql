@@ -16,14 +16,15 @@ create sequence if not exists app.sale_number_seq start 1;
 create or replace function app.generate_sale_number()
 returns text
 language plpgsql
+set search_path = ''
 as $$
 declare
   v_seq bigint;
   v_year text;
 begin
-  select nextval('app.sale_number_seq') into v_seq;
-  select to_char(now(), 'YYYY') into v_year;
-  return 'SAL-' || v_year || '-' || lpad(v_seq::text, 5, '0');
+  select pg_catalog.nextval('app.sale_number_seq'::regclass) into v_seq;
+  select pg_catalog.to_char(pg_catalog.now(), 'YYYY') into v_year;
+  return 'SAL-' || v_year || '-' || pg_catalog.lpad(v_seq::text, 5, '0');
 end;
 $$;
 
@@ -257,7 +258,7 @@ create or replace function public.pos_complete_sale(
 returns jsonb
 language plpgsql
 security definer
-set search_path = app, public
+set search_path = ''
 as $$
 declare
   v_auth_uid uuid;
@@ -268,11 +269,11 @@ declare
   v_sale_id uuid;
   v_sale_number text;
   v_total_amount numeric(12, 2) := 0;
-  v_item record;
   v_prod record;
   v_new_stock integer;
   v_line_total numeric(12, 2);
   v_items_count integer := 0;
+  v_expected_count integer := 0;
   v_item_rows jsonb := '[]'::jsonb;
 begin
   -- 1. Caller Authentication & Staff Verification
@@ -295,32 +296,40 @@ begin
   end if;
 
   -- 2. Validate Cart Payload Structure
-  if p_items is null or jsonb_typeof(p_items) <> 'array' or jsonb_array_length(p_items) = 0 then
+  if p_items is null or pg_catalog.jsonb_typeof(p_items) <> 'array' or pg_catalog.jsonb_array_length(p_items) = 0 then
     raise exception 'invalid payload: p_items must be a non-empty array' using errcode = '22023';
   end if;
 
-  -- 3. Lock Product Rows in Deterministic Ascending UUID Order (Deadlock Prevention)
-  -- Creates a temporary aggregated item table to normalize duplicate product entries.
-  drop table if exists temp_pos_cart_items;
-  create temporary table temp_pos_cart_items on commit drop as
-  select
-    (item->>'product_id')::uuid as product_id,
-    sum((item->>'quantity')::integer)::integer as quantity
-  from jsonb_array_elements(p_items) as item
-  group by (item->>'product_id')::uuid;
-
   -- Validate item counts and quantities
-  select count(*) into v_items_count from temp_pos_cart_items;
-  if v_items_count = 0 then
-    raise exception 'invalid payload: no valid items in cart' using errcode = '22023';
-  end if;
-
-  if exists (select 1 from temp_pos_cart_items where quantity <= 0 or quantity > 10000) then
+  if exists (
+    select 1
+    from pg_catalog.jsonb_array_elements(p_items) as item
+    where (item->>'quantity') is null
+       or (item->>'quantity')::integer <= 0
+       or (item->>'quantity')::integer > 10000
+  ) then
     raise exception 'invalid quantity: quantities must be integers between 1 and 10000' using errcode = '22023';
   end if;
 
-  -- 4. Verify Product Existence, Branch Confinement, and Stock Availability
+  -- Calculate expected distinct products count
+  select pg_catalog.count(distinct (item->>'product_id')::uuid)
+  into v_expected_count
+  from pg_catalog.jsonb_array_elements(p_items) as item;
+
+  if v_expected_count = 0 then
+    raise exception 'invalid payload: no valid items in cart' using errcode = '22023';
+  end if;
+
+  -- 3. Verify Product Existence, Branch Confinement, and Stock Availability
+  -- Locks rows deterministically in ascending UUID order (Deadlock Prevention)
   for v_prod in
+    with cart_items as (
+      select
+        (item->>'product_id')::uuid as product_id,
+        pg_catalog.sum((item->>'quantity')::integer)::integer as quantity
+      from pg_catalog.jsonb_array_elements(p_items) as item
+      group by (item->>'product_id')::uuid
+    )
     select
       p.id,
       p.branch_id,
@@ -331,10 +340,12 @@ begin
       p.stock_quantity,
       c.quantity as requested_qty
     from app.products p
-    join temp_pos_cart_items c on c.product_id = p.id
+    join cart_items c on c.product_id = p.id
     order by p.id asc
     for update of p
   loop
+    v_items_count := v_items_count + 1;
+
     -- Branch safety check
     if v_prod.branch_id <> v_staff_branch_id then
       raise exception 'cross-branch sale rejected: product % belongs to a different branch', v_prod.sku
@@ -354,13 +365,11 @@ begin
   end loop;
 
   -- Verify all requested products were found and locked
-  if (select count(*) from temp_pos_cart_items) <> (
-    select count(*) from app.products p join temp_pos_cart_items c on c.product_id = p.id
-  ) then
+  if v_items_count <> v_expected_count then
     raise exception 'one or more products not found in branch catalogue' using errcode = 'P0002';
   end if;
 
-  -- 5. Create Sale Header
+  -- 4. Create Sale Header
   v_sale_number := app.generate_sale_number();
   insert into app.sales (
     sale_number,
@@ -376,8 +385,15 @@ begin
     'completed'
   ) returning id into v_sale_id;
 
-  -- 6. Insert Sale Items, Decrement Product Stock, Append Inventory Movements
+  -- 5. Insert Sale Items, Decrement Product Stock, Append Inventory Movements
   for v_prod in
+    with cart_items as (
+      select
+        (item->>'product_id')::uuid as product_id,
+        pg_catalog.sum((item->>'quantity')::integer)::integer as quantity
+      from pg_catalog.jsonb_array_elements(p_items) as item
+      group by (item->>'product_id')::uuid
+    )
     select
       p.id,
       p.name,
@@ -387,7 +403,7 @@ begin
       p.stock_quantity,
       c.quantity as requested_qty
     from app.products p
-    join temp_pos_cart_items c on c.product_id = p.id
+    join cart_items c on c.product_id = p.id
     order by p.id asc
   loop
     v_line_total := (v_prod.requested_qty * v_prod.sell_price)::numeric(12, 2);
@@ -435,7 +451,7 @@ begin
     );
 
     -- Add to receipt item return array
-    v_item_rows := v_item_rows || jsonb_build_object(
+    v_item_rows := v_item_rows || pg_catalog.jsonb_build_object(
       'product_id', v_prod.id,
       'name', v_prod.name,
       'sku', v_prod.sku,
@@ -445,13 +461,13 @@ begin
     );
   end loop;
 
-  return jsonb_build_object(
+  return pg_catalog.jsonb_build_object(
     'ok', true,
     'sale_id', v_sale_id,
     'sale_number', v_sale_number,
     'total_amount', v_total_amount,
     'items', v_item_rows,
-    'created_at', now()
+    'created_at', pg_catalog.now()
   );
 end;
 $$;

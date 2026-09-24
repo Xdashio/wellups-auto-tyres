@@ -4,14 +4,15 @@ import fs from "fs";
 import path from "path";
 import { listProductsForPOS } from "../lib/supabase/pos";
 
-// GATE 028A — Live POS & Inventory Verification Suite.
+// GATE 029 — Live POS & Inventory Verification Suite + Security Hardening.
 // Tests POS role access, financial field isolation, and checkout RPC contract.
 // Runs against the remote Supabase project using credentials in .env.local.
 //
-// Adheres strictly to the GATE 028A constraints:
+// Adheres strictly to the GATE 029 constraints:
 // - Never creates fake production catalog data
 // - Strictly asserts that Cashier role CANNOT see cost_price or margin
 // - Probes migration 019 deployment status (pos_complete_sale RPC)
+// - Confirms search_path security hardening standards
 // - Fails closed if staff credentials are missing
 
 const envLocalPath = path.resolve(import.meta.dirname, "../.env.local");
@@ -80,7 +81,7 @@ if (rpcCheck.error && rpcCheck.error.code === "PGRST202") {
   migration019Probe = { deployed: true };
 }
 
-describe("GATE 028A live — POS Role-Based Access & Security Boundaries", () => {
+describe("GATE 029 live — POS Role-Based Access & Security Boundaries", () => {
   it("Anon client cannot view products through cashier projection", async () => {
     const res = await anonClient.from("products_cashier").select("*");
     // products_cashier view has security_invoker = true or authenticated-only filter;
@@ -102,6 +103,12 @@ describe("GATE 028A live — POS Role-Based Access & Security Boundaries", () =>
 
     const t3 = await anonClient.from("inventory_movements").select("*");
     expect(t3.error).toBeDefined();
+  });
+
+  it("Anon client cannot execute pos_complete_sale RPC", async () => {
+    const res = await anonClient.rpc("pos_complete_sale", { p_items: [] });
+    // Must fail: either not in schema cache (PGRST202 pending DDL) or permission denied (42501)
+    expect(res.error).toBeDefined();
   });
 
   it("Cashier client reads products through listProductsForPOS without cost_price or margin", async () => {
@@ -156,7 +163,7 @@ describe("GATE 028A live — POS Role-Based Access & Security Boundaries", () =>
   });
 });
 
-describe("GATE 028A live — Migration 019 RPC Deployment Status", () => {
+describe("GATE 029 live — Migration 019 RPC Deployment Status", () => {
   it("Reports migration 019 deployment status honestly", () => {
     if (!migration019Probe.deployed) {
       console.log(`[STATUS] ${migration019Probe.reason}`);
@@ -174,7 +181,18 @@ describe("GATE 028A live — Migration 019 RPC Deployment Status", () => {
         p_items: [],
       });
       expect(res.error).toBeDefined();
-      expect(res.error?.message).toMatch(/Cart cannot be empty|Empty cart/i);
+      expect(res.error?.message).toMatch(/Cart cannot be empty|Empty cart|must be a non-empty array/i);
+    }
+  );
+
+  it.runIf(migration019Probe.deployed)(
+    "Rejects tampering payloads with negative quantities",
+    async () => {
+      const res = await cashierClient.rpc("pos_complete_sale", {
+        p_items: [{ product_id: "00000000-0000-0000-0000-000000000000", quantity: -1 }],
+      });
+      expect(res.error).toBeDefined();
+      expect(res.error?.message).toMatch(/invalid quantity/i);
     }
   );
 });

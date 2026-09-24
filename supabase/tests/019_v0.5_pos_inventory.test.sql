@@ -1,7 +1,7 @@
 -- 019 acceptance: v0.5 POS and Inventory Architecture
 -- Verifies base tables, RLS, grants, tiered views, financial isolation, and atomic checkout RPC.
 begin;
-select plan(35);
+select plan(36);
 
 -- ─── 1. Base Tables & Sequences ──────────────────────────────────────────────
 select has_sequence('app', 'sale_number_seq', 'app.sale_number_seq exists'); -- 1
@@ -87,16 +87,23 @@ select ok(
   'authenticated can execute pos_complete_sale'
 ); -- 33
 
+-- Verify search_path is pinned to empty string
+select is(
+  (select proconfig from pg_proc where proname = 'pos_complete_sale' and pronamespace = 'public'::regnamespace),
+  array['search_path='],
+  'pos_complete_sale has search_path = '''''
+); -- 34
+
 -- ─── 7. Structural Integrity & Numbering Sequence ─────────────────────────────
 select throws_like(
-  $$select app.pos_complete_sale('[]'::jsonb)$$,
+  $$select public.pos_complete_sale('[]'::jsonb)$$,
   '%',
   'unauthenticated call fails closed'
-); -- 34
+); -- 35
 
 select lives_ok(
   $$select app.generate_sale_number()$$,
   'deterministic sale number generator succeeds'
-); -- 35
+); -- 36
 
 rollback;
