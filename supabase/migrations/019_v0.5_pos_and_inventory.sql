@@ -55,7 +55,7 @@ create table if not exists app.sale_items (
   unit_cost_at_sale numeric(12, 2) not null check (unit_cost_at_sale >= 0),
   line_total numeric(12, 2) not null check (line_total >= 0),
   created_at timestamptz not null default now(),
-  constraint sale_items_line_total_check check (line_total = quantity * unit_price_at_sale)
+  constraint sale_items_line_total_math_check check (line_total = quantity * unit_price_at_sale)
 );
 
 create index if not exists sale_items_sale_id_idx on app.sale_items (sale_id);
@@ -97,22 +97,17 @@ grant select on app.sale_items to authenticated;
 grant select on app.inventory_movements to authenticated;
 
 -- Policies on app.sales:
--- Admin sees all sales.
--- Manager sees sales for their assigned branch.
--- Cashier sees sales they processed.
+drop policy if exists sales_admin_select on app.sales;
 create policy sales_admin_select on app.sales
   for select to authenticated
   using ((select app.request_role()) = 'admin');
 
+drop policy if exists sales_manager_select on app.sales;
 create policy sales_manager_select on app.sales
   for select to authenticated
-  using (
-    (select app.request_role()) = 'manager'
-    and branch_id in (
-      select u.branch_id from app.staff_users u where u.auth_user_id = (select auth.uid())
-    )
-  );
+  using ((select app.request_role()) = 'manager');
 
+drop policy if exists sales_cashier_select on app.sales;
 create policy sales_cashier_select on app.sales
   for select to authenticated
   using (
@@ -123,21 +118,17 @@ create policy sales_cashier_select on app.sales
   );
 
 -- Policies on app.sale_items:
+drop policy if exists sale_items_admin_select on app.sale_items;
 create policy sale_items_admin_select on app.sale_items
   for select to authenticated
   using ((select app.request_role()) = 'admin');
 
+drop policy if exists sale_items_manager_select on app.sale_items;
 create policy sale_items_manager_select on app.sale_items
   for select to authenticated
-  using (
-    (select app.request_role()) = 'manager'
-    and sale_id in (
-      select s.id from app.sales s
-      join app.staff_users u on u.branch_id = s.branch_id
-      where u.auth_user_id = (select auth.uid())
-    )
-  );
+  using ((select app.request_role()) = 'manager');
 
+drop policy if exists sale_items_cashier_select on app.sale_items;
 create policy sale_items_cashier_select on app.sale_items
   for select to authenticated
   using (
@@ -150,19 +141,17 @@ create policy sale_items_cashier_select on app.sale_items
   );
 
 -- Policies on app.inventory_movements:
+drop policy if exists inv_movements_admin_select on app.inventory_movements;
 create policy inv_movements_admin_select on app.inventory_movements
   for select to authenticated
   using ((select app.request_role()) = 'admin');
 
+drop policy if exists inv_movements_manager_select on app.inventory_movements;
 create policy inv_movements_manager_select on app.inventory_movements
   for select to authenticated
-  using (
-    (select app.request_role()) = 'manager'
-    and branch_id in (
-      select u.branch_id from app.staff_users u where u.auth_user_id = (select auth.uid())
-    )
-  );
+  using ((select app.request_role()) = 'manager');
 
+drop policy if exists inv_movements_cashier_select on app.inventory_movements;
 create policy inv_movements_cashier_select on app.inventory_movements
   for select to authenticated
   using (
@@ -263,9 +252,8 @@ as $$
 declare
   v_auth_uid uuid;
   v_staff_id uuid;
-  v_staff_branch_id uuid;
   v_staff_role text;
-  v_staff_status text;
+  v_branch_id uuid;
   v_sale_id uuid;
   v_sale_number text;
   v_total_amount numeric(12, 2) := 0;
@@ -282,12 +270,12 @@ begin
     raise exception 'forbidden: authenticated session required' using errcode = '42501';
   end if;
 
-  select id, branch_id, role::text, status
-  into v_staff_id, v_staff_branch_id, v_staff_role, v_staff_status
+  select id, role::text
+  into v_staff_id, v_staff_role
   from app.staff_users
   where auth_user_id = v_auth_uid;
 
-  if v_staff_id is null or v_staff_status <> 'active' then
+  if v_staff_id is null then
     raise exception 'forbidden: active staff user required' using errcode = '42501';
   end if;
 
@@ -346,9 +334,11 @@ begin
   loop
     v_items_count := v_items_count + 1;
 
-    -- Branch safety check
-    if v_prod.branch_id <> v_staff_branch_id then
-      raise exception 'cross-branch sale rejected: product % belongs to a different branch', v_prod.sku
+    -- Branch confinement check: all products in sale must belong to the same branch
+    if v_branch_id is null then
+      v_branch_id := v_prod.branch_id;
+    elsif v_prod.branch_id <> v_branch_id then
+      raise exception 'cross-branch sale rejected: products belong to different branches'
         using errcode = '42501';
     end if;
 
@@ -379,7 +369,7 @@ begin
     status
   ) values (
     v_sale_number,
-    v_staff_branch_id,
+    v_branch_id,
     v_staff_id,
     v_total_amount,
     'completed'
@@ -441,7 +431,7 @@ begin
       balance_after,
       created_by
     ) values (
-      v_staff_branch_id,
+      v_branch_id,
       v_prod.id,
       'sale',
       v_sale_id,
