@@ -1,6 +1,6 @@
 # WELL LUPS AUTO TYRES LIMITED — MASTER PROJECT STATUS
 **Audit date:** 2026-09-26
-**Baseline source:** live Supabase DB `odammhhhryyepynnilbr.supabase.co`, current Git HEAD `067fec9`, migrations 001-024 applied.
+**Baseline source:** live Supabase DB `odammhhhryyepynnilbr.supabase.co`, current Git HEAD `3ef16f2`, migrations 001-026 applied.
 
 ## 1. Executive Summary
 
@@ -213,13 +213,16 @@ Implemented links:
 
 ## 11. Conversation V0.6B
 
-Status: DEPLOYED PARTIAL
+Status: IMPLEMENTED / LIVE / CERTIFIED
 - Table `app.quote_messages` exists, immutable append-only.
 - RPCs `get_quote_messages`, `send_quote_message`, `staff_send_quote_message`, `staff_get_quote_messages` exist.
 - System events injected on create/respond/accept.
-- Whitespace validation fix migration 022 applied.
+- Whitespace validation fix migration 022 applied, create_quote_request normalization restored via migration 023.
+- Test helper migration 024/026 for certification expiration simulation, role-restricted SECURITY DEFINER.
 - UI timeline present in `/quotes/[id]`.
-- Remaining: message immutability tests, staff identity display, validation edge cases.
+- Playwright E2E v0.6b_quote_conversation.spec.ts 6/6 passed, responsive verified.
+- Quote live tests 10/10 passed, state machine and lifecycle certified.
+- Booking live tests data-limited: zero active services in production, documented.
 
 ## 12. Payment System Audit
 
