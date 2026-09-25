@@ -12,6 +12,7 @@ import {
   QuoteMessage,
   isQuoteExpired,
 } from "@/lib/supabase/quotes";
+import { customerSubmitPayment, customerGetQuotePayments, PaymentRecord } from "@/lib/supabase/payments";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
@@ -34,15 +35,25 @@ export default function GuestQuotePage({ params }: GuestQuotePageProps) {
 
   const [quote, setQuote] = useState<QuoteRequestCustomer | null>(null);
   const [messages, setMessages] = useState<QuoteMessage[]>([]);
+  const [payments, setPayments] = useState<PaymentRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [actionSuccess, setActionSuccess] = useState<string>("");
   const [actionError, setActionError] = useState<string | null>(null);
+  const [paymentRef, setPaymentRef] = useState("");
+  const [payerPhone, setPayerPhone] = useState("");
+  const [submittingPayment, setSubmittingPayment] = useState(false);
 
   const loadMessages = useCallback(async () => {
     if (!id || !token) return;
     const data = await getQuoteMessages(id, token);
     setMessages(data);
+  }, [id, token]);
+
+  const loadPayments = useCallback(async () => {
+    if (!id || !token) return;
+    const data = await customerGetQuotePayments(id, token);
+    setPayments(data);
   }, [id, token]);
 
   useEffect(() => {
@@ -57,7 +68,8 @@ export default function GuestQuotePage({ params }: GuestQuotePageProps) {
     }
     loadQuote();
     loadMessages();
-  }, [id, token, loadMessages]);
+    loadPayments();
+  }, [id, token, loadMessages, loadPayments]);
 
   const handleUpdateStatus = async (status: "accepted" | "declined") => {
     if (!quote) return;
@@ -86,6 +98,35 @@ export default function GuestQuotePage({ params }: GuestQuotePageProps) {
       await loadMessages();
     }
     return result;
+  };
+
+  const handleSubmitPayment = async () => {
+    setActionError(null);
+    setActionSuccess("");
+    if (!quote || !id) return;
+    const ref = paymentRef.trim().toUpperCase();
+    if (!/^ [A-Z0-9]{10}$/.test(ref) && !/^[A-Z0-9]{10}$/.test(ref)) {
+      setActionError("M-Pesa reference must be 10 uppercase alphanumeric characters");
+      return;
+    }
+    setSubmittingPayment(true);
+    const res = await customerSubmitPayment({
+      quoteId: id,
+      token,
+      providerReference: ref,
+      payerPhone: payerPhone || undefined,
+      payerName: undefined,
+      paymentChannel: "mpesa",
+    });
+    setSubmittingPayment(false);
+    if (res.success) {
+      setActionSuccess("Payment submitted successfully. Pending verification.");
+      setPaymentRef("");
+      setPayerPhone("");
+      await loadPayments();
+    } else {
+      setActionError(res.error || "Payment submission failed");
+    }
   };
 
   if (loading) {
@@ -287,6 +328,56 @@ export default function GuestQuotePage({ params }: GuestQuotePageProps) {
               </p>
               <div className="p-2.5 bg-background border border-border text-[11px] text-muted-foreground font-medium">
                 Payment Verification Notice: No payment has been verified yet. Stock remains in pool until full payment verification and counter sale completion.
+              </div>
+
+              {/* Payment submission form */}
+              <div className="pt-3 space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs uppercase font-semibold text-muted-foreground block mb-1">M-Pesa Transaction Reference</label>
+                    <input
+                      data-testid="payment-reference-input"
+                      value={paymentRef}
+                      onChange={(e) => setPaymentRef(e.target.value.toUpperCase())}
+                      placeholder="10 characters"
+                      className="w-full border rounded px-2 py-1.5 text-sm font-mono"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs uppercase font-semibold text-muted-foreground block mb-1">Payer Phone</label>
+                    <input
+                      value={payerPhone}
+                      onChange={(e) => setPayerPhone(e.target.value)}
+                      placeholder="07..."
+                      className="w-full border rounded px-2 py-1.5 text-sm"
+                    />
+                  </div>
+                </div>
+                <Button
+                  data-testid="submit-payment-button"
+                  onClick={handleSubmitPayment}
+                  disabled={submittingPayment}
+                  size="sm"
+                >
+                  {submittingPayment ? "Submitting..." : "Submit Payment"}
+                </Button>
+
+                {payments.length > 0 && (
+                  <div className="mt-3 space-y-2">
+                    <span className="text-xs uppercase font-semibold text-muted-foreground">Payment History</span>
+                    {payments.map(p => (
+                      <div key={p.id} data-testid="payment-record" className="text-xs border rounded p-2 bg-background">
+                        <div className="flex justify-between">
+                          <span className="font-mono">{p.payment_number}</span>
+                          <span className="uppercase">{p.status}</span>
+                        </div>
+                        <div>Ref: {p.provider_reference} | Amount: KES {p.amount?.toLocaleString()}</div>
+                        {p.verified_at && <div>Verified: {new Date(p.verified_at).toLocaleString()}</div>}
+                        {p.rejection_reason && <div className="text-destructive">Rejected: {p.rejection_reason}</div>}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
