@@ -148,14 +148,20 @@ describe("GATE 010C Live Database Integration & Security Test Suite", () => {
       if (targetState === "under_review") return { qId, tok };
 
       // under_review -> quoted
-      const validity = targetState === "expired" ? "2020-01-01T00:00:00Z" : new Date(Date.now() + 86400000).toISOString();
+      const validity = new Date(Date.now() + 86400000).toISOString();
       await adminClient.rpc("staff_respond_to_quote", {
         p_quote_id: qId,
         p_status: "quoted",
         p_offered_price: 10000,
         p_valid_until: validity
       });
-      if (targetState === "quoted" || targetState === "expired") return { qId, tok };
+      if (targetState === "quoted") return { qId, tok };
+      if (targetState === "expired") {
+        // Simulate expiration by moving valid_until to the past via test helper RPC
+        const { error: updErr } = await adminClient.rpc('test_set_quote_valid_until', { p_quote_id: qId, p_valid_until: '2020-01-01T00:00:00Z' });
+        if (updErr) throw updErr;
+        return { qId, tok };
+      }
 
       if (targetState === "accepted") {
         await anonClient.rpc("customer_respond_to_quote", { p_quote_id: qId, p_action: "accept", p_token: tok });
@@ -402,7 +408,10 @@ describe("GATE 010C Live Database Integration & Security Test Suite", () => {
   // =========================================================================
   // LIFECYCLE 3: COMPLETE LIVE EXPIRY FLOW
   // =========================================================================
-  it("Lifecycle 3: guest create -> staff price with past valid_until -> guest accept attempt -> rejected -> DB expired", async () => {
+  it("Lifecycle 3: guest create -> staff price -> expired via valid_until update -> guest accept attempt -> rejected -> DB expired", async () => {
+    const adminClient = createClient(supabaseUrl, supabaseAnonKey, { auth: { persistSession: false } });
+    await adminClient.auth.signInWithPassword({ email: "admin@test.local", password: "TestPassword123!" });
+
     // 1. Guest creates quote
     const { data: createData } = await anonClient.rpc("create_quote_request", {
       p_branch_id: primaryBranchId,
@@ -415,16 +424,21 @@ describe("GATE 010C Live Database Integration & Security Test Suite", () => {
     const quoteId = createData[0].id;
     const secretToken = createData[0].secret_token;
 
-    // 2. Staff prices quote with expired date (1 year in the past)
-    const pastDate = new Date(Date.now() - 365 * 86400000).toISOString();
+    // 2. Staff prices quote with valid future date (business rule prohibits past dates)
+    const futureDate = new Date(Date.now() + 7 * 86400000).toISOString();
     const priceSuccess = await executeStaffPricing({
       quoteId,
       status: "quoted",
       offeredPrice: 11000.0,
-      validUntil: pastDate,
+      validUntil: futureDate,
       role: "admin"
     });
     expect(priceSuccess).toBe(true);
+
+    // 2b. Simulate expiration by moving valid_until to the past via test helper RPC
+    const pastDate = new Date(Date.now() - 365 * 86400000).toISOString();
+    const { error: updErr } = await adminClient.rpc('test_set_quote_valid_until', { p_quote_id: quoteId, p_valid_until: pastDate });
+    if (updErr) throw updErr;
 
     // 3. Customer attempts to accept expired quote -> rejection
     const { error: acceptErr } = await anonClient.rpc("customer_respond_to_quote", {
