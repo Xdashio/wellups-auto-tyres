@@ -21,6 +21,12 @@ function getEventIcon(eventType: string | null) {
       return <CheckCircle2 className="h-3.5 w-3.5" />;
     case "quote_declined":
       return <XCircle className="h-3.5 w-3.5" />;
+    case "payment_submitted":
+      return <Clock className="h-3.5 w-3.5" />;
+    case "payment_verified":
+      return <CheckCircle2 className="h-3.5 w-3.5" />;
+    case "payment_rejected":
+      return <XCircle className="h-3.5 w-3.5" />;
     default:
       return <Settings className="h-3.5 w-3.5" />;
   }
@@ -38,6 +44,12 @@ function getEventLabel(eventType: string | null): string {
       return "Quote Accepted";
     case "quote_declined":
       return "Quote Declined";
+    case "payment_submitted":
+      return "Payment Submitted";
+    case "payment_verified":
+      return "Payment Verified";
+    case "payment_rejected":
+      return "Payment Rejected";
     default:
       return "System Event";
   }
@@ -107,6 +119,11 @@ export function QuoteConversationTimeline({
               {msg.event_metadata && msg.event_type === "quote_priced" && (
                 <span className="ml-1 font-mono text-navy">
                   KES {Number(msg.event_metadata.offered_price).toLocaleString()}
+                </span>
+              )}
+              {msg.event_metadata && (msg.event_type === "payment_submitted" || msg.event_type === "payment_verified" || msg.event_type === "payment_rejected") && msg.event_metadata.amount && (
+                <span className="ml-1 font-mono text-navy">
+                  KES {Number(msg.event_metadata.amount).toLocaleString()}
                 </span>
               )}
               <span className="ml-auto text-[10px] text-muted-foreground font-normal">
