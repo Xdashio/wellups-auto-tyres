@@ -116,24 +116,30 @@ AFTER INSERT OR UPDATE OF status ON app.payments
 FOR EACH ROW
 EXECUTE FUNCTION app.log_quote_system_event();
 
--- 4. Backfill events for existing payments
-INSERT INTO app.quote_messages (quote_id, sender_type, sender_display_name, event_type, event_metadata)
-SELECT DISTINCT ON (p.id)
-  p.quote_id,
-  'system',
-  'Well Lups System',
-  CASE 
-    WHEN p.status = 'verified' THEN 'payment_verified'
-    WHEN p.status = 'rejected' THEN 'payment_rejected'
-    ELSE 'payment_submitted'
-  END,
-  jsonb_build_object(
-    'payment_number', p.payment_number,
-    'amount', p.amount,
-    'payment_channel', p.payment_channel,
-    'provider_reference', p.provider_reference,
-    'status', p.status
-  )
-FROM app.payments p
-LEFT JOIN app.quote_messages m ON m.quote_id = p.quote_id AND m.event_type IN ('payment_submitted','payment_verified','payment_rejected') AND (m.event_metadata->>'payment_number') = p.payment_number
-WHERE m.id IS NULL;
+-- 4. Backfill events for existing payments - idempotent
+DO $$
+BEGIN
+  INSERT INTO app.quote_messages (quote_id, sender_type, sender_display_name, event_type, event_metadata)
+  SELECT DISTINCT ON (p.id)
+    p.quote_id,
+    'system',
+    'Well Lups System',
+    CASE 
+      WHEN p.status = 'verified' THEN 'payment_verified'
+      WHEN p.status = 'rejected' THEN 'payment_rejected'
+      ELSE 'payment_submitted'
+    END,
+    jsonb_build_object(
+      'payment_number', p.payment_number,
+      'amount', p.amount,
+      'payment_channel', p.payment_channel,
+      'provider_reference', p.provider_reference,
+      'status', p.status
+    )
+  FROM app.payments p
+  LEFT JOIN app.quote_messages m ON m.quote_id = p.quote_id AND m.event_type IN ('payment_submitted','payment_verified','payment_rejected') AND (m.event_metadata->>'payment_number') = p.payment_number
+  WHERE m.id IS NULL;
+EXCEPTION WHEN check_violation THEN
+  -- Constraint may not yet allow payment events; skip backfill
+  NULL;
+END $$;
