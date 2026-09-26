@@ -2,21 +2,8 @@
 -- Add payment event types to quote_messages and auto-generate events via triggers
 
 -- 1. Extend event_type check constraint to allow payment events
--- Drop existing constraint and recreate with additional values
-DO $$
-DECLARE
-  v_constraint_name text;
-BEGIN
-  SELECT conname INTO v_constraint_name
-  FROM pg_constraint
-  WHERE conrelid = 'app.quote_messages'::regclass
-    AND contype = 'c'
-    AND pg_get_constraintdef(oid) LIKE '%event_type%';
-  
-  IF v_constraint_name IS NOT NULL THEN
-    EXECUTE format('ALTER TABLE app.quote_messages DROP CONSTRAINT %I', v_constraint_name);
-  END IF;
-END $$;
+-- Drop existing constraint if it exists
+ALTER TABLE app.quote_messages DROP CONSTRAINT IF EXISTS quote_messages_event_type_check;
 
 DO $$
 BEGIN
