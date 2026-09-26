@@ -118,12 +118,12 @@ export function QuoteConversationTimeline({
               <span className="font-semibold">{getEventLabel(msg.event_type)}</span>
               {msg.event_metadata && msg.event_type === "quote_priced" && (
                 <span className="ml-1 font-mono text-navy">
-                  KES {Number(msg.event_metadata.offered_price).toLocaleString()}
+                  KES {Number((msg.event_metadata as any).offered_price).toLocaleString()}
                 </span>
               )}
-              {msg.event_metadata && (msg.event_type === "payment_submitted" || msg.event_type === "payment_verified" || msg.event_type === "payment_rejected") && msg.event_metadata.amount && (
+              {msg.event_metadata && (msg.event_type === "payment_submitted" || msg.event_type === "payment_verified" || msg.event_type === "payment_rejected") && (msg.event_metadata as any).amount && (
                 <span className="ml-1 font-mono text-navy">
-                  KES {Number(msg.event_metadata.amount).toLocaleString()}
+                  KES {Number((msg.event_metadata as any).amount).toLocaleString()}
                 </span>
               )}
               <span className="ml-auto text-[10px] text-muted-foreground font-normal">

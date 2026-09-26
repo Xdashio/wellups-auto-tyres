@@ -367,7 +367,10 @@ export type QuoteMessageEventType =
   | "quote_accepted"
   | "quote_declined"
   | "customer_message"
-  | "staff_message";
+  | "staff_message"
+  | "payment_submitted"
+  | "payment_verified"
+  | "payment_rejected";
 
 export interface QuoteMessage {
   id: string;

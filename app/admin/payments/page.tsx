@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { publicSupabase } from "@/lib/supabase/catalog";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -58,9 +58,7 @@ export default function AdminPaymentsPage() {
 
       <Dialog open={!!verifyDialog} onOpenChange={() => setVerifyDialog(null)}>
         <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Verify Payment</DialogTitle>
-          </DialogHeader>
+          <div className="font-semibold mb-3">Verify Payment</div>
           {verifyDialog && (
             <div className="space-y-2 text-sm">
               <p>Payment: {verifyDialog.payment_number}</p>
@@ -69,28 +67,26 @@ export default function AdminPaymentsPage() {
               <p>Reference: {verifyDialog.provider_reference}</p>
             </div>
           )}
-          <DialogFooter>
+          <div className="flex justify-end gap-2 mt-4">
             <Button variant="outline" onClick={() => setVerifyDialog(null)}>Cancel</Button>
             <Button onClick={() => verify(verifyDialog?.id)}>Confirm Verify</Button>
-          </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
 
       <Dialog open={!!rejectDialog} onOpenChange={() => setRejectDialog(null)}>
         <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Reject Payment</DialogTitle>
-          </DialogHeader>
+          <div className="font-semibold mb-3">Reject Payment</div>
           {rejectDialog && (
             <div className="space-y-3">
               <p className="text-sm">Payment: {rejectDialog.payment_number} – {rejectDialog.provider_reference}</p>
               <Input placeholder="Rejection reason" value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} />
             </div>
           )}
-          <DialogFooter>
+          <div className="flex justify-end gap-2 mt-4">
             <Button variant="outline" onClick={() => setRejectDialog(null)}>Cancel</Button>
             <Button variant="destructive" onClick={() => reject(rejectDialog?.id)} disabled={!rejectReason.trim()}>Reject</Button>
-          </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
