@@ -18,21 +18,32 @@ BEGIN
   END IF;
 END $$;
 
-ALTER TABLE app.quote_messages
-  ALTER COLUMN event_type DROP NOT NULL,
-  ADD CONSTRAINT quote_messages_event_type_check
-  CHECK (event_type IS NULL OR event_type IN (
-    'quote_created',
-    'quote_reviewed',
-    'quote_priced',
-    'quote_accepted',
-    'quote_declined',
-    'customer_message',
-    'staff_message',
-    'payment_submitted',
-    'payment_verified',
-    'payment_rejected'
-  ));
+DO $$
+BEGIN
+  ALTER TABLE app.quote_messages ALTER COLUMN event_type DROP NOT NULL;
+EXCEPTION WHEN undefined_column THEN
+  NULL;
+END $$;
+
+DO $$
+BEGIN
+  ALTER TABLE app.quote_messages
+    ADD CONSTRAINT quote_messages_event_type_check
+    CHECK (event_type IS NULL OR event_type IN (
+      'quote_created',
+      'quote_reviewed',
+      'quote_priced',
+      'quote_accepted',
+      'quote_declined',
+      'customer_message',
+      'staff_message',
+      'payment_submitted',
+      'payment_verified',
+      'payment_rejected'
+    ));
+EXCEPTION WHEN duplicate_object THEN
+  NULL;
+END $$;
 
 -- 2. Helper function to insert system events
 CREATE OR REPLACE FUNCTION app.log_quote_system_event()
