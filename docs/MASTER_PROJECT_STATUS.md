@@ -1,6 +1,6 @@
 # WELL LUPS AUTO TYRES LIMITED — MASTER PROJECT STATUS
 **Audit date:** 2026-09-26
-**Baseline source:** live Supabase DB `odammhhhryyepynnilbr.supabase.co`, current Git HEAD `1af8383`, migrations 001-027 applied.
+**Baseline source:** live Supabase DB `odammhhhryyepynnilbr.supabase.co`, current Git HEAD `682ee08`, migrations 001-029 applied.
 
 ## 1. Executive Summary
 
@@ -12,7 +12,7 @@
 - Customer: Guest token model only, no customer auth. Quote portal `/quotes/[id]?token=` functional, conversation visible.
 - Staff: Admin/Manager/Cashier roles via JWT `app_metadata.user_role`, custom access token hook.
 - Quote: Request → staff review → price → guest portal → accept/decline → acceptance snapshot. Conversation timeline exists.
-- Payments: NOT IMPLEMENTED. No `app.payments` table, no payment RPCs, no payment UX.
+- Payments: IMPLEMENTED / LIVE / CERTIFICATION PENDING. `app.payments` table, RPCs, customer portal UI, admin queue UI, payment timeline integration via trigger.
 - M-Pesa: Branch settings columns exist, no integration.
 - POS: Schema live, `pos_complete_sale` RPC exists, UI present, sales count 0.
 - Inventory: Movement ledger exists, zero movements.
