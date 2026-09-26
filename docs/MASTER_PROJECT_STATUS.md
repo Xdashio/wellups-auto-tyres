@@ -1,6 +1,6 @@
 # WELL LUPS AUTO TYRES LIMITED — MASTER PROJECT STATUS
 **Audit date:** 2026-09-26
-**Baseline source:** live Supabase DB `odammhhhryyepynnilbr.supabase.co`, current Git HEAD `3ef16f2`, migrations 001-026 applied.
+**Baseline source:** live Supabase DB `odammhhhryyepynnilbr.supabase.co`, current Git HEAD `1af8383`, migrations 001-027 applied.
 
 ## 1. Executive Summary
 
@@ -298,7 +298,7 @@ V0.4 Service Booking — COMPLETE LIVE tag v0.4.0-rc.1
 V0.5 POS & Inventory — PARTIAL LIVE schema/UI, zero transactions
 V0.6A Quote Acceptance — COMPLETE LIVE
 V0.6B Conversation — COMPLETE LIVE
-V0.6C/D Payment Ledger — NOT STARTED
+V0.6C/D Payment Ledger — IMPLEMENTED / LIVE / CERTIFICATION PENDING
 V0.7 Payments Automated — PLANNED
 V0.6 customer accounts per ROADMAP.md is a documentation drift; actual V0.6 is Quote-to-Payment per architecture doc.
 
